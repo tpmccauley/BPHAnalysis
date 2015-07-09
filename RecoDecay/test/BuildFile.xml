@@ -1,0 +1,15 @@
+<use   name="FWCore/Framework"/>
+<use   name="FWCore/PluginManager"/>
+<use   name="CommonTools/Utils"/>
+<use   name="PhysicsTools/FWLite"/>
+<use   name="BPHAnalysis/RecoDecay"/>
+<use   name="root"/>
+<use   name="rootrflx"/>
+<use   name="boost"/>
+<flags CXXFLAGS="-Wno-delete-non-virtual-dtor"/>
+<library   file="stubs/*.cc" name="BPHAnalysisRecoDecayTest">
+  <flags   EDM_PLUGIN="1"/>
+</library>
+<environment>
+  <bin   file="bphRecoFWLite.cc" name="bphRecoFWLite"></bin>
+</environment>

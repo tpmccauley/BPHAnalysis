@@ -1,0 +1,27 @@
+<use   name="boost"/>
+<use   name="root"/>
+<use   name="rootgpad"/>
+<use   name="rootgraphics"/>
+<use   name="rootcore"/>
+<use   name="rootrflx"/>
+<use   name="roothistmatrix"/>
+<use   name="CommonTools/Utils"/>
+<use   name="DataFormats/FWLite"/>
+<use   name="DataFormats/MuonReco"/>
+<use   name="FWCore/ParameterSet"/>
+<use   name="FWCore/Framework"/>
+<use   name="FWCore/PluginManager"/>
+<use   name="HLTrigger/HLTcore"/>
+<use   name="DataFormats/PatCandidates"/>
+<use   name="PhysicsTools/CandUtils"/>
+<use   name="PhysicsTools/Utilities"/>
+<use   name="PhysicsTools/FWLite"/>
+<use   name="CommonTools/CandUtils"/>
+<use   name="PhysicsTools/UtilAlgos"/>
+<use   name="PhysicsTools/PatUtils"/>
+<use   name="RecoVertex/KalmanVertexFit"/>
+<use   name="RecoVertex/KinematicFit"/>
+<flags CXXFLAGS="-Wno-delete-non-virtual-dtor"/>
+<export>
+  <lib   name="1"/>
+</export>
