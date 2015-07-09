@@ -10,6 +10,3 @@
 <library   file="stubs/*.cc" name="BPHAnalysisRecoDecayTest">
   <flags   EDM_PLUGIN="1"/>
 </library>
-<environment>
-  <bin   file="bphRecoFWLite.cc" name="bphRecoFWLite"></bin>
-</environment>
