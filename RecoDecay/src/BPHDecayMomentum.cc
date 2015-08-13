@@ -74,6 +74,10 @@ BPHDecayMomentum::~BPHDecayMomentum() {
 //--------------
 void BPHDecayMomentum::add( const string& name,
                             const reco::Candidate* daug, double mass ) {
+  if ( dMap.find( name ) != dMap.end() ) {
+    cout << "daughter particle \"" << name << "\" already present, ignored"
+         << endl;
+  }
   setNotUpdated();
   reco::Candidate* dnew = daug->clone();
   if ( mass > 0.0 ) dnew->setMass( mass );
