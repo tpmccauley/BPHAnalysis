@@ -370,7 +370,7 @@ void TestBPHRecoDecay::dumpRecoCand( const string& name,
     reco::TransientTrack* tt = cand->getTransientTrack( dp );
     GlobalPoint gp( vp.X(), vp.Y(), vp.Z() ); 
     TrajectoryStateClosestToPoint tscp =
-                                  trk->trajectoryStateClosestToPoint( gp );
+                                  tt->trajectoryStateClosestToPoint( gp );
     GlobalVector gv = tscp.momentum();
 //    TrajectoryStateOnSurface tsos = tt->stateOnSurface( gp );
 //    GlobalVector gv = tsos.globalMomentum();
