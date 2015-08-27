@@ -43,9 +43,8 @@ using namespace std;
 // Constructors --
 //----------------
 BPHDecayVertex::BPHDecayVertex( const edm::EventSetup* es ):
-  evSetup( es ),
-  updatedTracks( false ),
-  updatedVertex( false ) {
+ evSetup( es ) {
+  setNotUpdated();
 }
 
 //--------------
@@ -57,21 +56,27 @@ BPHDecayVertex::~BPHDecayVertex() {
 //--------------
 // Operations --
 //--------------
+bool BPHDecayVertex::isValid() const {
+  if ( oldVertex ) fitVertex();
+  return validVertex;
+}
+
+
 const reco::Vertex& BPHDecayVertex::vertex() const {
-  fitVertex();
+  if ( oldVertex ) fitVertex();
   return fittedVertex;
 }
 
 
 const vector<reco::TransientTrack>& BPHDecayVertex::transientTracks() const {
-  tTracks();
+  if ( oldTracks ) tTracks();
   return trTracks;
 }
 
 
 reco::TransientTrack* BPHDecayVertex::getTransientTrack(
                                       const reco::Candidate* cand ) const {
-  tTracks();
+  if ( oldTracks ) tTracks();
   map<const reco::Candidate*,
             reco::TransientTrack*>::const_iterator iter = ttMap.find( cand );
   return ( iter != ttMap.end() ? iter->second : 0 );
@@ -80,13 +85,14 @@ reco::TransientTrack* BPHDecayVertex::getTransientTrack(
 
 void BPHDecayVertex::setNotUpdated() const {
   BPHDecayMomentum::setNotUpdated();
-  updatedTracks = updatedVertex = false;
+  oldTracks = oldVertex = true;
+  validVertex = false;
   return;
 }
 
 
 void BPHDecayVertex::tTracks() const {
-  if ( updatedTracks ) return;
+  oldTracks = false;
   trTracks.clear();
   ttMap.clear();
   edm::ESHandle<TransientTrackBuilder> ttB;
@@ -94,37 +100,38 @@ void BPHDecayVertex::tTracks() const {
   const vector<const reco::Candidate*>& dL = daughFull();
   int n = dL.size();
   trTracks.reserve( n );
+  validVertex = true;
   while ( n-- ) {
     const reco::Candidate* rp = dL[n];
-    if ( !rp->charge() ) {
-      ttMap[rp] = 0;
-      continue;
-    }
+    ttMap[rp] = 0;
+    if ( !rp->charge() ) continue;
     const reco::Track* tp;
     const reco::PFCandidate* pp =
           dynamic_cast<const reco::PFCandidate*>( rp );
+//    if ( pp == 0 ) cout << " tTrack from reco::  Candidate " << rp << endl;
+//    else           cout << " tTrack from reco::PFCandidate " << rp << endl;
     if ( pp != 0 ) tp = pp->trackRef().get();
     else           tp = rp->get<reco::TrackRef>().get();
     if ( tp == 0 ) {
-      cout << "no track" << endl;
+      cout << "no track for reco::(PF)Candidate" << endl;
+      validVertex = false;
       continue;
     }
     trTracks.push_back( ttB->build( tp ) );
     reco::TransientTrack* ttp = &trTracks.back();
     ttMap[rp] = ttp;
   }
-  updatedTracks = true;
   return;
 }
 
 
 void BPHDecayVertex::fitVertex() const {
-  if ( updatedVertex ) return;
-  tTracks();
+  oldVertex = false;
+  if ( oldTracks ) tTracks();
+  if ( trTracks.size() < 2 ) return;
   KalmanVertexFitter kvf( true );
   TransientVertex tv = kvf.vertex( trTracks );
   fittedVertex = tv;
-  updatedVertex = true;
   return;
 }
 

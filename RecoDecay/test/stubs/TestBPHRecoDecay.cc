@@ -369,11 +369,8 @@ void TestBPHRecoDecay::dumpRecoCand( const string& name,
     const reco::Candidate* dp = cand->getDaug( name );
     reco::TransientTrack* tt = cand->getTransientTrack( dp );
     GlobalPoint gp( vp.X(), vp.Y(), vp.Z() ); 
-    TrajectoryStateClosestToPoint tscp =
-                                  tt->trajectoryStateClosestToPoint( gp );
-    GlobalVector gv = tscp.momentum();
-//    TrajectoryStateOnSurface tsos = tt->stateOnSurface( gp );
-//    GlobalVector gv = tsos.globalMomentum();
+    TrajectoryStateOnSurface tsos = tt->stateOnSurface( gp );
+    GlobalVector gv = tsos.globalMomentum();
     cout << "daughter " << i
          << " " << name
          << " momentum: "
