@@ -367,11 +367,11 @@ void TestBPHRecoDecay::dumpRecoCand( const string& name,
   for ( i = 0; i < n; ++i ) {
     const string& name = dl[i];
     const reco::Candidate* dp = cand->getDaug( name );
-    reco::TransientTrack* tt = cand->getTransientTrack( dp );
+    const reco::TransientTrack& tt = *cand->getTransientTrack( dp );
     GlobalPoint gp( vp.X(), vp.Y(), vp.Z() ); 
     TrajectoryStateClosestToPoint tscp =
-                                  tt->trajectoryStateClosestToPoint( gp );
-    GlobalVector gv = tscp.momentum();
+                                  tt.trajectoryStateClosestToPoint( gp );
+    GlobalVector dm = tscp.momentum();
 //    TrajectoryStateOnSurface tsos = tt->stateOnSurface( gp );
 //    GlobalVector gv = tsos.globalMomentum();
     cout << "daughter " << i
@@ -380,9 +380,9 @@ void TestBPHRecoDecay::dumpRecoCand( const string& name,
          << dp->px() << " "
          << dp->py() << " "
          << dp->pz() << " - at vertex: "
-         << gv.x() << " "
-         << gv.y() << " "
-         << gv.z() << endl;
+         << dm.x() << " "
+         << dm.y() << " "
+         << dm.z() << endl;
   }
   const vector<string>& dc = cand->compNames();
   int j;
@@ -420,8 +420,8 @@ void TestBPHRecoDecay::dumpRecoCand( const string& name,
   for ( j = 0; j < m; ++j ) {
     const reco::TransientTrack& tt = dk[j]->refittedTransientTrack();
     TrajectoryStateClosestToPoint tscp =
-                                  tt->trajectoryStateClosestToPoint( gp );
-    GlobalVector gv = tscp.momentum();
+                                  tt.trajectoryStateClosestToPoint( gp );
+    GlobalVector dm = tscp.momentum();
 //    TrajectoryStateOnSurface tsos = tt.stateOnSurface( gp );
 //    GlobalVector dm = tsos.globalMomentum();
     cout << "daughter " << j << " refitted: "
