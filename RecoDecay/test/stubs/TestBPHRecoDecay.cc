@@ -419,8 +419,11 @@ void TestBPHRecoDecay::dumpRecoCand( const string& name,
   int m = dk.size();
   for ( j = 0; j < m; ++j ) {
     const reco::TransientTrack& tt = dk[j]->refittedTransientTrack();
-    TrajectoryStateOnSurface tsos = tt.stateOnSurface( gp );
-    GlobalVector dm = tsos.globalMomentum();
+    TrajectoryStateClosestToPoint tscp =
+                                  tt->trajectoryStateClosestToPoint( gp );
+    GlobalVector gv = tscp.momentum();
+//    TrajectoryStateOnSurface tsos = tt.stateOnSurface( gp );
+//    GlobalVector dm = tsos.globalMomentum();
     cout << "daughter " << j << " refitted: "
          << dm.x() << " "
          << dm.y() << " "

@@ -54,6 +54,9 @@ class BPHDecayVertex: public virtual BPHDecayMomentum {
   /** Operations
    */
 
+  /// check for valid reconstructed vertex
+  virtual bool isValid() const;
+
   /// get reconstructed vertex
   virtual const reco::Vertex& vertex() const;
 
@@ -77,8 +80,9 @@ class BPHDecayVertex: public virtual BPHDecayMomentum {
   const edm::EventSetup* evSetup;
 
   // reconstruction results cache
-  mutable bool updatedTracks;
-  mutable bool updatedVertex;
+  mutable bool oldTracks;
+  mutable bool oldVertex;
+  mutable bool validVertex;
   mutable std::vector<reco::TransientTrack> trTracks;
   mutable std::map<const reco::Candidate*,reco::TransientTrack*> ttMap;
   mutable reco::Vertex fittedVertex;
