@@ -337,8 +337,6 @@ void TestBPHRecoDecay::dumpRecoCand( const string& name,
        << cand->composite().py() << " "
        << cand->composite().pz() << *type << endl;
 
-//  if ( constrMass )
-//  cout << "       " << name << " constr mass: "
   cout << "****** " << name << " constr mass: "
        << cand->p4().mass() << " momentum "
        << cand->p4().px() << " "
