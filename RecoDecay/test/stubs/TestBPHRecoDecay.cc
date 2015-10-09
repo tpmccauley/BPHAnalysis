@@ -218,6 +218,7 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
 //  vector<const BPHRecoCandidate*> lJPsi =
 //               BPHRecoCandidate::build( bJPsi, 
 //                                        3.096916, 0.00004 );
+
   int iJPsi;
   int nJPsi = lJPsi.size();
   cout << nJPsi << " JPsi cand found" << endl;
@@ -337,8 +338,6 @@ void TestBPHRecoDecay::dumpRecoCand( const string& name,
        << cand->composite().py() << " "
        << cand->composite().pz() << *type << endl;
 
-//  if ( constrMass )
-//  cout << "       " << name << " constr mass: "
   cout << "****** " << name << " constr mass: "
        << cand->p4().mass() << " momentum "
        << cand->p4().px() << " "
@@ -367,19 +366,27 @@ void TestBPHRecoDecay::dumpRecoCand( const string& name,
   for ( i = 0; i < n; ++i ) {
     const string& name = dl[i];
     const reco::Candidate* dp = cand->getDaug( name );
-    reco::TransientTrack* tt = cand->getTransientTrack( dp );
+    const reco::TransientTrack& tt = *cand->getTransientTrack( dp );
     GlobalPoint gp( vp.X(), vp.Y(), vp.Z() ); 
+<<<<<<< HEAD
     TrajectoryStateOnSurface tsos = tt->stateOnSurface( gp );
     GlobalVector gv = tsos.globalMomentum();
+=======
+    TrajectoryStateClosestToPoint tscp =
+                                  tt.trajectoryStateClosestToPoint( gp );
+    GlobalVector dm = tscp.momentum();
+//    TrajectoryStateOnSurface tsos = tt->stateOnSurface( gp );
+//    GlobalVector gv = tsos.globalMomentum();
+>>>>>>> V01-01-07
     cout << "daughter " << i
          << " " << name
          << " momentum: "
          << dp->px() << " "
          << dp->py() << " "
          << dp->pz() << " - at vertex: "
-         << gv.x() << " "
-         << gv.y() << " "
-         << gv.z() << endl;
+         << dm.x() << " "
+         << dm.y() << " "
+         << dm.z() << endl;
   }
   const vector<string>& dc = cand->compNames();
   int j;
@@ -416,8 +423,11 @@ void TestBPHRecoDecay::dumpRecoCand( const string& name,
   int m = dk.size();
   for ( j = 0; j < m; ++j ) {
     const reco::TransientTrack& tt = dk[j]->refittedTransientTrack();
-    TrajectoryStateOnSurface tsos = tt.stateOnSurface( gp );
-    GlobalVector dm = tsos.globalMomentum();
+    TrajectoryStateClosestToPoint tscp =
+                                  tt.trajectoryStateClosestToPoint( gp );
+    GlobalVector dm = tscp.momentum();
+//    TrajectoryStateOnSurface tsos = tt.stateOnSurface( gp );
+//    GlobalVector dm = tsos.globalMomentum();
     cout << "daughter " << j << " refitted: "
          << dm.x() << " "
          << dm.y() << " "
