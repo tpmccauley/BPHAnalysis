@@ -67,17 +67,38 @@ class BPHRecoBuilder {
   /** Operations
    */
 
+  // common object to interface with edm collections
+  struct BPHGenericCollection {
+    virtual ~BPHGenericCollection() {}
+    virtual const reco::Candidate& get( int i ) const = 0;
+    virtual int size() const = 0;
+  };
+  template <class T>
+  static BPHGenericCollection* createCollection(
+                               const edm::Handle<T>& collection );
+  static BPHGenericCollection* createCollection(
+                               const std::vector<const reco::Candidate*>&
+                               candList );
+
   /// add collection of particles giving them a name
   /// collections can be added as 
   /// - for simple particles as edm::Handle of an edm collection
-  ///   (an object with an operator [] returning a pointer to reco::Candidate
+  ///   (an object with an operator [] returning a pointer to reco::Candidate)
+  ///   or a BPHGenericCollection created from it
   /// - for previously reconstructed particles as std::vector
-  ///   of pointers to objects inheriting from BPHRecoCandidate
+  ///   of pointers to BPHRecoCandidate or objects inheriting 
+  ///   from BPHRecoCandidate
+  void add( const std::string& name,
+            const BPHGenericCollection* collection,
+            double mass = -1.0,
+            double msig = -1.0 );
   template <class T>
   void add( const std::string& name,
             const edm::Handle<T>& collection,
             double mass = -1.0,
             double msig = -1.0 );
+  void add( const std::string& name,
+            const std::vector<const BPHRecoCandidate*>& collection );
   template <class T>
   void add( const std::string& name,
             const std::vector<const T*>& collection );
@@ -125,21 +146,14 @@ class BPHRecoBuilder {
   BPHRecoBuilder           ( const BPHRecoBuilder& x );
   BPHRecoBuilder& operator=( const BPHRecoBuilder& x );
 
-  // common object to interface with edm collections
-  struct BPHGenericCollection {
-    virtual ~BPHGenericCollection() {}
-    virtual const reco::Candidate& get( int i ) = 0;
-    virtual int size() = 0;
-  };
-
   // object to interface with a specific edm collection
   template <class T>
   class BPHSpecificCollection: public BPHGenericCollection {
    public:
     BPHSpecificCollection( const T& c ): cPtr( &c ) {}
     virtual ~BPHSpecificCollection() {}
-    virtual const reco::Candidate& get( int i ) { return (*cPtr)[i]; }
-    virtual int size() { return cPtr->size(); }
+    virtual const reco::Candidate& get( int i ) const { return (*cPtr)[i]; }
+    virtual int size() const { return cPtr->size(); }
    private:
     const T* cPtr;
   };
@@ -148,7 +162,7 @@ class BPHRecoBuilder {
   // with their names, selections, masses and sigma
   struct BPHRecoSource {
     const std::string* name;
-    BPHGenericCollection* collection;
+    const BPHGenericCollection* collection;
     std::vector<const BPHRecoSelect*> selector;
     double mass;
     double msig;
@@ -189,14 +203,6 @@ class BPHRecoBuilder {
   std::map<std::string,int> sourceId;
   std::map<std::string,int> srCompId;
 
-  // add collection of particles
-  void addCollection( const std::string& name,
-                      BPHGenericCollection* collection,
-                      double mass,
-                      double msig );
-  void addCollection( const std::string& name,
-                      const std::vector<const BPHRecoCandidate*>* collection );
-
   // recursive function to build particles combinations
   void build( std::vector<ComponentSet>& compList,
               ComponentSet& compSet,
@@ -215,15 +221,17 @@ class BPHRecoBuilder {
   // compare two particles with their track reference and return 
   // true or false for same or different particles, including a
   // check with momentum difference
-  bool sameTrack( const reco::Candidate* cand,
-                  const reco::TrackRef& tkCandRef,
-                  const reco::RecoCandidate* rrCand,
-                  const reco::Candidate* cChk,
-                  const reco::TrackRef& tkCChkRef,
-                  const reco::RecoCandidate* rrCChk ) const;
-
+  bool sameTrack( const reco::Candidate* lCand,
+                  const reco::Candidate* rCand ) const;
 
 };
+
+
+template <class T>
+BPHRecoBuilder::BPHGenericCollection* BPHRecoBuilder::createCollection(
+                                      const edm::Handle<T>& collection ) {
+  return new BPHSpecificCollection<T>( *collection );
+}
 
 
 template <class T>
@@ -232,8 +240,7 @@ void BPHRecoBuilder::add( const std::string& name,
                           double mass,
                           double msig ) {
   // forward call after creating an interface to the collection
-  BPHGenericCollection* gc = new BPHSpecificCollection<T>( *collection );
-  addCollection( name, gc, mass, msig );
+  add( name, new BPHSpecificCollection<T>( *collection ), mass, msig );
   return;
 }
 
@@ -250,9 +257,10 @@ void BPHRecoBuilder::add( const std::string& name,
   for ( i = 0; i < n; ++i ) (*compCandList)[i] = collection[i];
   // save the converted list for cleanup
   compCollectList.insert( compCandList );
-  addCollection( name, compCandList );
+  add( name, *compCandList );
   return;
 }
+
 
 #endif // BPHRecoBuilder_H
 

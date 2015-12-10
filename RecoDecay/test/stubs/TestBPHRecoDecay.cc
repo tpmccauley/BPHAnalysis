@@ -194,8 +194,8 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
   string muPos = "muPos";
   string muNeg = "muNeg";
   BPHRecoBuilder bJPsi( es );
-  bJPsi.add( muPos, muons );
-  bJPsi.add( muNeg, muons );
+  bJPsi.add( muPos, BPHRecoBuilder::createCollection( muons ) );
+  bJPsi.add( muNeg, BPHRecoBuilder::createCollection( muons ) );
   bJPsi.filter( muPos, muPt  );
   bJPsi.filter( muNeg, muPt  );
   bJPsi.filter( muPos, muEta );
@@ -218,7 +218,6 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
 //  vector<const BPHRecoCandidate*> lJPsi =
 //               BPHRecoCandidate::build( bJPsi, 
 //                                        3.096916, 0.00004 );
-
   int iJPsi;
   int nJPsi = lJPsi.size();
   cout << nJPsi << " JPsi cand found" << endl;
@@ -234,8 +233,8 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
   KaonPtSelect tkPt( 0.7 );
   string kPos = "kPos";
   string kNeg = "kNeg";
-  bPhi.add( kPos, pfcands, 0.493677 );
-  bPhi.add( kNeg, pfcands, 0.493677 );
+  bPhi.add( kPos, BPHRecoBuilder::createCollection( pfcands ), 0.493677 );
+  bPhi.add( kNeg, BPHRecoBuilder::createCollection( pfcands ), 0.493677 );
   bPhi.filter( kPos, tkPos );
   bPhi.filter( kNeg, tkNeg );
   bPhi.filter( kPos, tkPt  );
@@ -286,7 +285,7 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
   BPHRecoBuilder bBp( es );
   bBp.setMinPDiffererence( 1.0e-5 );
   bBp.add( "JPsi", lJPsi );
-  bBp.add( "Kaon", pfcands, 0.493677 );
+  bBp.add( "Kaon", BPHRecoBuilder::createCollection( pfcands ), 0.493677 );
   MassSelect mJPsi( 2.946916, 3.246916 );
   KaonNeutralVeto knv;
   bBp.filter( "JPsi", mJPsi );

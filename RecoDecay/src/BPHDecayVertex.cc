@@ -17,8 +17,10 @@
 //-------------------------------
 #include "BPHAnalysis/RecoDecay/interface/BPHRecoCandidate.h"
 #include "BPHAnalysis/RecoDecay/interface/BPHRecoBuilder.h"
+#include "BPHAnalysis/RecoDecay/interface/BPHTrackReference.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
+//#include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
@@ -106,12 +108,7 @@ void BPHDecayVertex::tTracks() const {
     ttMap[rp] = 0;
     if ( !rp->charge() ) continue;
     const reco::Track* tp;
-    const reco::PFCandidate* pp =
-          dynamic_cast<const reco::PFCandidate*>( rp );
-//    if ( pp == 0 ) cout << " tTrack from reco::  Candidate " << rp << endl;
-//    else           cout << " tTrack from reco::PFCandidate " << rp << endl;
-    if ( pp != 0 ) tp = pp->trackRef().get();
-    else           tp = rp->get<reco::TrackRef>().get();
+    tp = BPHTrackReference::getTrack( *rp, "cfp" );
     if ( tp == 0 ) {
       cout << "no track for reco::(PF)Candidate" << endl;
       validVertex = false;

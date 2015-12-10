@@ -1,11 +1,9 @@
-<use   name="FWCore/Framework"/>
-<use   name="FWCore/PluginManager"/>
-<use   name="CommonTools/Utils"/>
-<use   name="PhysicsTools/FWLite"/>
 <use   name="BPHAnalysis/RecoDecay"/>
-<use   name="root"/>
-<use   name="rootrflx"/>
-<use   name="boost"/>
+<use   name="DataFormats/ParticleFlowCandidate"/>
+<use   name="DataFormats/PatCandidates"/>
+<use   name="DataFormats/TrackReco"/>
+<use   name="FWCore/Framework"/>
+<use   name="FWCore/ParameterSet"/>
 <flags CXXFLAGS="-Wno-delete-non-virtual-dtor"/>
 <library   file="stubs/*.cc" name="BPHAnalysisRecoDecayTest">
   <flags   EDM_PLUGIN="1"/>

@@ -20,6 +20,7 @@
 #include "BPHAnalysis/RecoDecay/interface/BPHVertexSelect.h"
 #include "BPHAnalysis/RecoDecay/interface/BPHFitSelect.h"
 #include "BPHAnalysis/RecoDecay/interface/BPHRecoCandidate.h"
+#include "BPHAnalysis/RecoDecay/interface/BPHTrackReference.h"
 #include "DataFormats/RecoCandidate/interface/RecoCandidate.h"
 
 //---------------
@@ -50,9 +51,13 @@ BPHRecoBuilder::BPHRecoBuilder( const edm::EventSetup& es ):
 //--------------
 BPHRecoBuilder::~BPHRecoBuilder() {
   int n = sourceList.size();
-  while ( n-- ) delete sourceList[n];
+  while ( n-- ) {
+    delete sourceList[n]->collection;
+    delete sourceList[n];
+  }
   int m = srCompList.size();
-  while ( m-- ) delete srCompList[m];
+  while ( m-- )
+    delete srCompList[m];
   while ( compCollectList.size() ) {
     const std::vector<const BPHRecoCandidate*>* cCollection =
       *compCollectList.begin();
@@ -64,6 +69,23 @@ BPHRecoBuilder::~BPHRecoBuilder() {
 //--------------
 // Operations --
 //--------------
+BPHRecoBuilder::BPHGenericCollection* BPHRecoBuilder::createCollection(
+                                      const std::vector<const reco::Candidate*>&
+                                      candList ) {
+  return new BPHSpecificCollection< std::vector<const reco::Candidate*> >(
+                                                candList );
+}
+
+
+template<>
+const reco::Candidate&
+BPHRecoBuilder::BPHSpecificCollection< std::vector<
+                                       const reco::Candidate*> >::get( int i )
+                                       const {
+  return *(*cPtr)[i];
+}
+
+
 void BPHRecoBuilder::filter( const std::string& name,
                              const BPHRecoSelect& sel ) const {
   std::map<std::string,int>::const_iterator iter = sourceId.find( name );
@@ -176,10 +198,10 @@ std::map<std::string,const BPHRecoCandidate*>& BPHRecoBuilder::compMap() {
 }
 
 
-void BPHRecoBuilder::addCollection( const std::string& name,
-                                    BPHGenericCollection* collection,
-                                    double mass,
-                                    double msig ) {
+void BPHRecoBuilder::add( const std::string& name,
+                          const BPHGenericCollection* collection,
+                          double mass,
+                          double msig ) {
   BPHRecoSource* rs;
   if ( sourceId.find( name ) != sourceId.end() ) {
     cout << "Decay product already inserted with name " << name
@@ -198,9 +220,9 @@ void BPHRecoBuilder::addCollection( const std::string& name,
 }
 
 
-void BPHRecoBuilder::addCollection( const std::string& name,
-                                    const std::vector<const BPHRecoCandidate*>*
-                                          collection ) {
+void BPHRecoBuilder::add( const std::string& name,
+                          const std::vector<const BPHRecoCandidate*>&
+                                collection ) {
   BPHCompSource* cs;
   if ( srCompId.find( name ) != srCompId.end() ) {
     cout << "Decay product already inserted with name " << name
@@ -210,7 +232,7 @@ void BPHRecoBuilder::addCollection( const std::string& name,
   cs = new BPHCompSource;
   cs->name =
       &srCompId.insert( make_pair( name, srCompList.size() ) ).first->first;
-  cs->collection = collection;
+  cs->collection = &collection;
   srCompList.push_back( cs );
   return;
 }
@@ -264,7 +286,7 @@ void BPHRecoBuilder::build( std::vector<ComponentSet>& compList,
     return;
   }
   BPHRecoSource* source = *r_iter++;
-  BPHGenericCollection* collection = source->collection;
+  const BPHGenericCollection* collection = source->collection;
   std::vector<const BPHRecoSelect*>& selector = source->selector;
   int i;
   int j;
@@ -297,9 +319,6 @@ void BPHRecoBuilder::build( std::vector<ComponentSet>& compList,
 
 bool BPHRecoBuilder::contained( ComponentSet& compSet,
                                 const reco::Candidate* cand ) const {
-  reco::TrackRef tkCandRef = cand->get<reco::TrackRef>();
-  const reco::RecoCandidate* rrCand =
-        dynamic_cast<const reco::RecoCandidate*>( cand );
   std::map<std::string,BPHDecayMomentum::Component>& dMap = compSet.daugMap;
   map<std::string,
       BPHDecayMomentum::Component>::const_iterator d_iter;
@@ -308,10 +327,7 @@ bool BPHRecoBuilder::contained( ComponentSet& compSet,
   for ( d_iter = dMap.begin(); d_iter != d_iend; ++d_iter ) {
     const reco::Candidate* cChk = d_iter->second.cand;
     if ( cand == cChk ) return true;
-    if ( sameTrack( cand, tkCandRef, rrCand,
-                    cChk, cChk->get<reco::TrackRef>(),
-                    dynamic_cast<const reco::RecoCandidate*>( cChk ) ) )
-         return true;
+    if ( sameTrack( cand, cChk ) ) return true;
   }
   return false;
 
@@ -334,9 +350,6 @@ bool BPHRecoBuilder::contained( ComponentSet& compSet,
   for ( j = 0; j < m; ++j ) {
 
     const reco::Candidate* cand = cCand->originalReco( dCand[j] );
-    reco::TrackRef tkCandRef = cand->get<reco::TrackRef>();
-      const reco::RecoCandidate* rrCand =
-            dynamic_cast<const reco::RecoCandidate*>( cand );
     std::map<std::string,BPHDecayMomentum::Component>& dMap = compSet.daugMap;
     map<std::string,
         BPHDecayMomentum::Component>::const_iterator d_iter;
@@ -345,10 +358,7 @@ bool BPHRecoBuilder::contained( ComponentSet& compSet,
     for ( d_iter = dMap.begin(); d_iter != d_iend; ++d_iter ) {
       const reco::Candidate* cChk = d_iter->second.cand;
       if ( cand == cChk ) return true;
-      if ( sameTrack( cand, tkCandRef, rrCand,
-                      cChk, cChk->get<reco::TrackRef>(),
-                      dynamic_cast<const reco::RecoCandidate*>( cChk ) ) )
-           return true;
+      if ( sameTrack( cand, cChk ) ) return true;
     }
 
     for ( c_iter = cMap.begin(); c_iter != c_iend; ++c_iter ) {
@@ -358,11 +368,8 @@ bool BPHRecoBuilder::contained( ComponentSet& compSet,
       l = dCChk.size();
       for ( k = 0; k < l; ++k ) {
         const reco::Candidate* cChk = cCChk->originalReco( dCChk[j] );
-        if ( &cand == &cChk ) return true;
-        if ( sameTrack( cand, tkCandRef, rrCand,
-                        cChk, cChk->get<reco::TrackRef>(),
-                        dynamic_cast<const reco::RecoCandidate*>( cChk ) ) )
-             return true;
+        if ( cand == cChk ) return true;
+        if ( sameTrack( cand, cChk ) ) return true;
       }
     }
 
@@ -373,32 +380,26 @@ bool BPHRecoBuilder::contained( ComponentSet& compSet,
 }
 
 
-bool BPHRecoBuilder::sameTrack( const reco::Candidate* cand,
-                                const reco::TrackRef& tkCandRef,
-                                const reco::RecoCandidate* rrCand,
-                                const reco::Candidate* cChk,
-                                const reco::TrackRef& tkCChkRef,
-                                const reco::RecoCandidate* rrCChk ) const {
-  reco::Candidate::Vector pDiff = ( cand->momentum() -
-                                    cChk->momentum() );
-  reco::Candidate::Vector pMean = ( cand->momentum() +
-                                    cChk->momentum() );
+bool BPHRecoBuilder::sameTrack( const reco::Candidate* lCand,
+                                const reco::Candidate* rCand ) const {
+  const reco::Track* lrcTrack = BPHTrackReference::getFromRC( *lCand );
+  const reco::Track* rrcTrack = BPHTrackReference::getFromRC( *rCand );
+  const reco::Track* lpfTrack = BPHTrackReference::getFromPF( *lCand );
+  const reco::Track* rpfTrack = BPHTrackReference::getFromPF( *rCand );
+  if (   ( lrcTrack != 0        ) &&
+       ( ( lrcTrack == rrcTrack ) ||
+         ( lrcTrack == rpfTrack ) ) ) return true;
+  if (   ( lpfTrack != 0        ) &&
+       ( ( lpfTrack == rrcTrack ) ||
+         ( lpfTrack == rpfTrack ) ) ) return true;
+  reco::Candidate::Vector pDiff = ( lCand->momentum() -
+                                    rCand->momentum() );
+  reco::Candidate::Vector pMean = ( lCand->momentum() +
+                                    rCand->momentum() );
   double pDMod = pDiff.mag2();
   double pMMod = pMean.mag2();
   if ( ( ( pDMod / pMMod ) < minPDiff ) &&
-       ( cand->charge() == cChk->charge() ) ) return true;
-  if ( !tkCandRef.isNull() && !tkCChkRef.isNull() ) {
-    if ( tkCandRef       == tkCChkRef       ) return true;
-    if ( tkCandRef.get() == tkCChkRef.get() ) return true;
-  }
-  if ( rrCand == 0 ) return false;
-  if ( rrCChk == 0 ) return false;
-  reco::TrackRef tkCandRtk = rrCand->get<reco::TrackRef>();
-  reco::TrackRef tkCChkRtk = rrCChk->get<reco::TrackRef>();
-  if ( !tkCandRtk.isNull() && !tkCChkRtk.isNull() ) {
-    if ( tkCandRtk       == tkCChkRtk       ) return true;
-    if ( tkCandRtk.get() == tkCChkRtk.get() ) return true;
-  }
+       ( lCand->charge() == rCand->charge() ) ) return true;
   return false;
 }
 
