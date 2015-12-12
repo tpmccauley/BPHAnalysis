@@ -22,7 +22,6 @@
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/RecoCandidate/interface/RecoCandidate.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
-//#include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 
@@ -84,12 +83,6 @@ class BPHTrackReference {
   }
   static const reco::Track* getFromBT( const reco::Candidate& rc ) {
 //    std::cout << "getFromBT" << std::endl;
-//    try {
-//      const reco::Track* trk = rc.bestTrack();
-//      return trk;
-//    }
-//    catch ( edm::Exception e ) {
-//    }
     return 0;
   }
   static const reco::Track* getFromPF( const reco::Candidate& rc ) {
@@ -107,9 +100,6 @@ class BPHTrackReference {
   }
   static const reco::Track* getFromPC( const reco::Candidate& rc ) {
 //    std::cout << "getFromPC" << std::endl;
-//    const pat::PackedCandidate* pp =
-//        dynamic_cast<const pat::PackedCandidate*>( &rc );
-//    if ( pp != 0 ) return &pp->pseudoTrack();
     return 0;
   }
   static const reco::Track* getMuonPF( const reco::Candidate& rc ) {
