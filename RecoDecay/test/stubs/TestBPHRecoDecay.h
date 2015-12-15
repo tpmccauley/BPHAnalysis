@@ -8,7 +8,10 @@
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
 
 #include <string>
+#include <iostream>
+#include <fstream>
 
+class TH1F;
 class BPHRecoCandidate;
 
 class TestBPHRecoDecay: public edm::EDAnalyzer {
@@ -24,8 +27,25 @@ class TestBPHRecoDecay: public edm::EDAnalyzer {
 
  private:
 
+  std::string patMuonLabel;
+  std::string recoTrkLabel;
+  std::string pfCandsLabel;
+
+  std::string outDump;
+  std::string outHist;
+
+  std::ofstream* fPtr;
+
+  std::map<std::string,TH1F*> histoMap;
+
   void dumpRecoCand( const std::string& name,
                      const BPHRecoCandidate* cand );
+  void fillHisto   ( const std::string& name,
+                     const BPHRecoCandidate* cand );
+  void fillHisto( const std::string& name, float x );
+
+  void createHisto( const std::string& name,
+                    int nbin, float hmin, float hmax );
 
 };
 

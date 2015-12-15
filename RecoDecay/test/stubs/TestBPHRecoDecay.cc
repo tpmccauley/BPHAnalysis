@@ -12,53 +12,72 @@
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 
-#include <iostream>
+#include <TH1.h>
+#include <TFile.h>
+
 #include <string>
+#include <iostream>
+#include <fstream>
 
 using namespace std;
 
 TestBPHRecoDecay::TestBPHRecoDecay( const edm::ParameterSet& ps ) {
+  patMuonLabel = ps.getParameter<string>( "patMuonLabel" );
+  recoTrkLabel = ps.getParameter<string>( "recoTrkLabel" );
+  pfCandsLabel = ps.getParameter<string>( "pfCandsLabel" );
+  outDump = ps.getParameter<string>( "outDump" );
+  outHist = ps.getParameter<string>( "outHist" );
+  fPtr = new ofstream( outDump.c_str() );
 }
+
 
 TestBPHRecoDecay::~TestBPHRecoDecay() {
 }
 
+
 void TestBPHRecoDecay::beginJob() {
-  cout << "TestBPHRecoDecay::beginJob" << endl;
+  *fPtr << "TestBPHRecoDecay::beginJob" << endl;
+  createHisto( "massJPsi"  , 50, 2.85 , 3.35  ); // JPsi mass
+  createHisto( "mcstJPsi"  , 50, 2.85 , 3.35  ); // JPsi mass, with constraint
+  createHisto( "massPhi"   , 50, 0.995, 1.045 ); // Phi  mass
+  createHisto( "massBu"    , 20, 5.0  , 5.5   ); // Bu   mass
+  createHisto( "mcstBu"    , 20, 5.0  , 5.5   ); // Bu   mass, with constraint
+  createHisto( "massBs"    , 20, 5.1  , 5.6   ); // Bs   mass
+  createHisto( "mcstBs"    , 20, 5.1  , 5.6   ); // Bs   mass, with constraint
+  createHisto( "massBsPhi" , 50, 0.995, 1.045 ); // Phi  mass in Bs decay
   return;
 }
 
 void TestBPHRecoDecay::analyze( const edm::Event& ev,
                                 const edm::EventSetup& es ) {
 
-  cout << "--------- event "
+  std::ofstream& outF = *fPtr;
+  outF << "--------- event "
        << ev.id().run() << " / "
        << ev.id().event() << " ---------" << endl;
-
-//  if ( ev.id().event() != 3670523273 ) return;
 
   // get object collections
 
   edm::Handle<pat::MuonCollection> muons;
-  string muonLabel = "calibratedPatMuonsPFlow";
-  edm::InputTag muonTag( muonLabel );
-  ev.getByLabel( muonTag, muons );
-  if ( muons.isValid() ) cout << muons->size() << " muons found" << endl;
-  else                   cout << "no muons" << endl;
+//  edm::InputTag patMuonTag( patMuonLabel );
+//  ev.getByLabel( patMuonTag, muons );
+  ev.getByLabel( patMuonLabel, muons );
+  if ( muons.isValid() ) outF << muons->size() << " muons found" << endl;
+  else                   outF << "no muons" << endl;
 
   edm::Handle< vector<reco::Track> > tracks;
-  string trackLabel = "generalTracks";
-  edm::InputTag trackTag( trackLabel );
-  ev.getByLabel( trackTag, tracks );
-  if ( tracks.isValid() ) cout << tracks->size() << " tracks found" << endl;
-  else                    cout << "no tracks" << endl;
+//  string recoTrkLabel = "generalTracks";
+//  edm::InputTag ( recoTrkLabel );
+  ev.getByLabel( recoTrkLabel, tracks );
+  if ( tracks.isValid() ) outF << tracks->size() << " tracks found" << endl;
+  else                    outF << "no tracks" << endl;
 
   edm::Handle< vector<reco::PFCandidate> > pfcands;
-  string pfcandLabel = "selectedPatJetsPFlow:pfCandidates:PAT";
-  edm::InputTag pftag( pfcandLabel );
-  ev.getByLabel( pftag, pfcands );
-  if ( pfcands.isValid() ) cout << pfcands->size() << " pfcands found" << endl;
-  else                     cout << "no pfcands" << endl;
+//  string  = "selectedPatJetsPFlow:pfCandidates:PAT";
+//  edm::InputTag pftag(  );
+  ev.getByLabel( pfCandsLabel, pfcands );
+  if ( pfcands.isValid() ) outF << pfcands->size() << " pfcands found" << endl;
+  else                     outF << "no pfcands" << endl;
 
   //
   // starting objects selection
@@ -188,7 +207,7 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
 
   // build and dump JPsi
 
-  cout << "build and dump JPsi" << endl;
+  outF << "build and dump JPsi" << endl;
   MuonPtSelect     muPt ( 4.0 );
   MuonEtaSelect    muEta( 2.1 );
   string muPos = "muPos";
@@ -220,13 +239,13 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
 //                                        3.096916, 0.00004 );
   int iJPsi;
   int nJPsi = lJPsi.size();
-  cout << nJPsi << " JPsi cand found" << endl;
+  outF << nJPsi << " JPsi cand found" << endl;
   for ( iJPsi = 0; iJPsi < nJPsi; ++iJPsi ) dumpRecoCand( "JPsi",
                                                           lJPsi[iJPsi] );
 
   // build and dump Phi
 
-  cout << "build and dump Phi" << endl;
+  outF << "build and dump Phi" << endl;
   BPHRecoBuilder bPhi( es );
   KaonChargeSelect tkPos( +1 );
   KaonChargeSelect tkNeg( -1 );
@@ -252,14 +271,14 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
 //               BPHPlusMinusCandidate::build( bPhi, kPos, kNeg );
   int iPhi;
   int nPhi = lPhi.size();
-  cout << nPhi << " Phi cand found" << endl;
+  outF << nPhi << " Phi cand found" << endl;
   for ( iPhi = 0; iPhi < nPhi; ++iPhi ) dumpRecoCand( "Phi",
                                                       lPhi[iPhi] );
 
   // build and dump Bs
 
   if ( nJPsi && nPhi ) {
-  cout << "build and dump Bs" << endl;
+  outF << "build and dump Bs" << endl;
   BPHRecoBuilder bBs( es );
   bBs.setMinPDiffererence( 1.0e-5 );
   bBs.add( "JPsi", lJPsi );
@@ -273,15 +292,15 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
   std::vector<const BPHRecoCandidate*> lBs = BPHRecoCandidate::build( bBs );
   int iBs;
   int nBs = lBs.size();
-  cout << nBs << " Bs cand found" << endl;
+  outF << nBs << " Bs cand found" << endl;
   for ( iBs = 0; iBs < nBs; ++iBs ) dumpRecoCand( "Bs",
                                                   lBs[iBs] );
   }
 
-  // build and dump B+
+  // build and dump Bu
 
   if ( nJPsi && pfcands->size() ) {
-  cout << "build and dump B+" << endl;
+  outF << "build and dump Bu" << endl;
   BPHRecoBuilder bBp( es );
   bBp.setMinPDiffererence( 1.0e-5 );
   bBp.add( "JPsi", lJPsi );
@@ -296,8 +315,8 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
   std::vector<const BPHRecoCandidate*> lBp = BPHRecoCandidate::build( bBp );
   int iBp;
   int nBp = lBp.size();
-  cout << nBp << " B+ cand found" << endl;
-  for ( iBp = 0; iBp < nBp; ++iBp ) dumpRecoCand( "B+",
+  outF << nBp << " Bu cand found" << endl;
+  for ( iBp = 0; iBp < nBp; ++iBp ) dumpRecoCand( "Bu",
                                                   lBp[iBp] );
   }
 
@@ -309,13 +328,23 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
 
 
 void TestBPHRecoDecay::endJob() {
-  cout << "TestBPHRecoDecay::endJob" << endl;
+  *fPtr << "TestBPHRecoDecay::endJob" << endl;
+  TDirectory* currentDir = gDirectory;
+  TFile file( outHist.c_str(), "RECREATE" );
+  map<string,TH1F*>::iterator iter = histoMap.begin();
+  map<string,TH1F*>::iterator iend = histoMap.end();
+  while ( iter != iend ) iter++->second->Write();
+  currentDir->cd();
   return;
 }
 
 
 void TestBPHRecoDecay::dumpRecoCand( const string& name,
                                      const BPHRecoCandidate* cand ) {
+
+  fillHisto( name, cand );
+
+  std::ofstream& outF = *fPtr;
 
   static string cType = " cowboy";
   static string sType = " sailor";
@@ -331,13 +360,13 @@ void TestBPHRecoDecay::dumpRecoCand( const string& name,
 
   bool constrMass = ( cand->constrMass() > 0.0 );
 
-  cout << "****** " << name << "   cand mass: "
+  outF << "****** " << name << "   cand mass: "
        << cand->composite().mass() << " momentum "
        << cand->composite().px() << " "
        << cand->composite().py() << " "
        << cand->composite().pz() << *type << endl;
 
-  cout << "****** " << name << " constr mass: "
+  outF << "****** " << name << " constr mass: "
        << cand->p4().mass() << " momentum "
        << cand->p4().px() << " "
        << cand->p4().py() << " "
@@ -354,10 +383,15 @@ void TestBPHRecoDecay::dumpRecoCand( const string& name,
     sstr << " - " << pmCand->cAppInRPhi().distance();
     tdca = sstr.str();
   }
-  cout << "****** " << name << " vertex: "
+  outF << "****** " << name << " vertex: "
        << vx.isFake() << " " << vx.isValid() << " - "
        << chi2 << " " << ndof << " " << prob << " - "
        << vp.X() << " " << vp.Y() << " " << vp.Z() << tdca << endl;
+
+  if ( !cand->isValid() ) {
+    outF << "reco::Track missing" << endl;
+    return;
+  }
 
   const vector<string>& dl = cand->daugNames();
   int i;
@@ -372,7 +406,7 @@ void TestBPHRecoDecay::dumpRecoCand( const string& name,
     GlobalVector dm = tscp.momentum();
 //    TrajectoryStateOnSurface tsos = tt->stateOnSurface( gp );
 //    GlobalVector gv = tsos.globalMomentum();
-    cout << "daughter " << i
+    outF << "daughter " << i
          << " " << name
          << " momentum: "
          << dp->px() << " "
@@ -388,7 +422,7 @@ void TestBPHRecoDecay::dumpRecoCand( const string& name,
   for ( j = 0; j < m; ++j ) {
     const string& name = dc[j];
     const BPHRecoCandidate* dp = cand->getComp( name );
-    cout << "composite daughter " << j
+    outF << "composite daughter " << j
          << " " << name
          << " momentum: "
          << dp->composite().px() << " "
@@ -396,43 +430,77 @@ void TestBPHRecoDecay::dumpRecoCand( const string& name,
          << dp->composite().pz() << endl;
   }
 
-  if ( constrMass ) {
+  if ( !constrMass ) return;
   const RefCountedKinematicTree& kt = cand->kinematicTree();
   const RefCountedKinematicVertex& kd = kt->currentDecayVertex();
   GlobalPoint gp = kd->position(); 
-  cout << "   kin fit vertex: "
+  outF << "   kin fit vertex: "
        << gp.x() << " "
        << gp.y() << " "
        << gp.z() << endl;
   const KinematicState& ks = kt->currentParticle()->currentState();
   GlobalVector gv = ks.globalMomentum();
-  cout << "   kin fit momentum: "
+  outF << "   kin fit momentum: "
        << ks.mass() << " - "
        << gv.x() << " "
        << gv.y() << " "
        << gv.z() << " - deltaM: "
        << ks.mass() - cand->constrMass() << endl;
   vector<RefCountedKinematicParticle> dk = kt->finalStateParticles();
-  int j;
-  int m = dk.size();
-  for ( j = 0; j < m; ++j ) {
-    const reco::TransientTrack& tt = dk[j]->refittedTransientTrack();
+  int k;
+  int l = dk.size();
+  for ( k = 0; k < l; ++k ) {
+    const reco::TransientTrack& tt = dk[k]->refittedTransientTrack();
     TrajectoryStateClosestToPoint tscp =
                                   tt.trajectoryStateClosestToPoint( gp );
     GlobalVector dm = tscp.momentum();
 //    TrajectoryStateOnSurface tsos = tt.stateOnSurface( gp );
 //    GlobalVector dm = tsos.globalMomentum();
-    cout << "daughter " << j << " refitted: "
+    outF << "daughter " << k << " refitted: "
          << dm.x() << " "
          << dm.y() << " "
          << dm.z() << endl;
-  }
   }
 
   return;
 
 }
 
+
+void TestBPHRecoDecay::fillHisto( const string& name,
+                                  const BPHRecoCandidate* cand ) {
+  string mass = "mass";
+  string mcst = "mcst";
+  fillHisto( mass + name, cand->composite().mass() );
+  fillHisto( mcst + name, cand->p4()       .mass() );
+
+  const vector<string>& dc = cand->compNames();
+  int i;
+  int n = dc.size();
+  for ( i = 0; i < n; ++i ) {
+    const string& daug = dc[i];
+    const BPHRecoCandidate* dptr = cand->getComp( daug );
+    fillHisto( mass + name + daug, dptr->composite().mass() );
+    fillHisto( mcst + name + daug, dptr->p4()       .mass() );
+  }
+  return;
+}
+
+
+void TestBPHRecoDecay::fillHisto( const string& name, float x ) {
+  map<string,TH1F*>::iterator iter = histoMap.find( name );
+  map<string,TH1F*>::iterator iend = histoMap.end();
+  if ( iter == iend ) return;
+  iter->second->Fill( x );
+  return;
+}
+
+
+void TestBPHRecoDecay::createHisto( const string& name,
+                                    int nbin, float hmin, float hmax ) {
+  histoMap[name] = new TH1F( name.c_str(), name.c_str(), nbin, hmin, hmax );
+  return;
+}
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 
