@@ -28,8 +28,16 @@ class TestBPHRecoDecay: public edm::EDAnalyzer {
  private:
 
   std::string patMuonLabel;
-  std::string recoTrkLabel;
+  std::string ccCandsLabel;
   std::string pfCandsLabel;
+  std::string pcCandsLabel;
+  std::string gpCandsLabel;
+
+  bool usePM;
+  bool useCC;
+  bool usePF;
+  bool usePC;
+  bool useGP;
 
   std::string outDump;
   std::string outHist;
@@ -37,6 +45,9 @@ class TestBPHRecoDecay: public edm::EDAnalyzer {
   std::ofstream* fPtr;
 
   std::map<std::string,TH1F*> histoMap;
+
+  static std::string getParameter( const edm::ParameterSet& ps,
+                                   const std::string& name );
 
   void dumpRecoCand( const std::string& name,
                      const BPHRecoCandidate* cand );

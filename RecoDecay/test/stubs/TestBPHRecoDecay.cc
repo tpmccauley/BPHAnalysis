@@ -8,9 +8,15 @@
 #include "BPHAnalysis/RecoDecay/interface/BPHPlusMinusCandidate.h"
 #include "BPHAnalysis/RecoDecay/interface/BPHMomentumSelect.h"
 #include "BPHAnalysis/RecoDecay/interface/BPHVertexSelect.h"
+#include "BPHAnalysis/RecoDecay/interface/BPHTrackReference.h"
+
+#include "BPHAnalysis/RecoDecay/interface/BPHMessageLogger.h"
 
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/TrackReco/interface/Track.h"
+
+#include "DataFormats/PatCandidates/interface/GenericParticle.h"
+#include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
 
 #include <TH1.h>
 #include <TFile.h>
@@ -21,13 +27,23 @@
 
 using namespace std;
 
+#define SET_LABEL(NAME,PSET) ( NAME = getParameter( PSET, #NAME ) )
+// SET_LABEL(xyz,ps);
+// is equivalent to
+// xyz = getParameter( ps, "xyx" )
+
 TestBPHRecoDecay::TestBPHRecoDecay( const edm::ParameterSet& ps ) {
-  patMuonLabel = ps.getParameter<string>( "patMuonLabel" );
-  recoTrkLabel = ps.getParameter<string>( "recoTrkLabel" );
-  pfCandsLabel = ps.getParameter<string>( "pfCandsLabel" );
-  outDump = ps.getParameter<string>( "outDump" );
-  outHist = ps.getParameter<string>( "outHist" );
+  usePM = ( SET_LABEL( patMuonLabel, ps ) != "" );
+  useCC = ( SET_LABEL( ccCandsLabel, ps ) != "" );
+  usePF = ( SET_LABEL( pfCandsLabel, ps ) != "" );
+  usePC = ( SET_LABEL( pcCandsLabel, ps ) != "" );
+  useGP = ( SET_LABEL( gpCandsLabel, ps ) != "" );
+  outDump = getParameter( ps, "outDump" );
+  outHist = getParameter( ps, "outHist" );
   fPtr = new ofstream( outDump.c_str() );
+  std::ofstream os("dum");
+  BPHMessageLogger::setStream( os );
+  BPHMessageLogger::outStream() << "dum" << endl;
 }
 
 
@@ -58,26 +74,72 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
 
   // get object collections
 
-  edm::Handle<pat::MuonCollection> muons;
-//  edm::InputTag patMuonTag( patMuonLabel );
-//  ev.getByLabel( patMuonTag, muons );
-  ev.getByLabel( patMuonLabel, muons );
-  if ( muons.isValid() ) outF << muons->size() << " muons found" << endl;
-  else                   outF << "no muons" << endl;
+  int nrc = 0;
 
-  edm::Handle< vector<reco::Track> > tracks;
-//  string recoTrkLabel = "generalTracks";
-//  edm::InputTag ( recoTrkLabel );
-  ev.getByLabel( recoTrkLabel, tracks );
-  if ( tracks.isValid() ) outF << tracks->size() << " tracks found" << endl;
-  else                    outF << "no tracks" << endl;
+  edm::Handle< vector<reco::PFCandidate> > pfCands;
+  if ( usePF ) {
+    edm::InputTag pfCandTag( pfCandsLabel );
+    ev.getByLabel( pfCandTag, pfCands );
+//    ev.getByLabel( pfCandsLabel, pfCands );
+    nrc = pfCands->size();
+    if ( pfCands.isValid() ) outF << nrc << " pfCands found" << endl;
+    else                     outF << "no pfCands" << endl;
+  }
 
-  edm::Handle< vector<reco::PFCandidate> > pfcands;
-//  string  = "selectedPatJetsPFlow:pfCandidates:PAT";
-//  edm::InputTag pftag(  );
-  ev.getByLabel( pfCandsLabel, pfcands );
-  if ( pfcands.isValid() ) outF << pfcands->size() << " pfcands found" << endl;
-  else                     outF << "no pfcands" << endl;
+  edm::Handle< vector<BPHTrackReference::candidate> > pcCands;
+  if ( usePC ) {
+    edm::InputTag pcCandTag( pcCandsLabel );
+    ev.getByLabel( pcCandTag, pcCands );
+//    ev.getByLabel( pcCandsLabel, pcCands );
+    nrc = pcCands->size();
+    if ( pcCands.isValid() ) outF << nrc << " pcCands found" << endl;
+    else                     outF << "no pcCands" << endl;
+  }
+
+  edm::Handle< vector<pat::GenericParticle> > gpCands;
+  if ( useGP ) {
+    edm::InputTag gpCandsTag( gpCandsLabel );
+    ev.getByLabel( gpCandsTag, gpCands );
+//    ev.getByLabel( gpCandsLabel, pfCands );
+    nrc = gpCands->size();
+    if ( gpCands.isValid() ) outF << nrc << " gpCands found" << endl;
+    else                     outF << "no gpCands" << endl;
+  }
+
+  edm::Handle<pat::MuonCollection> patMuon;
+  if ( usePM ) {
+    edm::InputTag patMuonTag( patMuonLabel );
+    ev.getByLabel( patMuonTag, patMuon );
+//    ev.getByLabel( patMuonLabel, patMuon );
+    int n = patMuon->size();
+    if ( patMuon.isValid() ) outF << n << " muons found" << endl;
+    else                     outF << "no muons" << endl;
+  }
+
+  vector<const reco::Candidate*> muDaugs;
+  if ( useCC ) {
+    edm::Handle< vector<pat::CompositeCandidate> > ccCands;
+    edm::InputTag ccCandsTag( ccCandsLabel );
+    ev.getByLabel( ccCandsTag, ccCands );
+//    ev.getByLabel( ccCandsLabel, ccCands );
+    int n = ccCands->size();
+    if ( ccCands.isValid() ) outF << n << " ccCands found" << endl;
+    else                     outF << "no ccCands" << endl;
+    muDaugs.clear();
+    muDaugs.reserve( n );
+    int i;
+    for ( i = 0; i < n; ++i ) {
+      const pat::CompositeCandidate& cc = ccCands->at( i );
+      int j;
+      int m = cc.numberOfDaughters();
+      for ( j = 0; j < m; ++j ) {
+        const reco::Candidate* dp = cc.daughter( j );
+        const pat::Muon* mp = dynamic_cast<const pat::Muon*>( dp );
+	if ( mp != 0 ) muDaugs.push_back( mp );
+      }
+    }
+    if ( n ) outF << muDaugs.size() << " muons found" << endl;
+  }
 
   //
   // starting objects selection
@@ -213,8 +275,14 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
   string muPos = "muPos";
   string muNeg = "muNeg";
   BPHRecoBuilder bJPsi( es );
-  bJPsi.add( muPos, BPHRecoBuilder::createCollection( muons ) );
-  bJPsi.add( muNeg, BPHRecoBuilder::createCollection( muons ) );
+  if ( usePM ) {
+  bJPsi.add( muPos, BPHRecoBuilder::createCollection( patMuon ), 0.105658 );
+  bJPsi.add( muNeg, BPHRecoBuilder::createCollection( patMuon ), 0.105658 );
+  } else
+  if ( useCC ) {
+  bJPsi.add( muPos, BPHRecoBuilder::createCollection( muDaugs ), 0.105658 );
+  bJPsi.add( muNeg, BPHRecoBuilder::createCollection( muDaugs ), 0.105658 );
+  }
   bJPsi.filter( muPos, muPt  );
   bJPsi.filter( muNeg, muPt  );
   bJPsi.filter( muPos, muEta );
@@ -252,8 +320,18 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
   KaonPtSelect tkPt( 0.7 );
   string kPos = "kPos";
   string kNeg = "kNeg";
-  bPhi.add( kPos, BPHRecoBuilder::createCollection( pfcands ), 0.493677 );
-  bPhi.add( kNeg, BPHRecoBuilder::createCollection( pfcands ), 0.493677 );
+  if ( usePF ) {
+  bPhi.add( kPos, BPHRecoBuilder::createCollection( pfCands ), 0.493677 );
+  bPhi.add( kNeg, BPHRecoBuilder::createCollection( pfCands ), 0.493677 );
+  } else
+  if ( usePC ) {
+  bPhi.add( kPos, BPHRecoBuilder::createCollection( pcCands ), 0.493677 );
+  bPhi.add( kNeg, BPHRecoBuilder::createCollection( pcCands ), 0.493677 );
+  } else
+  if ( useGP ) {
+  bPhi.add( kPos, BPHRecoBuilder::createCollection( gpCands ), 0.493677 );
+  bPhi.add( kNeg, BPHRecoBuilder::createCollection( gpCands ), 0.493677 );
+  }
   bPhi.filter( kPos, tkPos );
   bPhi.filter( kNeg, tkNeg );
   bPhi.filter( kPos, tkPt  );
@@ -299,12 +377,17 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
 
   // build and dump Bu
 
-  if ( nJPsi && pfcands->size() ) {
+  if ( nJPsi && nrc ) {
   outF << "build and dump Bu" << endl;
   BPHRecoBuilder bBp( es );
   bBp.setMinPDiffererence( 1.0e-5 );
   bBp.add( "JPsi", lJPsi );
-  bBp.add( "Kaon", BPHRecoBuilder::createCollection( pfcands ), 0.493677 );
+  if ( usePF ) {
+  bBp.add( "Kaon", BPHRecoBuilder::createCollection( pfCands ), 0.493677 );
+  } else
+  if ( useGP ) {
+  bBp.add( "Kaon", BPHRecoBuilder::createCollection( gpCands ), 0.493677 );
+  }
   MassSelect mJPsi( 2.946916, 3.246916 );
   KaonNeutralVeto knv;
   bBp.filter( "JPsi", mJPsi );
@@ -336,6 +419,13 @@ void TestBPHRecoDecay::endJob() {
   while ( iter != iend ) iter++->second->Write();
   currentDir->cd();
   return;
+}
+
+
+std::string TestBPHRecoDecay::getParameter( const edm::ParameterSet& ps,
+                                            const std::string& name ) {
+  if ( ps.exists( name ) ) return ps.getParameter<string>( name );
+  return "";
 }
 
 

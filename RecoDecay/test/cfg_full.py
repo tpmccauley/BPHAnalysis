@@ -3,7 +3,7 @@ import FWCore.ParameterSet.Config as cms
 process = cms.Process("bphAnalysis")
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 process.load("Configuration.Geometry.GeometryRecoDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
@@ -22,7 +22,16 @@ process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 process.options.allowUnscheduled = cms.untracked.bool(True)
 
 process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring(
-    'file:/lustre/cmswork/ronchese/store/mc/RunIISpring15DR74/BsToJpsiPhi_BMuonFilter_TuneCUEP8M1_13TeV-pythia8-evtgen/AODSIM/Asympt25nsRaw_MCRUN2_74_V9-v1/50000/D0D90725-1D61-E511-B812-0025907277CE.root'
+#
+### use this to access the nearest copy of the input file, querying the catalog
+    '/store/mc/RunIISpring15DR74/BsToJpsiPhi_BMuonFilter_TuneCUEP8M1_13TeV-pythia8-evtgen/AODSIM/Asympt25nsRaw_MCRUN2_74_V9-v1/50000/D0D90725-1D61-E511-B812-0025907277CE.root'
+#
+### use this to access the input file if by any reason you want to specify 
+### the data server
+#    'root://xrootd-cms.infn.it//store/mc/RunIISpring15DR74/BsToJpsiPhi_BMuonFilter_TuneCUEP8M1_13TeV-pythia8-evtgen/AODSIM/Asympt25nsRaw_MCRUN2_74_V9-v1/50000/D0D90725-1D61-E511-B812-0025907277CE.root'
+#
+### use this to access an input file locally available
+#    'file:/...complete_file_path.../D0D90725-1D61-E511-B812-0025907277CE.root'
 ))
 
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
@@ -56,7 +65,6 @@ process.patTrackCands.embedTrack = True
 
 process.testBPHRecoDecay = cms.EDAnalyzer('TestBPHRecoDecay',
     patMuonLabel = cms.string('selectedPatMuons'),
-    recoTrkLabel = cms.string('generalTracks'),
     pfCandsLabel = cms.string('particleFlow'),
     outDump = cms.string('dump_full.txt'),
     outHist = cms.string('hist_full.root')
