@@ -22,6 +22,7 @@
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/RecoCandidate/interface/RecoCandidate.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
+#include "DataFormats/PatCandidates/interface/GenericParticle.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 
@@ -52,15 +53,16 @@ class BPHTrackReference {
    */
   /// 
   static const reco::Track* getTrack( const reco::Candidate& rc,
-                            const char* modeList = "cbfpmige" ) {
+                            const char* modeList = "cfhbpmige" ) {
     const char* mptr = modeList;
     char mode;
     const reco::Track* tkp = 0;
     while ( ( mode = *mptr++ ) ) {
       switch ( mode ) {
       case 'c': if ( ( tkp = getFromRC( rc ) ) != 0 ) return tkp; break;
-      case 'b': if ( ( tkp = getFromBT( rc ) ) != 0 ) return tkp; break;
       case 'f': if ( ( tkp = getFromPF( rc ) ) != 0 ) return tkp; break;
+      case 'h': if ( ( tkp = getFromGC( rc ) ) != 0 ) return tkp; break;
+      case 'b': if ( ( tkp = getFromBT( rc ) ) != 0 ) return tkp; break;
       case 'p': if ( ( tkp = getFromPC( rc ) ) != 0 ) return tkp; break;
       case 'm': if ( ( tkp = getMuonPF( rc ) ) != 0 ) return tkp; break;
       case 'i': if ( ( tkp = getMuonIT( rc ) ) != 0 ) return tkp; break;
@@ -81,10 +83,6 @@ class BPHTrackReference {
     }
     return 0;
   }
-  static const reco::Track* getFromBT( const reco::Candidate& rc ) {
-//    std::cout << "getFromBT" << std::endl;
-    return 0;
-  }
   static const reco::Track* getFromPF( const reco::Candidate& rc ) {
 //    std::cout << "getFromPF" << std::endl;
     const reco::PFCandidate* pf =
@@ -96,6 +94,23 @@ class BPHTrackReference {
     }
     catch ( edm::Exception e ) {
     }
+    return 0;
+  }
+  static const reco::Track* getFromGC( const reco::Candidate& rc ) {
+//    std::cout << "getFromGC" << std::endl;
+    const pat::GenericParticle* gp =
+        dynamic_cast<const pat::GenericParticle*>( &rc );
+    if ( gp == 0 ) return 0;
+    try {
+      const reco::TrackRef& tkr = gp->track();
+      if ( !tkr.isNull() ) return tkr.get();
+    }
+    catch ( edm::Exception e ) {
+    }
+    return 0;
+  }
+  static const reco::Track* getFromBT( const reco::Candidate& rc ) {
+//    std::cout << "getFromBT" << std::endl;
     return 0;
   }
   static const reco::Track* getFromPC( const reco::Candidate& rc ) {
