@@ -108,7 +108,7 @@ void BPHDecayVertex::tTracks() const {
     ttMap[rp] = 0;
     if ( !rp->charge() ) continue;
     const reco::Track* tp;
-    tp = BPHTrackReference::getTrack( *rp, "cfp" );
+    tp = BPHTrackReference::getTrack( *rp, "cfhp" );
     if ( tp == 0 ) {
       cout << "no track for reco::(PF)Candidate" << endl;
       validVertex = false;
