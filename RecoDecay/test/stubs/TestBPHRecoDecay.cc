@@ -10,8 +10,6 @@
 #include "BPHAnalysis/RecoDecay/interface/BPHVertexSelect.h"
 #include "BPHAnalysis/RecoDecay/interface/BPHTrackReference.h"
 
-#include "BPHAnalysis/RecoDecay/interface/BPHMessageLogger.h"
-
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 
@@ -41,9 +39,6 @@ TestBPHRecoDecay::TestBPHRecoDecay( const edm::ParameterSet& ps ) {
   outDump = getParameter( ps, "outDump" );
   outHist = getParameter( ps, "outHist" );
   fPtr = new ofstream( outDump.c_str() );
-  std::ofstream os("dum");
-  BPHMessageLogger::setStream( os );
-  BPHMessageLogger::outStream() << "dum" << endl;
 }
 
 
