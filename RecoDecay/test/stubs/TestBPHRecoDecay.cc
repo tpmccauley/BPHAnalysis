@@ -76,6 +76,7 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
 
   int nrc = 0;
 
+  // get reco::PFCandidate collection (in full AOD )
   edm::Handle< vector<reco::PFCandidate> > pfCands;
   if ( usePF ) {
     edm::InputTag pfCandTag( pfCandsLabel );
@@ -86,6 +87,10 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
     else                     outF << "no pfCands" << endl;
   }
 
+  // get pat::PackedCandidate collection (in MiniAOD)
+  // pat::PackedCandidate is not defined in CMSSW_5XY, so a
+  // typedef (BPHTrackReference::candidate) is used, actually referring 
+  // to pat::PackedCandidate only for CMSSW versions where it's defined
   edm::Handle< vector<BPHTrackReference::candidate> > pcCands;
   if ( usePC ) {
     edm::InputTag pcCandTag( pcCandsLabel );
@@ -96,6 +101,7 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
     else                     outF << "no pcCands" << endl;
   }
 
+  // get pat::GenericParticle collection (in skimmed data)
   edm::Handle< vector<pat::GenericParticle> > gpCands;
   if ( useGP ) {
     edm::InputTag gpCandsTag( gpCandsLabel );
@@ -106,6 +112,7 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
     else                     outF << "no gpCands" << endl;
   }
 
+  // get pat::Muon collection (in full AOD and MiniAOD)
   edm::Handle<pat::MuonCollection> patMuon;
   if ( usePM ) {
     edm::InputTag patMuonTag( patMuonLabel );
@@ -116,6 +123,8 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
     else                     outF << "no muons" << endl;
   }
 
+  // get muons from pat::CompositeCandidate objects describing onia;
+  // muons from all composite objects are copied to an unique std::vector
   vector<const reco::Candidate*> muDaugs;
   if ( useCC ) {
     edm::Handle< vector<pat::CompositeCandidate> > ccCands;
