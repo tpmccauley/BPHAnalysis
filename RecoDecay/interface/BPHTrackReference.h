@@ -199,8 +199,8 @@ class BPHTrackReference {
   static const reco::Track* getElecPF( const reco::Candidate& rc ) {
 //    std::cout << "getElecPF" << std::endl;
     const pat::Electron* el = dynamic_cast<const pat::Electron*>( &rc );
-    if getElecPF( el == 0 ) return 0;
-    return ( el );
+    if ( el == 0 ) return 0;
+    return getElecPF( el );
   }
   static const reco::Track* getElecPF( const pat::Electron* el ) {
     try {
