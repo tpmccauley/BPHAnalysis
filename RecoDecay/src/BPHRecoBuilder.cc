@@ -71,9 +71,10 @@ BPHRecoBuilder::~BPHRecoBuilder() {
 //--------------
 BPHRecoBuilder::BPHGenericCollection* BPHRecoBuilder::createCollection(
                                       const std::vector<const reco::Candidate*>&
-                                      candList ) {
+                                      candList,
+                                      const std::string& list ) {
   return new BPHSpecificCollection< std::vector<const reco::Candidate*> >(
-                                                candList );
+                                                candList, list );
 }
 
 
@@ -305,6 +306,7 @@ void BPHRecoBuilder::build( std::vector<ComponentSet>& compList,
     comp.cand = &cand;
     comp.mass = source->mass;
     comp.msig = source->msig;
+    comp.searchList = collection->searchList();
     compSet.daugMap[*source->name] = comp;
     daugMap()[*source->name] = &cand;
     build( compList, compSet,

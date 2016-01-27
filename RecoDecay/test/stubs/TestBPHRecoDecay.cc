@@ -280,12 +280,16 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
   string muNeg = "muNeg";
   BPHRecoBuilder bJPsi( es );
   if ( usePM ) {
-  bJPsi.add( muPos, BPHRecoBuilder::createCollection( patMuon ), 0.105658 );
-  bJPsi.add( muNeg, BPHRecoBuilder::createCollection( patMuon ), 0.105658 );
+  bJPsi.add( muPos, BPHRecoBuilder::createCollection( patMuon, "cfmig" ),
+             0.105658 );
+  bJPsi.add( muNeg, BPHRecoBuilder::createCollection( patMuon, "cfmig" ),
+             0.105658 );
   } else
   if ( useCC ) {
-  bJPsi.add( muPos, BPHRecoBuilder::createCollection( muDaugs ), 0.105658 );
-  bJPsi.add( muNeg, BPHRecoBuilder::createCollection( muDaugs ), 0.105658 );
+  bJPsi.add( muPos, BPHRecoBuilder::createCollection( muDaugs, "cfmig" ),
+             0.105658 );
+  bJPsi.add( muNeg, BPHRecoBuilder::createCollection( muDaugs, "cfmig" ),
+             0.105658 );
   }
   bJPsi.filter( muPos, muPt  );
   bJPsi.filter( muNeg, muPt  );

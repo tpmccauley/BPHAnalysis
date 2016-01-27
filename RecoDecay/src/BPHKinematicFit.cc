@@ -49,7 +49,7 @@ BPHKinematicFit::BPHKinematicFit():
 
 
 BPHKinematicFit::BPHKinematicFit( const std::vector<Component>& list ):
-  BPHDecayVertex( 0 ),
+  BPHDecayVertex( list, 0 ),
   massConst( -1.0 ),
   massSigma( -1.0 ),
   updatedFit( false ),

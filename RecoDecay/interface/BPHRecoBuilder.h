@@ -68,17 +68,24 @@ class BPHRecoBuilder {
    */
 
   // common object to interface with edm collections
-  struct BPHGenericCollection {
+  class BPHGenericCollection {
+   public:
+    BPHGenericCollection( const std::string& list ): sList( list ) {}
     virtual ~BPHGenericCollection() {}
     virtual const reco::Candidate& get( int i ) const = 0;
     virtual int size() const = 0;
+    const std::string& searchList() const { return sList; }
+   private:
+    std::string sList;
   };
   template <class T>
   static BPHGenericCollection* createCollection(
-                               const edm::Handle<T>& collection );
+                               const edm::Handle<T>& collection,
+                               const std::string& list = "cfhp" );
   static BPHGenericCollection* createCollection(
                                const std::vector<const reco::Candidate*>&
-                               candList );
+                               candList,
+                               const std::string& list = "cfhp" );
 
   /// add collection of particles giving them a name
   /// collections can be added as 
@@ -150,7 +157,8 @@ class BPHRecoBuilder {
   template <class T>
   class BPHSpecificCollection: public BPHGenericCollection {
    public:
-    BPHSpecificCollection( const T& c ): cPtr( &c ) {}
+    BPHSpecificCollection( const T& c, const std::string& list ):
+                           BPHGenericCollection( list ), cPtr( &c ) {}
     virtual ~BPHSpecificCollection() {}
     virtual const reco::Candidate& get( int i ) const { return (*cPtr)[i]; }
     virtual int size() const { return cPtr->size(); }
@@ -229,8 +237,9 @@ class BPHRecoBuilder {
 
 template <class T>
 BPHRecoBuilder::BPHGenericCollection* BPHRecoBuilder::createCollection(
-                                      const edm::Handle<T>& collection ) {
-  return new BPHSpecificCollection<T>( *collection );
+                                      const edm::Handle<T>& collection,
+                                      const std::string& list ) {
+  return new BPHSpecificCollection<T>( *collection, list );
 }
 
 

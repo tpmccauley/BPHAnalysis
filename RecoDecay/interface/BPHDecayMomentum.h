@@ -29,6 +29,7 @@ class BPHRecoCandidate;
 //---------------
 #include <vector>
 #include <map>
+#include <string>
 
 //              ---------------------
 //              -- Class Interface --
@@ -113,6 +114,7 @@ class BPHDecayMomentum {
     const reco::Candidate* cand;
     double mass;
     double msig;
+    std::string searchList;
   };
 
   // get a static object filled in the constructor
@@ -166,11 +168,6 @@ class BPHDecayMomentum {
   // fill lists of previously reconstructed particles and their names
   // and retrieve cascade decay products
   void dCompList();
-
-  // include in the map of clones to original particles the
-  // corresponding map for previously reconstructed particles
-  void addClonesMap( const std::map<const reco::Candidate*,
-                                    const reco::Candidate*>& clMap );
 
   // compute the total momentum of simple particles, produced
   // directly or in cascade decays

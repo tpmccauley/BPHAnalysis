@@ -70,6 +70,8 @@ class BPHDecayVertex: public virtual BPHDecayMomentum {
 
   // constructor
   BPHDecayVertex( const edm::EventSetup* es );
+  BPHDecayVertex( const std::vector<Component>& list,
+                  const edm::EventSetup* es );
 
   // utility function used to cash reconstruction results
   virtual void setNotUpdated() const;
@@ -78,6 +80,9 @@ class BPHDecayVertex: public virtual BPHDecayMomentum {
 
   // EventSetup needed to build TransientTrack
   const edm::EventSetup* evSetup;
+
+  // map linking particles to associated track search list
+  std::map<const reco::Candidate*,std::string> searchMap;
 
   // reconstruction results cache
   mutable bool oldTracks;

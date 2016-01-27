@@ -49,6 +49,25 @@ BPHDecayVertex::BPHDecayVertex( const edm::EventSetup* es ):
   setNotUpdated();
 }
 
+
+BPHDecayVertex::BPHDecayVertex( const std::vector<Component>& list,
+                                const edm::EventSetup* es ):
+ evSetup( es ) {
+  int i;
+  int n = list.size();
+  for ( i = 0; i < n; ++i ) {
+    const Component& component = list[i];
+    searchMap[component.cand] = component.searchList;
+  }
+  const std::vector<const BPHRecoCandidate*>& dComp = daughComp();
+  n = dComp.size();
+  while ( n-- ) {
+    const map<const reco::Candidate*,string>& dMap = dComp[n]->searchMap;
+    searchMap.insert( dMap.begin(), dMap.end() );
+  }
+  setNotUpdated();
+}
+
 //--------------
 // Destructor --
 //--------------
@@ -81,7 +100,10 @@ reco::TransientTrack* BPHDecayVertex::getTransientTrack(
   if ( oldTracks ) tTracks();
   map<const reco::Candidate*,
             reco::TransientTrack*>::const_iterator iter = ttMap.find( cand );
-  return ( iter != ttMap.end() ? iter->second : 0 );
+  map<const reco::Candidate*,
+            reco::TransientTrack*>::const_iterator iend = ttMap.end();
+  if ( iter == iend ) iter = ttMap.find( originalReco( cand ) );
+  return ( iter != iend ? iter->second : 0 );
 }
 
 
@@ -104,11 +126,15 @@ void BPHDecayVertex::tTracks() const {
   trTracks.reserve( n );
   validVertex = true;
   while ( n-- ) {
-    const reco::Candidate* rp = dL[n];
+    const reco::Candidate* rp = originalReco( dL[n] );
     ttMap[rp] = 0;
     if ( !rp->charge() ) continue;
     const reco::Track* tp;
-    tp = BPHTrackReference::getTrack( *rp, "cfhp" );
+    const char* searchList = "cfhp";
+    map<const reco::Candidate*,std::string>::const_iterator iter =
+                                             searchMap.find( rp );
+    if ( iter != searchMap.end() ) searchList = iter->second.c_str();
+    tp = BPHTrackReference::getTrack( *rp, searchList );
     if ( tp == 0 ) {
       cout << "no track for reco::(PF)Candidate" << endl;
       validVertex = false;

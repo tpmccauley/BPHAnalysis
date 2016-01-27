@@ -94,7 +94,7 @@ void BPHDecayMomentum::add( const string& name,
   setNotUpdated();
   nComp.push_back( name );
   cList.push_back( comp );
-  addClonesMap( comp->clonesMap );
+  clonesMap.insert( comp->clonesMap.begin(), comp->clonesMap.end() );
   return;
 }
 
@@ -224,22 +224,8 @@ void BPHDecayMomentum::dCompList() {
     nComp[i] = entry.first;
     const BPHRecoCandidate* comp = entry.second;
     cList[i++] = comp;
-    addClonesMap( comp->clonesMap );
+    clonesMap.insert( comp->clonesMap.begin(), comp->clonesMap.end() );
   }
-  return;
-}
-
-
-void BPHDecayMomentum::addClonesMap(
-                       const std::map<const reco::Candidate*,
-                                      const reco::Candidate*>& clMap ) {
-  // include in the map of clones to original particles the
-  // corresponding map for previously reconstructed particles
-  map<const reco::Candidate*,
-      const reco::Candidate*>::const_iterator iter = clMap.begin();
-  map<const reco::Candidate*,
-      const reco::Candidate*>::const_iterator iend = clMap.end();
-  while ( iter != iend ) clonesMap.insert( *iter++ );
   return;
 }
 
