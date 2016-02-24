@@ -60,12 +60,14 @@ class BPHTrackReference {
   /// b :  reco ::       Candidate ::       bestTrack     ()
   /// p :   pat :: PackedCandidate ::     pseudoTrack     ()
   /// m :   pat ::            Muon ::     pfCandidateRef  ()
+  /// n :   pat ::            Muon ::   muonBestTrack     ()
   /// i :   pat ::            Muon ::      innerTrack     ()
   /// g :   pat ::            Muon ::     globalTrack     ()
   /// s :   pat ::            Muon ::      standAloneMuon ()
   /// e :   pat ::        Electron ::     pfCandidateRef  ()
   static const reco::Track* getTrack( const reco::Candidate& rc,
-                            const char* modeList = "cfhbpmigse" ) {
+                            const char* modeList = "cfhbpmnigse" ) {
+    if ( rc.charge() == 0 ) return 0;
     const char* mptr = modeList;
     char mode;
     const reco::Track* tkp = 0;
@@ -77,6 +79,7 @@ class BPHTrackReference {
       case 'b': if ( ( tkp = getFromBT( rc ) ) != 0 ) return tkp; break;
       case 'p': if ( ( tkp = getFromPC( rc ) ) != 0 ) return tkp; break;
       case 'm': if ( ( tkp = getMuonPF( rc ) ) != 0 ) return tkp; break;
+      case 'n': if ( ( tkp = getMuonBT( rc ) ) != 0 ) return tkp; break;
       case 'i': if ( ( tkp = getMuonIT( rc ) ) != 0 ) return tkp; break;
       case 'g': if ( ( tkp = getMuonGT( rc ) ) != 0 ) return tkp; break;
       case 's': if ( ( tkp = getMuonSA( rc ) ) != 0 ) return tkp; break;
@@ -143,6 +146,21 @@ class BPHTrackReference {
         const reco::TrackRef& tkr = pcr->trackRef();
         if ( !tkr.isNull() ) return tkr.get();
       }
+    }
+    catch ( edm::Exception e ) {
+    }
+    return 0;
+  }
+  static const reco::Track* getMuonBT( const reco::Candidate& rc ) {
+//    std::cout << "getMuonBT" << std::endl;
+    const reco::Muon* mu = dynamic_cast<const reco::Muon*>( &rc );
+    if ( mu == 0 ) return 0;
+    return getMuonBT( mu );
+  }
+  static const reco::Track* getMuonBT( const reco::Muon* mu ) {
+    try {
+      const reco::TrackRef& tkr = mu->muonBestTrack();
+      if ( !tkr.isNull() ) return tkr.get();
     }
     catch ( edm::Exception e ) {
     }
