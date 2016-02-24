@@ -89,6 +89,24 @@ const reco::Vertex& BPHDecayVertex::vertex() const {
 }
 
 
+const vector<const reco::Track*>& BPHDecayVertex::tracks() const {
+  if ( oldTracks ) tTracks();
+  return rTracks;
+}
+
+
+const reco::Track* BPHDecayVertex::getTrack(
+                                   const reco::Candidate* cand ) const {
+  if ( oldTracks ) tTracks();
+  map<const reco::Candidate*,
+      const reco::Track*>::const_iterator iter = tkMap.find( cand );
+  map<const reco::Candidate*,
+      const reco::Track*>::const_iterator iend = tkMap.end();
+  if ( iter == iend ) iter = tkMap.find( originalReco( cand ) );
+  return ( iter != iend ? iter->second : 0 );
+}
+
+
 const vector<reco::TransientTrack>& BPHDecayVertex::transientTracks() const {
   if ( oldTracks ) tTracks();
   return trTracks;
@@ -117,7 +135,9 @@ void BPHDecayVertex::setNotUpdated() const {
 
 void BPHDecayVertex::tTracks() const {
   oldTracks = false;
+   rTracks.clear();
   trTracks.clear();
+  tkMap.clear();
   ttMap.clear();
   edm::ESHandle<TransientTrackBuilder> ttB;
   evSetup->get<TransientTrackRecord>().get( "TransientTrackBuilder", ttB );
@@ -127,6 +147,7 @@ void BPHDecayVertex::tTracks() const {
   validVertex = true;
   while ( n-- ) {
     const reco::Candidate* rp = originalReco( dL[n] );
+    tkMap[rp] = 0;
     ttMap[rp] = 0;
     if ( !rp->charge() ) continue;
     const reco::Track* tp;
@@ -140,8 +161,10 @@ void BPHDecayVertex::tTracks() const {
       validVertex = false;
       continue;
     }
+     rTracks.push_back( tp );
     trTracks.push_back( ttB->build( tp ) );
     reco::TransientTrack* ttp = &trTracks.back();
+    tkMap[rp] =  tp;
     ttMap[rp] = ttp;
   }
   return;

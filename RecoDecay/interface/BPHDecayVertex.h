@@ -60,7 +60,13 @@ class BPHDecayVertex: public virtual BPHDecayMomentum {
   /// get reconstructed vertex
   virtual const reco::Vertex& vertex() const;
 
-  /// get list of TransientTrack
+  /// get list of Tracks
+  const std::vector<const reco::Track*>& tracks() const;
+
+  /// get Track for a daughter
+  const reco::Track* getTrack( const reco::Candidate* cand ) const;
+
+  /// get list of TransientTracks
   const std::vector<reco::TransientTrack>& transientTracks() const;
 
   /// get TransientTrack for a daughter
@@ -88,7 +94,9 @@ class BPHDecayVertex: public virtual BPHDecayMomentum {
   mutable bool oldTracks;
   mutable bool oldVertex;
   mutable bool validVertex;
+  mutable std::vector<const    reco::Track*> rTracks;
   mutable std::vector<reco::TransientTrack> trTracks;
+  mutable std::map<const reco::Candidate*,const    reco::Track*> tkMap;
   mutable std::map<const reco::Candidate*,reco::TransientTrack*> ttMap;
   mutable reco::Vertex fittedVertex;
 
