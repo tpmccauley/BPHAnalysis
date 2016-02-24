@@ -242,10 +242,9 @@ void BPHDecayMomentum::sumMomentum(
 void BPHDecayMomentum::fillDaug( vector<const reco::Candidate*>& ad ) const {
   // recursively fill the list of simple particles, produced
   // directly or in cascade decays
-  int n = dList.size();
-  while ( n-- ) ad.push_back( dList[n] );
-  int m = cList.size();
-  while ( m-- ) cList[m]->fillDaug( ad );
+  ad.insert( ad.end(), dList.begin(), dList.end() );
+  int n = cList.size();
+  while ( n-- ) cList[n]->fillDaug( ad );
   return;
 }
 
