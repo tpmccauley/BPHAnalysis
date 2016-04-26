@@ -20,7 +20,6 @@
 #include "BPHAnalysis/RecoDecay/interface/BPHTrackReference.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
-//#include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
@@ -59,7 +58,7 @@ BPHDecayVertex::BPHDecayVertex( const std::vector<Component>& list,
     const Component& component = list[i];
     searchMap[component.cand] = component.searchList;
   }
-  const std::vector<const BPHRecoCandidate*>& dComp = daughComp();
+  const std::vector<BPHRecoConstCandPtr>& dComp = daughComp();
   n = dComp.size();
   while ( n-- ) {
     const map<const reco::Candidate*,string>& dMap = dComp[n]->searchMap;

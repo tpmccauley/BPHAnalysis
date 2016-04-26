@@ -45,7 +45,6 @@ namespace reco {
 #include <map>
 #include <set>
 
-
 //              ---------------------
 //              -- Class Interface --
 //              ---------------------
@@ -105,10 +104,10 @@ class BPHRecoBuilder {
             double mass = -1.0,
             double msig = -1.0 );
   void add( const std::string& name,
-            const std::vector<const BPHRecoCandidate*>& collection );
+            const std::vector<BPHRecoConstCandPtr>& collection );
   template <class T>
   void add( const std::string& name,
-            const std::vector<const T*>& collection );
+            const std::vector< std::shared_ptr<const T> >& collection );
 
   /// define selections to particles to be used in the reconstruction:
   /// simple particles
@@ -138,7 +137,7 @@ class BPHRecoBuilder {
   /// particles with their names
   struct ComponentSet {
     std::map<std::string,BPHDecayMomentum::Component> daugMap;
-    std::map<std::string,const BPHRecoCandidate*>     compMap;
+    std::map<std::string,BPHRecoConstCandPtr        > compMap;
   };
 
   /// build a set of combinations of particles fulfilling the selections
@@ -180,16 +179,16 @@ class BPHRecoBuilder {
   // with their names and selections
   struct BPHCompSource {
     const std::string* name;
-    const std::vector<const BPHRecoCandidate*>* collection;
+    const std::vector<BPHRecoConstCandPtr>* collection;
     std::vector<const BPHMomentumSelect*> momSelector;
-    std::vector<const BPHVertexSelect*>   vtxSelector;
-    std::vector<const BPHFitSelect*>      fitSelector;
+    std::vector<const BPHVertexSelect*  > vtxSelector;
+    std::vector<const BPHFitSelect*     > fitSelector;
   };
 
   // return map of names to simple or previously recontructed particles
   // for currently tested combination 
-  static std::map<std::string,const reco::Candidate *>& daugMap();
-  static std::map<std::string,const BPHRecoCandidate*>& compMap();
+  static std::map<std::string,const reco::Candidate*>& daugMap();
+  static std::map<std::string,BPHRecoConstCandPtr   >& compMap();
 
   const edm::EventSetup* evSetup;
   double minPDiff;
@@ -200,7 +199,7 @@ class BPHRecoBuilder {
 
   // set of copies of previously reconstructed particles list
   // for bookkeeping and cleanup
-  std::set<const std::vector<const BPHRecoCandidate*>*> compCollectList;
+  std::set<const std::vector<BPHRecoConstCandPtr>*> compCollectList;
 
   // list fo selections to reconstructed particle
   std::vector<const BPHMomentumSelect*> msList;
@@ -225,7 +224,7 @@ class BPHRecoBuilder {
   bool contained( ComponentSet& compSet,
                   const reco::Candidate* cand ) const;
   bool contained( ComponentSet& compSet,
-                  const BPHRecoCandidate* cand ) const;
+                  BPHRecoConstCandPtr cand ) const;
   // compare two particles with their track reference and return 
   // true or false for same or different particles, including a
   // check with momentum difference
@@ -256,13 +255,14 @@ void BPHRecoBuilder::add( const std::string& name,
 
 template <class T>
 void BPHRecoBuilder::add( const std::string& name,
-                          const std::vector<const T*>& collection ) {
+                          const std::vector< std::shared_ptr<const T> >&
+                                             collection ) {
   // forward call after converting the list of pointer to a list
   // of pointer to base objects
   int i;
   int n = collection.size();
-  std::vector<const BPHRecoCandidate*>* compCandList =
-       new std::vector<const BPHRecoCandidate*>( n );
+  std::vector<BPHRecoConstCandPtr>* compCandList =
+       new std::vector<BPHRecoConstCandPtr>( n );
   for ( i = 0; i < n; ++i ) (*compCandList)[i] = collection[i];
   // save the converted list for cleanup
   compCollectList.insert( compCandList );

@@ -60,12 +60,12 @@ class BPHPlusMinusCandidate: public BPHRecoCandidate,
   /// specified in the BPHRecoBuilder, with given names for 
   /// positive and negative particle
   /// charge selection is applied inside
-  static std::vector<const BPHPlusMinusCandidate*> build(
-                           const BPHRecoBuilder& builder,
-                           const std::string nPos,
-                           const std::string nNeg,
-                           double mass = -1,
-                           double msig = -1 );
+  static std::vector<BPHPlusMinusConstCandPtr> build(
+                                               const BPHRecoBuilder& builder,
+                                               const std::string nPos,
+                                               const std::string nNeg,
+                                               double mass = -1,
+                                               double msig = -1 );
 
   /// get a composite by the simple sum of simple particles
   virtual const pat::CompositeCandidate& composite() const;

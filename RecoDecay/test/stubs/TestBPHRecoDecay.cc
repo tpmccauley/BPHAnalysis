@@ -306,9 +306,8 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
   Chi2Select chi2Valid( 0.0 );
   bJPsi.filter( massJPsi );
   bJPsi.filter( chi2Valid );
-  vector<const BPHPlusMinusCandidate*> lJPsi =
-               BPHPlusMinusCandidate::build( bJPsi, muPos, muNeg,
-                                             3.096916, 0.00004 );
+  vector<BPHPlusMinusConstCandPtr> lJPsi =
+         BPHPlusMinusCandidate::build( bJPsi, muPos, muNeg, 3.096916, 0.00004 );
 //  //  BPHPlusMinusCandidate::build function has embedded charge selection
 //  //  alternatively simple BPHRecoCandidate::build function can be used
 //  //  as in the following
@@ -316,14 +315,13 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
 //  MuonChargeSelect mqNeg( +1 );
 //  bJPsi.filter( nPos, mqPos );
 //  bJPsi.filter( nNeg, mqNeg );
-//  vector<const BPHRecoCandidate*> lJPsi =
-//               BPHRecoCandidate::build( bJPsi, 
-//                                        3.096916, 0.00004 );
+//  vector<BPHRecoConstCandPtr> lJPsi = BPHRecoCandidate::build( bJPsi, 
+//                                      3.096916, 0.00004 );
   int iJPsi;
   int nJPsi = lJPsi.size();
   outF << nJPsi << " JPsi cand found" << endl;
   for ( iJPsi = 0; iJPsi < nJPsi; ++iJPsi ) dumpRecoCand( "JPsi",
-                                                          lJPsi[iJPsi] );
+                                                          lJPsi[iJPsi].get() );
 
   // build and dump Phi
 
@@ -353,8 +351,7 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
 
   MassSelect massPhi( 1.00, 1.04 );
   bPhi.filter( massPhi );
-  vector<const BPHRecoCandidate*> lPhi =
-               BPHRecoCandidate::build( bPhi );
+  vector<BPHRecoConstCandPtr> lPhi = BPHRecoCandidate::build( bPhi );
 //  //  BPHRecoCandidate::build function requires explicit charge selection
 //  //  alternatively BPHPlusMinusCandidate::build function can be used
 //  //  as in the following
@@ -365,7 +362,7 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
   int nPhi = lPhi.size();
   outF << nPhi << " Phi cand found" << endl;
   for ( iPhi = 0; iPhi < nPhi; ++iPhi ) dumpRecoCand( "Phi",
-                                                      lPhi[iPhi] );
+                                                      lPhi[iPhi].get() );
 
   // build and dump Bs
 
@@ -381,12 +378,12 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
   bBs.filter(  "Phi",  mPhi );
   Chi2Select chi2Bs( 0.02 );
   bBs.filter( chi2Bs );
-  std::vector<const BPHRecoCandidate*> lBs = BPHRecoCandidate::build( bBs );
+  std::vector<BPHRecoConstCandPtr> lBs = BPHRecoCandidate::build( bBs );
   int iBs;
   int nBs = lBs.size();
   outF << nBs << " Bs cand found" << endl;
   for ( iBs = 0; iBs < nBs; ++iBs ) dumpRecoCand( "Bs",
-                                                  lBs[iBs] );
+                                                  lBs[iBs].get() );
   }
 
   // build and dump Bu
@@ -409,15 +406,13 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
   bBp.filter( "Kaon", knv );
   Chi2Select chi2Bp( 0.02 );
   bBp.filter( chi2Bp );
-  std::vector<const BPHRecoCandidate*> lBp = BPHRecoCandidate::build( bBp );
+  std::vector<BPHRecoConstCandPtr> lBp = BPHRecoCandidate::build( bBp );
   int iBp;
   int nBp = lBp.size();
   outF << nBp << " Bu cand found" << endl;
   for ( iBp = 0; iBp < nBp; ++iBp ) dumpRecoCand( "Bu",
-                                                  lBp[iBp] );
+                                                  lBp[iBp].get() );
   }
-
-  BPHRecoCandidate::clear();
 
   return;
 
@@ -525,7 +520,7 @@ void TestBPHRecoDecay::dumpRecoCand( const string& name,
   int m = dc.size();
   for ( j = 0; j < m; ++j ) {
     const string& name = dc[j];
-    const BPHRecoCandidate* dp = cand->getComp( name );
+    const BPHRecoCandidate* dp = cand->getComp( name ).get();
     outF << "composite daughter " << j
          << " " << name
          << " momentum: "
@@ -583,7 +578,7 @@ void TestBPHRecoDecay::fillHisto( const string& name,
   int n = dc.size();
   for ( i = 0; i < n; ++i ) {
     const string& daug = dc[i];
-    const BPHRecoCandidate* dptr = cand->getComp( daug );
+    const BPHRecoCandidate* dptr = cand->getComp( daug ).get();
     fillHisto( mass + name + daug, dptr->composite().mass() );
     fillHisto( mcst + name + daug, dptr->p4()       .mass() );
   }

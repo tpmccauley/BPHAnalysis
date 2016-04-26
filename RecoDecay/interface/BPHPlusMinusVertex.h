@@ -20,6 +20,7 @@
 //------------------------------------
 // Collaborating Class Declarations --
 //------------------------------------
+#include "BPHAnalysis/RecoDecay/interface/BPHPlusMinusCandidatePtr.h"
 #include "TrackingTools/PatternTools/interface/ClosestApproachInRPhi.h"
 
 //---------------

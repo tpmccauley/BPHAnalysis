@@ -166,7 +166,7 @@ void BPHKinematicFit::fitMomentum() const {
     const std::vector<const reco::Candidate*>& daug = daughters();
     int n = daug.size();
     while ( n-- ) tm += daug[n]->p4();
-    const std::vector<const BPHRecoCandidate*>& comp = daughComp();
+    const std::vector<BPHRecoConstCandPtr>& comp = daughComp();
     int m = comp.size();
     while ( m-- ) tm += comp[m]->p4();
     totalMomentum = tm;

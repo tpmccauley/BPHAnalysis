@@ -82,12 +82,12 @@ void BPHPlusMinusCandidate::add( const std::string& name,
 }
 
 
-std::vector<const BPHPlusMinusCandidate*> BPHPlusMinusCandidate::build(
-                                          const BPHRecoBuilder& builder,
-                                          const std::string nPos,
-                                          const std::string nNeg,
-                                          double mass, double msig ) {
-  vector<const BPHPlusMinusCandidate*> cList;
+std::vector<BPHPlusMinusConstCandPtr> BPHPlusMinusCandidate::build(
+                                      const BPHRecoBuilder& builder,
+                                      const std::string nPos,
+                                      const std::string nNeg,
+                                      double mass, double msig ) {
+  vector<BPHPlusMinusConstCandPtr> cList;
   class ChargeSelect: public BPHRecoSelect {
    public:
     ChargeSelect( int c ): charge ( c ) {}

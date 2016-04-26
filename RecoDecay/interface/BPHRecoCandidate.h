@@ -39,7 +39,6 @@ namespace reco {
 // C++ Headers --
 //---------------
 #include <vector>
-#include <set>
 
 //              ---------------------
 //              -- Class Interface --
@@ -66,35 +65,26 @@ class BPHRecoCandidate: public virtual BPHKinematicFit {
    */
   /// look for candidates starting from particle collections as
   /// specified in the BPHRecoBuilder
-  static std::vector<const BPHRecoCandidate*> build(
-                                              const BPHRecoBuilder& builder,
-                                              double mass = -1,
-                                              double msig = -1 );
-
-  /// delete all the candidates
-  /// (all candidates are created in the heap)
-  static void clear();
+  static std::vector<BPHRecoConstCandPtr> build( const BPHRecoBuilder& builder,
+                                                 double mass = -1,
+                                                 double msig = -1 );
 
  protected:
 
   // template function called by "build" to allow
   // the creation of derived objects
   template <class T>
-  static void fill( std::vector<const T*>& cList,
+  static void fill( std::vector< std::shared_ptr<const T> >& cList,
                     const BPHRecoBuilder& builder,
                     double mass = -1, double msig = -1 );
 
  private:
 
-  // candidate bookkeeping to allow cleanup
-  static std::set<const BPHRecoCandidate*> allCand;
-  void addCand();
-
 };
 
 
 template <class T>
-void BPHRecoCandidate::fill( std::vector<const T*>& cList,
+void BPHRecoCandidate::fill( std::vector< std::shared_ptr<const T> >& cList,
                              const BPHRecoBuilder& builder,
                              double mass, double msig ) {
   // create paricle combinations
@@ -110,7 +100,8 @@ void BPHRecoCandidate::fill( std::vector<const T*>& cList,
     // apply mass constraint, if requested
     if ( mass > 0 ) rc->setConstraint( mass, msig );
     // apply post selection
-    if ( builder.accept( *rc ) ) cList.push_back( rc );
+    if ( builder.accept( *rc ) ) cList.push_back( std::shared_ptr<const T>
+                                                  ( rc ) );
     else                         delete rc;
   }
   return;

@@ -20,9 +20,9 @@
 //------------------------------------
 // Collaborating Class Declarations --
 //------------------------------------
+#include "BPHAnalysis/RecoDecay/interface/BPHRecoCandidatePtr.h"
 #include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
 class BPHRecoBuilder;
-class BPHRecoCandidate;
 
 //---------------
 // C++ Headers --
@@ -58,7 +58,7 @@ class BPHDecayMomentum {
                     const reco::Candidate* daug, double mass = -1.0 );
   /// add a previously reconstructed particle giving it a name
   virtual void add( const std::string& name,
-                    const BPHRecoCandidate* comp );
+                    const BPHRecoConstCandPtr& comp );
 
   /// get a composite by the simple sum of simple particles
   virtual const pat::CompositeCandidate& composite() const;
@@ -98,15 +98,15 @@ class BPHDecayMomentum {
   /// e.g. in JPsi -> mu+mu-   returns an empty list
   ///      in B+   -> JPsi K+  returns the JPsi
   ///      in Bs   -> JPsi Phi returns the JPsi and Phi
-  virtual const std::vector<const BPHRecoCandidate*>& daughComp() const;
+  virtual const std::vector<BPHRecoConstCandPtr>& daughComp() const;
 
   /// get a simple particle from the name
   /// return null pointer if not found
-  virtual const reco::Candidate*  getDaug( const std::string& name ) const;
+  virtual const reco::Candidate* getDaug( const std::string& name ) const;
 
   /// get a previously reconstructed particle from the name
   /// return null pointer if not found
-  virtual const BPHRecoCandidate* getComp( const std::string& name ) const;
+  virtual BPHRecoConstCandPtr getComp( const std::string& name ) const;
 
  protected:
 
@@ -126,12 +126,9 @@ class BPHDecayMomentum {
 
   // constructors
   BPHDecayMomentum();
-  BPHDecayMomentum( const std::map<std::string,
-                                   Component>& daugMap );
-  BPHDecayMomentum( const std::map<std::string,
-                                   Component>& daugMap,
-                    const std::map<std::string,
-                                   const BPHRecoCandidate*> compMap );
+  BPHDecayMomentum( const std::map<std::string,Component>& daugMap );
+  BPHDecayMomentum( const std::map<std::string,Component>& daugMap,
+                    const std::map<std::string,BPHRecoConstCandPtr> compMap );
 
   // utility function used to cash reconstruction results
   virtual void setNotUpdated() const;
@@ -149,12 +146,12 @@ class BPHDecayMomentum {
   // pointers to simple and previously reconstructed particles
   // (clones stored for simple particles)
   std::vector<const reco::Candidate*> dList;
-  std::vector<const BPHRecoCandidate*> cList;
+  std::vector<BPHRecoConstCandPtr   > cList;
 
   // maps linking names to decay products
   // (simple and previously reconstructed particles)
   std::map<std::string,const reco::Candidate*> dMap;
-  std::map<std::string,const BPHRecoCandidate*> cMap;
+  std::map<std::string,BPHRecoConstCandPtr   > cMap;
 
   // reconstruction results cache
   mutable bool updated;

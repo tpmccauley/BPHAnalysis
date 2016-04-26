@@ -27,14 +27,13 @@ using namespace std;
 //-------------------
 // Initializations --
 //-------------------
-std::set<const BPHRecoCandidate*> BPHRecoCandidate::allCand;
+
 
 //----------------
 // Constructors --
 //----------------
 BPHRecoCandidate::BPHRecoCandidate( const edm::EventSetup* es ):
   BPHDecayVertex( es ) {
-  addCand();
 }
 
 
@@ -43,42 +42,25 @@ BPHRecoCandidate::BPHRecoCandidate( const edm::EventSetup* es,
   BPHDecayMomentum( compList.daugMap, compList.compMap ),
   BPHDecayVertex( BPHDecayMomentum::componentList(), es ),
   BPHKinematicFit( BPHDecayMomentum::componentList() ) {
-  addCand();
 }
 
 //--------------
 // Destructor --
 //--------------
 BPHRecoCandidate::~BPHRecoCandidate() {
-  // remove this object form the bookkeeping list
-  allCand.erase( this );
 }
 
 
 //--------------
 // Operations --
 //--------------
-std::vector<const BPHRecoCandidate*> BPHRecoCandidate::build(
-                                     const BPHRecoBuilder& builder,
-                                     double mass, double msig ) {
+std::vector<BPHRecoConstCandPtr> BPHRecoCandidate::build(
+                                 const BPHRecoBuilder& builder,
+                                 double mass, double msig ) {
   // create a list of pointers to BPHRecoCandidate and fill it
   // with particle combinations selected by the BPHRecoBuilder
-  std::vector<const BPHRecoCandidate*> cList;
+  std::vector<BPHRecoConstCandPtr> cList;
   fill( cList, builder, mass, msig );
   return cList;
-}
-
-
-void BPHRecoCandidate::clear() {
-  // repeatedly delete all objects
-  // each objects is automatiaclly removed from the list when deleted
-  while ( allCand.size() ) delete *allCand.begin();
-  return;
-}
-
-
-void BPHRecoCandidate::addCand() {
-  allCand.insert( this );
-  return;
 }
 

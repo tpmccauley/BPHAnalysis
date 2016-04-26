@@ -22,7 +22,6 @@
 // C++ Headers --
 //---------------
 #include <iostream>
-#include <memory>
 
 using namespace std;
 
@@ -50,7 +49,7 @@ BPHDecayMomentum::BPHDecayMomentum(
 
 BPHDecayMomentum::BPHDecayMomentum(
                   const map<string,BPHDecayMomentum::Component>& daugMap,
-                  const map<string,const BPHRecoCandidate*> compMap ):
+                  const map<string,BPHRecoConstCandPtr> compMap ):
  // store the map of names to previously reconstructed particles
  cMap( compMap ),
  updated( false ) {
@@ -90,7 +89,7 @@ void BPHDecayMomentum::add( const string& name,
 
 
 void BPHDecayMomentum::add( const string& name,
-                            const BPHRecoCandidate* comp ) {
+                            const BPHRecoConstCandPtr& comp ) {
   setNotUpdated();
   nComp.push_back( name );
   cList.push_back( comp );
@@ -138,7 +137,7 @@ const reco::Candidate* BPHDecayMomentum::originalReco(
 }
 
 
-const vector<const BPHRecoCandidate*>& BPHDecayMomentum::daughComp() const {
+const vector<BPHRecoConstCandPtr>& BPHDecayMomentum::daughComp() const {
   // return the list of previously reconstructed particles
   return cList;
 }
@@ -154,12 +153,11 @@ const reco::Candidate* BPHDecayMomentum::getDaug(
 }
 
 
-const BPHRecoCandidate* BPHDecayMomentum::getComp(
-                       const std::string& name ) const {
+BPHRecoConstCandPtr BPHDecayMomentum::getComp( const std::string& name ) const {
   // return a previously reconstructed particle from the name
   // return null pointer if not found
   map<const string,
-      const BPHRecoCandidate*>::const_iterator iter = cMap.find( name );
+      BPHRecoConstCandPtr>::const_iterator iter = cMap.find( name );
   return ( iter != cMap.end() ? iter->second : 0 );
 }
 
@@ -217,12 +215,12 @@ void BPHDecayMomentum::dCompList() {
   cList.resize( n );
   nComp.resize( n );
   int i = 0;
-  map<string,const BPHRecoCandidate*>::const_iterator iter = cMap.begin();
-  map<string,const BPHRecoCandidate*>::const_iterator iend = cMap.end();
+  map<string,BPHRecoConstCandPtr>::const_iterator iter = cMap.begin();
+  map<string,BPHRecoConstCandPtr>::const_iterator iend = cMap.end();
   while ( iter != iend ) {
-    const pair<string,const BPHRecoCandidate*>& entry = *iter++;
+    const pair<string,BPHRecoConstCandPtr>& entry = *iter++;
     nComp[i] = entry.first;
-    const BPHRecoCandidate* comp = entry.second;
+    BPHRecoConstCandPtr comp = entry.second;
     cList[i++] = comp;
     clonesMap.insert( comp->clonesMap.begin(), comp->clonesMap.end() );
   }
