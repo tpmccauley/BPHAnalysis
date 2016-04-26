@@ -21,6 +21,7 @@
 // Collaborating Class Declarations --
 //------------------------------------
 #include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/EDConsumerBase.h"
 
 //---------------
 // C++ Headers --
@@ -34,10 +35,10 @@
 template<class Obj>
 class TokenWrapper {
  public:
-  typedef typename edm::InputTag type;
+  typedef typename edm::EDGetTokenT<Obj> type;
   bool get( const edm::Event& ev,
             edm::Handle<Obj>& obj ) {
-    return ev.getByLabel( token, obj );
+    return ev.getByToken( token, obj );
   }
   type token;
 };
@@ -47,7 +48,8 @@ class AnalyzerWrapper: public edm::EDAnalyzer {
   template<class Obj>
   void consume( TokenWrapper<Obj>& token,
                 const std::string& label ) {
-    token.token = edm::InputTag( label );
+    edm::InputTag tag( label );
+    token.token = this->template consumes<Obj>( tag );
     return;
   }
 };
