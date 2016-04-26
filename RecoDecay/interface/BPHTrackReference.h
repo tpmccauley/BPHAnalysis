@@ -21,6 +21,7 @@
 //------------------------------------
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/RecoCandidate/interface/RecoCandidate.h"
+#include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
 #include "DataFormats/PatCandidates/interface/GenericParticle.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
@@ -39,7 +40,7 @@ class BPHTrackReference {
 
  public:
 
-  typedef reco::PFCandidate candidate;
+  typedef pat::PackedCandidate candidate;
 
   /** Constructor
    */
@@ -75,7 +76,7 @@ class BPHTrackReference {
       switch ( mode ) {
       case 'c': if ( ( tkp = getFromRC( rc ) ) != 0 ) return tkp; break;
       case 'f': if ( ( tkp = getFromPF( rc ) ) != 0 ) return tkp; break;
-      case 'h': if ( ( tkp = getFromGC( rc ) ) != 0 ) return tkp; break;
+      case 'h': if ( ( tkp = getFromGP( rc ) ) != 0 ) return tkp; break;
       case 'b': if ( ( tkp = getFromBT( rc ) ) != 0 ) return tkp; break;
       case 'p': if ( ( tkp = getFromPC( rc ) ) != 0 ) return tkp; break;
       case 'm': if ( ( tkp = getMuonPF( rc ) ) != 0 ) return tkp; break;
@@ -112,7 +113,7 @@ class BPHTrackReference {
     }
     return 0;
   }
-  static const reco::Track* getFromGC( const reco::Candidate& rc ) {
+  static const reco::Track* getFromGP( const reco::Candidate& rc ) {
 //    std::cout << "getFromGC" << std::endl;
     const pat::GenericParticle* gp =
         dynamic_cast<const pat::GenericParticle*>( &rc );
@@ -127,10 +128,25 @@ class BPHTrackReference {
   }
   static const reco::Track* getFromBT( const reco::Candidate& rc ) {
 //    std::cout << "getFromBT" << std::endl;
+    try {
+      const reco::Track* trk = rc.bestTrack();
+      return trk;
+    }
+    catch ( edm::Exception e ) {
+    }
     return 0;
   }
   static const reco::Track* getFromPC( const reco::Candidate& rc ) {
 //    std::cout << "getFromPC" << std::endl;
+    const pat::PackedCandidate* pp =
+        dynamic_cast<const pat::PackedCandidate*>( &rc );
+    if ( pp == 0 ) return 0;
+    try {
+      const reco::Track* trk = &pp->pseudoTrack();
+      return trk;
+    }
+    catch ( edm::Exception e ) {
+    }
     return 0;
   }
   static const reco::Track* getMuonPF( const reco::Candidate& rc ) {

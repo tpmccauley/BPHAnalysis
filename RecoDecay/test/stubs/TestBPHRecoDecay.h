@@ -1,11 +1,19 @@
 #ifndef TestBaseNtuple_h
 #define TestBaseNtuple_h
 
+#include "BPHAnalysis/RecoDecay/test/stubs/AnalyzerTokenWrapper.h"
+
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
+
+#include "BPHAnalysis/RecoDecay/interface/BPHTrackReference.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/PatCandidates/interface/GenericParticle.h"
+#include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
 
 #include <string>
 #include <iostream>
@@ -14,7 +22,7 @@
 class TH1F;
 class BPHRecoCandidate;
 
-class TestBPHRecoDecay: public edm::EDAnalyzer {
+class TestBPHRecoDecay: public AnalyzerWrapper {
 
  public:
 
@@ -32,6 +40,13 @@ class TestBPHRecoDecay: public edm::EDAnalyzer {
   std::string pfCandsLabel;
   std::string pcCandsLabel;
   std::string gpCandsLabel;
+
+  // token wrappers to allow running both on "old" and "new" CMSSW versions
+  TokenWrapper< pat::MuonCollection                       > patMuonToken;
+  TokenWrapper< std::vector<pat::CompositeCandidate>      > ccCandsToken;
+  TokenWrapper< std::vector<reco::PFCandidate>            > pfCandsToken;
+  TokenWrapper< std::vector<BPHTrackReference::candidate> > pcCandsToken;
+  TokenWrapper< std::vector<pat::GenericParticle>         > gpCandsToken;
 
   bool usePM;
   bool useCC;

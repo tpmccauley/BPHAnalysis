@@ -31,14 +31,28 @@ using namespace std;
 // xyz = getParameter( ps, "xyx" )
 
 TestBPHRecoDecay::TestBPHRecoDecay( const edm::ParameterSet& ps ) {
+
   usePM = ( SET_LABEL( patMuonLabel, ps ) != "" );
   useCC = ( SET_LABEL( ccCandsLabel, ps ) != "" );
   usePF = ( SET_LABEL( pfCandsLabel, ps ) != "" );
   usePC = ( SET_LABEL( pcCandsLabel, ps ) != "" );
   useGP = ( SET_LABEL( gpCandsLabel, ps ) != "" );
+
+  if ( usePM ) consume< pat::MuonCollection                  >( patMuonToken,
+                                                                patMuonLabel );
+  if ( useCC ) consume< vector<pat::CompositeCandidate>      >( ccCandsToken,
+                                                                ccCandsLabel );
+  if ( usePF ) consume< vector<reco::PFCandidate>            >( pfCandsToken,
+                                                                pfCandsLabel );
+  if ( usePC ) consume< vector<BPHTrackReference::candidate> >( pcCandsToken,
+                                                                pcCandsLabel );
+  if ( useGP ) consume< vector<pat::GenericParticle>         >( gpCandsToken,
+                                                                gpCandsLabel );
+
   outDump = getParameter( ps, "outDump" );
   outHist = getParameter( ps, "outHist" );
   fPtr = new ofstream( outDump.c_str() );
+
 }
 
 
@@ -68,15 +82,15 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
        << ev.id().event() << " ---------" << endl;
 
   // get object collections
+  // collections are got through "TokenWrapper" interface to allow
+  // uniform access in different CMSSW versions
 
   int nrc = 0;
 
   // get reco::PFCandidate collection (in full AOD )
   edm::Handle< vector<reco::PFCandidate> > pfCands;
   if ( usePF ) {
-    edm::InputTag pfCandTag( pfCandsLabel );
-    ev.getByLabel( pfCandTag, pfCands );
-//    ev.getByLabel( pfCandsLabel, pfCands );
+    pfCandsToken.get( ev, pfCands );
     nrc = pfCands->size();
     if ( pfCands.isValid() ) outF << nrc << " pfCands found" << endl;
     else                     outF << "no pfCands" << endl;
@@ -88,9 +102,7 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
   // to pat::PackedCandidate only for CMSSW versions where it's defined
   edm::Handle< vector<BPHTrackReference::candidate> > pcCands;
   if ( usePC ) {
-    edm::InputTag pcCandTag( pcCandsLabel );
-    ev.getByLabel( pcCandTag, pcCands );
-//    ev.getByLabel( pcCandsLabel, pcCands );
+    pcCandsToken.get( ev, pcCands );
     nrc = pcCands->size();
     if ( pcCands.isValid() ) outF << nrc << " pcCands found" << endl;
     else                     outF << "no pcCands" << endl;
@@ -99,9 +111,7 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
   // get pat::GenericParticle collection (in skimmed data)
   edm::Handle< vector<pat::GenericParticle> > gpCands;
   if ( useGP ) {
-    edm::InputTag gpCandsTag( gpCandsLabel );
-    ev.getByLabel( gpCandsTag, gpCands );
-//    ev.getByLabel( gpCandsLabel, pfCands );
+    gpCandsToken.get( ev, gpCands );
     nrc = gpCands->size();
     if ( gpCands.isValid() ) outF << nrc << " gpCands found" << endl;
     else                     outF << "no gpCands" << endl;
@@ -110,9 +120,7 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
   // get pat::Muon collection (in full AOD and MiniAOD)
   edm::Handle<pat::MuonCollection> patMuon;
   if ( usePM ) {
-    edm::InputTag patMuonTag( patMuonLabel );
-    ev.getByLabel( patMuonTag, patMuon );
-//    ev.getByLabel( patMuonLabel, patMuon );
+    patMuonToken.get( ev, patMuon );
     int n = patMuon->size();
     if ( patMuon.isValid() ) outF << n << " muons found" << endl;
     else                     outF << "no muons" << endl;
@@ -123,9 +131,7 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
   vector<const reco::Candidate*> muDaugs;
   if ( useCC ) {
     edm::Handle< vector<pat::CompositeCandidate> > ccCands;
-    edm::InputTag ccCandsTag( ccCandsLabel );
-    ev.getByLabel( ccCandsTag, ccCands );
-//    ev.getByLabel( ccCandsLabel, ccCands );
+    ccCandsToken.get( ev, ccCands );
     int n = ccCands->size();
     if ( ccCands.isValid() ) outF << n << " ccCands found" << endl;
     else                     outF << "no ccCands" << endl;
