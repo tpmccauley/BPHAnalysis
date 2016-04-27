@@ -76,7 +76,8 @@ class BPHDecayVertex: public virtual BPHDecayMomentum {
 
   // constructor
   BPHDecayVertex( const edm::EventSetup* es );
-  BPHDecayVertex( const std::vector<Component>& list,
+  // pointer used to retrieve informations from other bases
+  BPHDecayVertex( const BPHDecayVertex* ptr,
                   const edm::EventSetup* es );
 
   // utility function used to cash reconstruction results

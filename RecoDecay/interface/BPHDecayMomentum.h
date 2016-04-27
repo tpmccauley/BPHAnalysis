@@ -117,9 +117,9 @@ class BPHDecayMomentum {
     std::string searchList;
   };
 
-  // get a static object filled in the constructor
+  // get an object filled in the constructor
   // to be used in the creation of other bases of BPHRecoCandidate
-  static const std::vector<Component>& componentList();
+  const std::vector<Component>& componentList() const;
 
   // map linking cloned particles to original ones
   std::map<const reco::Candidate*, const reco::Candidate*> clonesMap;
@@ -137,7 +137,7 @@ class BPHDecayMomentum {
 
   // static object filled in the constructor
   // to be used in the creation of other bases of BPHRecoCandidate
-  static std::vector<Component> compList;
+  std::vector<Component> compList;
 
   // names used for simple and previously reconstructed particles
   std::vector<std::string> nList;

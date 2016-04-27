@@ -185,10 +185,10 @@ class BPHRecoBuilder {
     std::vector<const BPHFitSelect*     > fitSelector;
   };
 
-  // return map of names to simple or previously recontructed particles
+  // map of names to simple or previously recontructed particles
   // for currently tested combination 
-  static std::map<std::string,const reco::Candidate*>& daugMap();
-  static std::map<std::string,BPHRecoConstCandPtr   >& compMap();
+  mutable std::map<std::string,const reco::Candidate*> daugMap;
+  mutable std::map<std::string,BPHRecoConstCandPtr   > compMap;
 
   const edm::EventSetup* evSetup;
   double minPDiff;

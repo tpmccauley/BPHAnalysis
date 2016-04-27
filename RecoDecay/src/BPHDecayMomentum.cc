@@ -28,7 +28,7 @@ using namespace std;
 //-------------------
 // Initializations --
 //-------------------
-vector<BPHDecayMomentum::Component> BPHDecayMomentum::compList;
+//vector<BPHDecayMomentum::Component> BPHDecayMomentum::compList;
 
 //----------------
 // Constructors --
@@ -162,7 +162,8 @@ BPHRecoConstCandPtr BPHDecayMomentum::getComp( const std::string& name ) const {
 }
 
 
-const vector<BPHDecayMomentum::Component>& BPHDecayMomentum::componentList() {
+const vector<BPHDecayMomentum::Component>&
+             BPHDecayMomentum::componentList() const {
   // return a static object filled in the constructor
   // to be used in the creation of other bases of BPHRecoCandidate
   return compList;
@@ -179,7 +180,7 @@ void BPHDecayMomentum::clonesList( const map<string,Component>& daugMap ) {
   int n = daugMap.size();
   dList.resize( n );
   nList.resize( n );
-  // reset and fill a static object
+  // reset and fill a list
   // to be used in the creation of other bases of BPHRecoCandidate
   compList.clear();
   compList.reserve( n );

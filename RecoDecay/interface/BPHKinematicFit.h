@@ -68,7 +68,8 @@ class BPHKinematicFit: public virtual BPHDecayVertex {
 
   // constructors
   BPHKinematicFit();
-  BPHKinematicFit( const std::vector<Component>& list );
+  // pointer used to retrieve informations from other bases
+  BPHKinematicFit( const BPHKinematicFit* ptr );
 
   // utility function used to cash reconstruction results
   virtual void setNotUpdated() const;

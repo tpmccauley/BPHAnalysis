@@ -47,8 +47,8 @@ BPHPlusMinusCandidate::BPHPlusMinusCandidate( const edm::EventSetup* es ):
 BPHPlusMinusCandidate::BPHPlusMinusCandidate( const edm::EventSetup* es,
                        const BPHRecoBuilder::ComponentSet& compList ):
   BPHDecayMomentum( compList.daugMap, compList.compMap ),
-  BPHDecayVertex( BPHDecayMomentum::componentList(), es ),
-  BPHKinematicFit( BPHDecayMomentum::componentList() ),
+  BPHDecayVertex( this, es ),
+  BPHKinematicFit( this ),
   BPHPlusMinusVertex( es ),
   BPHRecoCandidate( es, compList ) {
 }

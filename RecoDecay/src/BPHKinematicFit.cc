@@ -48,16 +48,17 @@ BPHKinematicFit::BPHKinematicFit():
 }
 
 
-BPHKinematicFit::BPHKinematicFit( const std::vector<Component>& list ):
-  BPHDecayVertex( list, 0 ),
-  massConst( -1.0 ),
-  massSigma( -1.0 ),
-  updatedFit( false ),
-  updatedMom( false ),
-  kinTree( 0 ) {
+BPHKinematicFit::BPHKinematicFit( const BPHKinematicFit* ptr ):
+ BPHDecayVertex( ptr, 0 ),
+ massConst( -1.0 ),
+ massSigma( -1.0 ),
+ updatedFit( false ),
+ updatedMom( false ),
+ kinTree( 0 ) {
   std::map<const reco::Candidate*,
            const reco::Candidate*> iMap;
   const vector<const reco::Candidate*>& daug = daughters();
+  const std::vector<Component>& list = ptr->BPHDecayMomentum::componentList();
   int i;
   int n = list.size();
   for ( i = 0; i < n; ++i ) {

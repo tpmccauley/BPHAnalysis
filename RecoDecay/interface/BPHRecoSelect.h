@@ -20,6 +20,8 @@
 //------------------------------------
 // Collaborating Class Declarations --
 //------------------------------------
+class BPHRecoBuilder;
+
 namespace reco {
   class Candidate;
 }
@@ -49,13 +51,17 @@ class BPHRecoSelect {
    */
   /// accept function
   /// pointers to other particles in the decays can be obtained 
-  /// by the function "get" giving the particle name
-  virtual bool accept( const reco::Candidate& cand ) const = 0;
+  /// by the function "get" giving the particle name (passing the pointer 
+  /// to the builder)
+  virtual bool accept( const reco::Candidate& cand ) const;
+  virtual bool accept( const reco::Candidate& cand,
+                       const BPHRecoBuilder* build ) const;
 
  protected:
 
   // function to get other particles pointers
-  const reco::Candidate* get( const std::string& name ) const;
+  const reco::Candidate* get( const std::string& name,
+                              const BPHRecoBuilder* build ) const;
 
  private:
 

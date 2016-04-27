@@ -171,8 +171,8 @@ void BPHRecoBuilder::setMinPDiffererence( double pMin ) {
 
 
 std::vector<BPHRecoBuilder::ComponentSet> BPHRecoBuilder::build() const {
-  daugMap().clear();
-  compMap().clear();
+  daugMap.clear();
+  compMap.clear();
   std::vector<ComponentSet> candList;
   ComponentSet compSet;
   build( candList, compSet,
@@ -184,18 +184,6 @@ std::vector<BPHRecoBuilder::ComponentSet> BPHRecoBuilder::build() const {
 
 const edm::EventSetup* BPHRecoBuilder::eventSetup() const {
   return evSetup;
-}
-
-
-std::map<std::string,const reco::Candidate*>& BPHRecoBuilder::daugMap() {
-  static std::map<std::string,const reco::Candidate*> stMap;
-  return stMap;
-}
-
-
-std::map<std::string,BPHRecoConstCandPtr>& BPHRecoBuilder::compMap() {
-  static std::map<std::string,BPHRecoConstCandPtr> stMap;
-  return stMap;
 }
 
 
@@ -247,7 +235,7 @@ void BPHRecoBuilder::build( std::vector<ComponentSet>& compList,
                             std::vector<BPHCompSource*>::const_iterator c_iend ) const {
   if ( r_iter == r_iend ) {
     if ( c_iter == c_iend ) {
-      compSet.compMap = compMap();
+      compSet.compMap = compMap;
       compList.push_back( compSet );
       return;
     }
@@ -278,11 +266,11 @@ void BPHRecoBuilder::build( std::vector<ComponentSet>& compList,
         if ( !fitSelector[j]->accept( *cand ) ) skip = true;
       }
       if ( skip ) continue;
-      compMap()[*source->name] = cand;
+      compMap[*source->name] = cand;
       build( compList, compSet,
              r_iter, r_iend,
              c_iter, c_iend );
-      compMap().erase( *source->name );
+      compMap.erase( *source->name );
     }
     return;
   }
@@ -299,7 +287,7 @@ void BPHRecoBuilder::build( std::vector<ComponentSet>& compList,
     if ( contained( compSet, &cand ) ) continue;
     skip = false;
     for ( j = 0; j < m; ++j ) {
-      if ( !selector[j]->accept( cand ) ) skip = true;
+      if ( !selector[j]->accept( cand, this ) ) skip = true;
     }
     if ( skip ) continue;
     BPHDecayMomentum::Component comp;
@@ -308,11 +296,11 @@ void BPHRecoBuilder::build( std::vector<ComponentSet>& compList,
     comp.msig = source->msig;
     comp.searchList = collection->searchList();
     compSet.daugMap[*source->name] = comp;
-    daugMap()[*source->name] = &cand;
+    daugMap[*source->name] = &cand;
     build( compList, compSet,
            r_iter, r_iend,
            c_iter, c_iend );
-    daugMap().erase( *source->name );
+    daugMap.erase( *source->name );
     compSet.daugMap.erase( *source->name );
   }
   return;
@@ -339,9 +327,8 @@ bool BPHRecoBuilder::contained( ComponentSet& compSet,
 bool BPHRecoBuilder::contained( ComponentSet& compSet,
                                 BPHRecoConstCandPtr cCand ) const {
 
-  const std::map<std::string,BPHRecoConstCandPtr>& cMap = compMap();
   map<std::string,BPHRecoConstCandPtr>::const_iterator c_iter;
-  map<std::string,BPHRecoConstCandPtr>::const_iterator c_iend = cMap.end();
+  map<std::string,BPHRecoConstCandPtr>::const_iterator c_iend = compMap.end();
   const vector<const reco::Candidate*>& dCand = cCand->daughFull();
   int j;
   int m = dCand.size();
@@ -361,7 +348,8 @@ bool BPHRecoBuilder::contained( ComponentSet& compSet,
       if ( sameTrack( cand, cChk ) ) return true;
     }
 
-    for ( c_iter = cMap.begin(); c_iter != c_iend; ++c_iter ) {
+//    for ( c_iter = cMap.begin(); c_iter != c_iend; ++c_iter ) {
+    for ( c_iter = compMap.begin(); c_iter != c_iend; ++c_iter ) {
       const pair<std::string,BPHRecoConstCandPtr>& entry = *c_iter;
       BPHRecoConstCandPtr cCChk = entry.second;
       const vector<const reco::Candidate*>& dCChk = cCChk->daughFull();

@@ -49,9 +49,10 @@ BPHDecayVertex::BPHDecayVertex( const edm::EventSetup* es ):
 }
 
 
-BPHDecayVertex::BPHDecayVertex( const std::vector<Component>& list,
+BPHDecayVertex::BPHDecayVertex( const BPHDecayVertex* ptr,
                                 const edm::EventSetup* es ):
  evSetup( es ) {
+  const std::vector<Component>& list = ptr->BPHDecayMomentum::componentList();
   int i;
   int n = list.size();
   for ( i = 0; i < n; ++i ) {
