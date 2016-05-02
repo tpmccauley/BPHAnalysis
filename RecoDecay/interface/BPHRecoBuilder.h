@@ -146,6 +146,13 @@ class BPHRecoBuilder {
   /// get the EventSetup set in the constructor
   const edm::EventSetup* eventSetup() const;
 
+  // compare two particles with their track reference and return 
+  // true or false for same or different particles, including a
+  // check with momentum difference
+  static
+  bool sameTrack( const reco::Candidate* lCand,
+                  const reco::Candidate* rCand, double minPDifference );
+
  private:
 
   // private copy and assigment constructors

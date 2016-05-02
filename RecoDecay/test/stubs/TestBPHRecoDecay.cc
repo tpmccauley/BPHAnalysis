@@ -19,6 +19,7 @@
 #include <TH1.h>
 #include <TFile.h>
 
+#include <set>
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -129,6 +130,7 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
   // get muons from pat::CompositeCandidate objects describing onia;
   // muons from all composite objects are copied to an unique std::vector
   vector<const reco::Candidate*> muDaugs;
+  set<const pat::Muon*> muonSet;
   if ( useCC ) {
     edm::Handle< vector<pat::CompositeCandidate> > ccCands;
     ccCandsToken.get( ev, ccCands );
@@ -137,6 +139,9 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
     else                     outF << "no ccCands" << endl;
     muDaugs.clear();
     muDaugs.reserve( n );
+    muonSet.clear();
+    set<const pat::Muon*>::const_iterator iter;
+    set<const pat::Muon*>::const_iterator iend;
     int i;
     for ( i = 0; i < n; ++i ) {
       const pat::CompositeCandidate& cc = ccCands->at( i );
@@ -145,10 +150,19 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
       for ( j = 0; j < m; ++j ) {
         const reco::Candidate* dp = cc.daughter( j );
         const pat::Muon* mp = dynamic_cast<const pat::Muon*>( dp );
-	if ( mp != 0 ) muDaugs.push_back( mp );
+        iter = muonSet.begin();
+        iend = muonSet.end();
+        bool add = ( mp != 0 ) && ( muonSet.find( mp ) == iend );
+        while ( add && ( iter != iend ) ) {
+          if ( BPHRecoBuilder::sameTrack( mp, *iter++, 1.0e-5 ) ) add = false;
+        }
+        if ( add ) muonSet.insert( mp );
       }
     }
-    if ( n ) outF << muDaugs.size() << " muons found" << endl;
+    iter = muonSet.begin();
+    iend = muonSet.end();
+    while ( iter != iend ) muDaugs.push_back( *iter++ );
+    if ( ( n = muDaugs.size() ) ) outF << n << " muons found" << endl;
   }
 
   //

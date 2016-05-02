@@ -187,6 +187,31 @@ const edm::EventSetup* BPHRecoBuilder::eventSetup() const {
 }
 
 
+bool BPHRecoBuilder::sameTrack( const reco::Candidate* lCand,
+                                const reco::Candidate* rCand,
+                                double minPDifference ) {
+  const reco::Track* lrcTrack = BPHTrackReference::getFromRC( *lCand );
+  const reco::Track* rrcTrack = BPHTrackReference::getFromRC( *rCand );
+  const reco::Track* lpfTrack = BPHTrackReference::getFromPF( *lCand );
+  const reco::Track* rpfTrack = BPHTrackReference::getFromPF( *rCand );
+  if (   ( lrcTrack != 0        ) &&
+       ( ( lrcTrack == rrcTrack ) ||
+         ( lrcTrack == rpfTrack ) ) ) return true;
+  if (   ( lpfTrack != 0        ) &&
+       ( ( lpfTrack == rrcTrack ) ||
+         ( lpfTrack == rpfTrack ) ) ) return true;
+  reco::Candidate::Vector pDiff = ( lCand->momentum() -
+                                    rCand->momentum() );
+  reco::Candidate::Vector pMean = ( lCand->momentum() +
+                                    rCand->momentum() );
+  double pDMod = pDiff.mag2();
+  double pMMod = pMean.mag2();
+  if ( ( ( pDMod / pMMod ) < minPDifference ) &&
+       ( lCand->charge() == rCand->charge() ) ) return true;
+  return false;
+}
+
+
 void BPHRecoBuilder::add( const std::string& name,
                           const BPHGenericCollection* collection,
                           double mass,
@@ -370,24 +395,6 @@ bool BPHRecoBuilder::contained( ComponentSet& compSet,
 
 bool BPHRecoBuilder::sameTrack( const reco::Candidate* lCand,
                                 const reco::Candidate* rCand ) const {
-  const reco::Track* lrcTrack = BPHTrackReference::getFromRC( *lCand );
-  const reco::Track* rrcTrack = BPHTrackReference::getFromRC( *rCand );
-  const reco::Track* lpfTrack = BPHTrackReference::getFromPF( *lCand );
-  const reco::Track* rpfTrack = BPHTrackReference::getFromPF( *rCand );
-  if (   ( lrcTrack != 0        ) &&
-       ( ( lrcTrack == rrcTrack ) ||
-         ( lrcTrack == rpfTrack ) ) ) return true;
-  if (   ( lpfTrack != 0        ) &&
-       ( ( lpfTrack == rrcTrack ) ||
-         ( lpfTrack == rpfTrack ) ) ) return true;
-  reco::Candidate::Vector pDiff = ( lCand->momentum() -
-                                    rCand->momentum() );
-  reco::Candidate::Vector pMean = ( lCand->momentum() +
-                                    rCand->momentum() );
-  double pDMod = pDiff.mag2();
-  double pMMod = pMean.mag2();
-  if ( ( ( pDMod / pMMod ) < minPDiff ) &&
-       ( lCand->charge() == rCand->charge() ) ) return true;
-  return false;
+  return sameTrack( lCand, rCand, minPDiff );
 }
 
