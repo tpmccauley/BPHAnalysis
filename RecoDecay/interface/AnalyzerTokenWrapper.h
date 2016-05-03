@@ -43,7 +43,8 @@ class TokenWrapper {
   type token;
 };
 
-class AnalyzerWrapper: public edm::EDAnalyzer {
+template<class T>
+class AnalyzerWrapper: public T {
  protected:
   template<class Obj>
   void consume( TokenWrapper<Obj>& token,

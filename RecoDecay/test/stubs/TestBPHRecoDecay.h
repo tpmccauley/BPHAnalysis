@@ -1,7 +1,7 @@
 #ifndef TestBaseNtuple_h
 #define TestBaseNtuple_h
 
-#include "BPHAnalysis/RecoDecay/test/stubs/AnalyzerTokenWrapper.h"
+#include "BPHAnalysis/RecoDecay/interface/AnalyzerTokenWrapper.h"
 
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -22,7 +22,8 @@
 class TH1F;
 class BPHRecoCandidate;
 
-class TestBPHRecoDecay: public AnalyzerWrapper {
+class TestBPHRecoDecay: public AnalyzerWrapper<edm::EDAnalyzer> {
+//class TestBPHRecoDecay: public AnalyzerWrapper {
 
  public:
 
