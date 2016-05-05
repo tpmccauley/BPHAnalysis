@@ -54,6 +54,13 @@ class BPHDecayVertex: public virtual BPHDecayMomentum {
   /** Operations
    */
 
+  /// add a simple particle giving it a name and specifying an option list 
+  /// to search for the associated track
+  virtual void add( const std::string& name,
+                    const reco::Candidate* daug, 
+                    const std::string& searchList,
+                    double mass );
+
   /// check for valid reconstructed vertex
   virtual bool isValid() const;
 

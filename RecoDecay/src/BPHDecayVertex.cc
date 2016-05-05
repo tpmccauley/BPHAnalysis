@@ -71,6 +71,16 @@ BPHDecayVertex::BPHDecayVertex( const BPHDecayVertex* ptr,
 //--------------
 // Destructor --
 //--------------
+void BPHDecayVertex::add( const std::string& name,
+                          const reco::Candidate* daug, 
+                          const std::string& searchList,
+                          double mass ) {
+  BPHDecayMomentum::add( name, daug, mass );
+  searchMap[daug] = searchList;
+  return;
+}
+
+
 BPHDecayVertex::~BPHDecayVertex() {
 }
 

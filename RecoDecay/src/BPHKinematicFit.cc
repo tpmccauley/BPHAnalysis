@@ -82,9 +82,18 @@ BPHKinematicFit::~BPHKinematicFit() {
 // Operations --
 //--------------
 void BPHKinematicFit::add( const std::string& name,
-                           const reco::Candidate* daug,
+                           const reco::Candidate* daug, 
                            double mass, double sigma ) {
-  BPHDecayMomentum::add( name, daug, mass );
+  add( name, daug, "cfhpmig", mass, sigma );
+  return;
+}
+
+
+void BPHKinematicFit::add( const std::string& name,
+                           const reco::Candidate* daug, 
+                           const std::string& searchList,
+                           double mass, double sigma ) {
+  BPHDecayVertex::add( name, daug, searchList, mass );
   dMSig[daughters().back()] = sigma;
   return;
 }

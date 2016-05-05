@@ -63,7 +63,17 @@ BPHPlusMinusCandidate::~BPHPlusMinusCandidate() {
 // Operations --
 //--------------
 void BPHPlusMinusCandidate::add( const std::string& name,
-                                 const reco::Candidate* daug, double mass ) {
+                                 const reco::Candidate* daug,
+                                 double mass, double sigma ) {
+  add( name, daug, "cfhpmig", mass, sigma );
+  return;
+}
+
+
+void BPHPlusMinusCandidate::add( const std::string& name,
+                                 const reco::Candidate* daug,
+                                 const std::string& searchList,
+                                 double mass, double sigma ) {
   const vector<const reco::Candidate*>& dL = daughters();
   switch ( dL.size() ) {
   case 2:
@@ -71,12 +81,12 @@ void BPHPlusMinusCandidate::add( const std::string& name,
     return;
   case 1:
     if ( ( daug->charge() * dL.front()->charge() ) > 0 ) {
-      cout << "BPHPlusMinusCandidate already containing same sign "
-           << "particle, add rejected" << endl;
+      cout << "BPHPlusMinusCandidate already containing same sign particle,"
+           << "add rejected" << endl;
       return;
     }
   case 0:
-    BPHDecayMomentum::add( name, daug );
+    BPHKinematicFit::add( name, daug, searchList, mass, sigma );
   }
   return;
 }

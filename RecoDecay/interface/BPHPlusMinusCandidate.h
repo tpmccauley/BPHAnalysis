@@ -54,7 +54,12 @@ class BPHPlusMinusCandidate: public BPHRecoCandidate,
   /// particles are cloned, eventually specifying a different mass
   /// particles can be added only up to two particles with opposite charge
   virtual void add( const std::string& name,
-                    const reco::Candidate* daug, double mass = -1.0 );
+                    const reco::Candidate* daug, 
+                    double mass = -1.0, double sigma = -1.0 );
+  virtual void add( const std::string& name,
+                    const reco::Candidate* daug, 
+                    const std::string& searchList,
+                    double mass = -1.0, double sigma = -1.0 );
 
   /// look for candidates starting from particle collections as
   /// specified in the BPHRecoBuilder, with given names for 
