@@ -77,7 +77,7 @@ void TestBPHRecoDecay::beginJob() {
 void TestBPHRecoDecay::analyze( const edm::Event& ev,
                                 const edm::EventSetup& es ) {
 
-  std::ofstream& outF = *fPtr;
+  std::ostream& outF = *fPtr;
   outF << "--------- event "
        << ev.id().run() << " / "
        << ev.id().event() << " ---------" << endl;
@@ -457,7 +457,7 @@ void TestBPHRecoDecay::dumpRecoCand( const string& name,
 
   fillHisto( name, cand );
 
-  std::ofstream& outF = *fPtr;
+  std::ostream& outF = *fPtr;
 
   static string cType = " cowboy";
   static string sType = " sailor";

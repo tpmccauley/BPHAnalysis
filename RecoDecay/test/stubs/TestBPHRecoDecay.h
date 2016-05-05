@@ -23,7 +23,6 @@ class TH1F;
 class BPHRecoCandidate;
 
 class TestBPHRecoDecay: public AnalyzerWrapper<edm::EDAnalyzer> {
-//class TestBPHRecoDecay: public AnalyzerWrapper {
 
  public:
 
@@ -58,7 +57,7 @@ class TestBPHRecoDecay: public AnalyzerWrapper<edm::EDAnalyzer> {
   std::string outDump;
   std::string outHist;
 
-  std::ofstream* fPtr;
+  std::ostream* fPtr;
 
   std::map<std::string,TH1F*> histoMap;
 
