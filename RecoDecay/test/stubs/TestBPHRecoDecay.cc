@@ -410,6 +410,9 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
   if ( usePF ) {
   bBp.add( "Kaon", BPHRecoBuilder::createCollection( pfCands ), 0.493677 );
   } else
+  if ( usePC ) {
+  bBp.add( "Kaon", BPHRecoBuilder::createCollection( pcCands ), 0.493677 );
+  } else
   if ( useGP ) {
   bBp.add( "Kaon", BPHRecoBuilder::createCollection( gpCands ), 0.493677 );
   }
