@@ -370,7 +370,7 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
 //  //  alternatively BPHPlusMinusCandidate::build function can be used
 //  //  as in the following
 //  //  (filter functions with tkPos and tkNeg can be dropped)
-//  vector<const BPHPlusMinusCandidate*> lPhi =
+//  vector<const BPHPlusMinusConstCandPtr> lPhi =
 //               BPHPlusMinusCandidate::build( bPhi, kPos, kNeg );
   int iPhi;
   int nPhi = lPhi.size();
