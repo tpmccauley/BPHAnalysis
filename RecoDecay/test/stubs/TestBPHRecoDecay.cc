@@ -77,7 +77,7 @@ void TestBPHRecoDecay::beginJob() {
 void TestBPHRecoDecay::analyze( const edm::Event& ev,
                                 const edm::EventSetup& es ) {
 
-  std::ostream& outF = *fPtr;
+  ostream& outF = *fPtr;
   outF << "--------- event "
        << ev.id().run() << " / "
        << ev.id().event() << " ---------" << endl;
@@ -392,7 +392,7 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
   bBs.filter(  "Phi",  mPhi );
   Chi2Select chi2Bs( 0.02 );
   bBs.filter( chi2Bs );
-  std::vector<BPHRecoConstCandPtr> lBs = BPHRecoCandidate::build( bBs );
+  vector<BPHRecoConstCandPtr> lBs = BPHRecoCandidate::build( bBs );
   int iBs;
   int nBs = lBs.size();
   outF << nBs << " Bs cand found" << endl;
@@ -423,7 +423,7 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
   bBp.filter( "Kaon", knv );
   Chi2Select chi2Bp( 0.02 );
   bBp.filter( chi2Bp );
-  std::vector<BPHRecoConstCandPtr> lBp = BPHRecoCandidate::build( bBp );
+  vector<BPHRecoConstCandPtr> lBp = BPHRecoCandidate::build( bBp );
   int iBp;
   int nBp = lBp.size();
   outF << nBp << " Bu cand found" << endl;
@@ -448,8 +448,8 @@ void TestBPHRecoDecay::endJob() {
 }
 
 
-std::string TestBPHRecoDecay::getParameter( const edm::ParameterSet& ps,
-                                            const std::string& name ) {
+string TestBPHRecoDecay::getParameter( const edm::ParameterSet& ps,
+                                       const string& name ) {
   if ( ps.exists( name ) ) return ps.getParameter<string>( name );
   return "";
 }
@@ -460,7 +460,7 @@ void TestBPHRecoDecay::dumpRecoCand( const string& name,
 
   fillHisto( name, cand );
 
-  std::ostream& outF = *fPtr;
+  ostream& outF = *fPtr;
 
   static string cType = " cowboy";
   static string sType = " sailor";
