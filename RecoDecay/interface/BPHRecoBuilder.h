@@ -80,11 +80,11 @@ class BPHRecoBuilder {
   template <class T>
   static BPHGenericCollection* createCollection(
                                const edm::Handle<T>& collection,
-                               const std::string& list = "cfhp" );
+                               const std::string& list = "cfhpmig" );
   static BPHGenericCollection* createCollection(
                                const std::vector<const reco::Candidate*>&
                                candList,
-                               const std::string& list = "cfhp" );
+                               const std::string& list = "cfhpmig" );
 
   /// add collection of particles giving them a name
   /// collections can be added as 
