@@ -1,5 +1,5 @@
-#ifndef BPHPlusMinusConstCandPtr_H
-#define BPHPlusMinusConstCandPtr_H
+#ifndef BPHPlusMinusCandidatePtr_H
+#define BPHPlusMinusCandidatePtr_H
 
 #include <memory>
 class BPHPlusMinusCandidate;
