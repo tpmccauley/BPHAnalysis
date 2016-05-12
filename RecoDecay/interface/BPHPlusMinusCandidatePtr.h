@@ -1,9 +1,11 @@
 #ifndef BPHPlusMinusCandidatePtr_H
 #define BPHPlusMinusCandidatePtr_H
 
-#include <memory>
+#include "BPHAnalysis/RecoDecay/interface/BPHGenericPtr.h"
 class BPHPlusMinusCandidate;
-typedef std::shared_ptr<      BPHPlusMinusCandidate> BPHPlusMinusCandidatePtr;
-typedef std::shared_ptr<const BPHPlusMinusCandidate> BPHPlusMinusConstCandPtr;
+typedef BPHGenericPtr<      BPHPlusMinusCandidate>::type
+                            BPHPlusMinusCandidatePtr;
+typedef BPHGenericPtr<const BPHPlusMinusCandidate>::type
+                            BPHPlusMinusConstCandPtr;
 
 #endif

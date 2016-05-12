@@ -1,9 +1,9 @@
 #ifndef BPHRecoCandidatePtr_H
 #define BPHRecoCandidatePtr_H
 
-#include <memory>
+#include "BPHAnalysis/RecoDecay/interface/BPHGenericPtr.h"
 class BPHRecoCandidate;
-typedef std::shared_ptr<      BPHRecoCandidate> BPHRecoCandidatePtr;
-typedef std::shared_ptr<const BPHRecoCandidate> BPHRecoConstCandPtr;
+typedef BPHGenericPtr<      BPHRecoCandidate>::type BPHRecoCandidatePtr;
+typedef BPHGenericPtr<const BPHRecoCandidate>::type BPHRecoConstCandPtr;
 
 #endif
