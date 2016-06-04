@@ -60,7 +60,7 @@ std::vector<BPHRecoConstCandPtr> BPHRecoCandidate::build(
   // create a list of pointers to BPHRecoCandidate and fill it
   // with particle combinations selected by the BPHRecoBuilder
   std::vector<BPHRecoConstCandPtr> cList;
-  fill( cList, builder, mass, msig );
+  fill<BPHRecoCandidate>( cList, builder, mass, msig );
   return cList;
 }
 

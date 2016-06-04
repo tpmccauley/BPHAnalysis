@@ -24,6 +24,7 @@
 #include "BPHAnalysis/RecoDecay/interface/BPHDecayMomentum.h"
 #include "BPHAnalysis/RecoDecay/interface/BPHDecayVertex.h"
 #include "BPHAnalysis/RecoDecay/interface/BPHKinematicFit.h"
+#include "BPHAnalysis/RecoDecay/interface/BPHGenericPtr.h"
 class BPHRecoSelect;
 class BPHMomentumSelect;
 class BPHVertexSelect;
@@ -107,7 +108,7 @@ class BPHRecoBuilder {
             const std::vector<BPHRecoConstCandPtr>& collection );
   template <class T>
   void add( const std::string& name,
-            const std::vector< std::shared_ptr<const T> >& collection );
+            const std::vector<T>& collection );
 
   /// define selections to particles to be used in the reconstruction:
   /// simple particles
@@ -262,8 +263,7 @@ void BPHRecoBuilder::add( const std::string& name,
 
 template <class T>
 void BPHRecoBuilder::add( const std::string& name,
-                          const std::vector< std::shared_ptr<const T> >&
-                                             collection ) {
+                          const std::vector<T>& collection ) {
   // forward call after converting the list of pointer to a list
   // of pointer to base objects
   int i;

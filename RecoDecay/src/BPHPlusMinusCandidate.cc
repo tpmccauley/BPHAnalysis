@@ -112,7 +112,7 @@ std::vector<BPHPlusMinusConstCandPtr> BPHPlusMinusCandidate::build(
   ChargeSelect tkNeg( -1 );
   builder.filter( nPos, tkPos );
   builder.filter( nNeg, tkNeg );
-  fill( cList, builder, mass, msig );
+  fill<BPHPlusMinusCandidate>( cList, builder, mass, msig );
   return cList;
 }
 

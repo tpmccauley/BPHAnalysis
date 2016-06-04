@@ -25,6 +25,7 @@
 // Collaborating Class Declarations --
 //------------------------------------
 #include "BPHAnalysis/RecoDecay/interface/BPHRecoBuilder.h"
+#include "BPHAnalysis/RecoDecay/interface/BPHGenericPtr.h"
 #include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
 
 namespace edm {
@@ -74,7 +75,7 @@ class BPHRecoCandidate: public virtual BPHKinematicFit {
   // template function called by "build" to allow
   // the creation of derived objects
   template <class T>
-  static void fill( std::vector< std::shared_ptr<const T> >& cList,
+  static void fill( std::vector< typename BPHGenericPtr<const T>::type >& cList,
                     const BPHRecoBuilder& builder,
                     double mass = -1, double msig = -1 );
 
@@ -84,7 +85,8 @@ class BPHRecoCandidate: public virtual BPHKinematicFit {
 
 
 template <class T>
-void BPHRecoCandidate::fill( std::vector< std::shared_ptr<const T> >& cList,
+void BPHRecoCandidate::fill( std::vector<
+                             typename BPHGenericPtr<const T>::type >& cList,
                              const BPHRecoBuilder& builder,
                              double mass, double msig ) {
   // create paricle combinations
@@ -100,7 +102,8 @@ void BPHRecoCandidate::fill( std::vector< std::shared_ptr<const T> >& cList,
     // apply mass constraint, if requested
     if ( mass > 0 ) rc->setConstraint( mass, msig );
     // apply post selection
-    if ( builder.accept( *rc ) ) cList.push_back( std::shared_ptr<const T>
+    if ( builder.accept( *rc ) ) cList.push_back( typename
+                                                  BPHGenericPtr<const T>::type
                                                   ( rc ) );
     else                         delete rc;
   }
