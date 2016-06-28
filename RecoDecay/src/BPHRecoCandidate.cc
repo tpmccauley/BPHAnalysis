@@ -54,12 +54,12 @@ BPHRecoCandidate::~BPHRecoCandidate() {
 //--------------
 // Operations --
 //--------------
-std::vector<BPHRecoConstCandPtr> BPHRecoCandidate::build(
-                                 const BPHRecoBuilder& builder,
-                                 double mass, double msig ) {
+vector<BPHRecoConstCandPtr> BPHRecoCandidate::build(
+                            const BPHRecoBuilder& builder,
+                            double mass, double msig ) {
   // create a list of pointers to BPHRecoCandidate and fill it
   // with particle combinations selected by the BPHRecoBuilder
-  std::vector<BPHRecoConstCandPtr> cList;
+  vector<BPHRecoConstCandPtr> cList;
   fill<BPHRecoCandidate>( cList, builder, mass, msig );
   return cList;
 }

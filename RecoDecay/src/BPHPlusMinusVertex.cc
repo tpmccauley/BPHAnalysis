@@ -58,7 +58,7 @@ ClosestApproachInRPhi& BPHPlusMinusVertex::cAppInRPhi() const {
 }
 
 
-bool BPHPlusMinusVertex::chkSize( const std::string& msg ) const {
+bool BPHPlusMinusVertex::chkSize( const string& msg ) const {
   return chkSize( daughters(), msg );
 }
 
@@ -79,7 +79,7 @@ void BPHPlusMinusVertex::computeApp() const {
     return;
   }
   inRPhi = new ClosestApproachInRPhi;
-  const std::vector<reco::TransientTrack>& ttk = transientTracks();
+  const vector<reco::TransientTrack>& ttk = transientTracks();
   const reco::TransientTrack& ttp = ttk[0];
   const reco::TransientTrack& ttn = ttk[1];
   inRPhi->calculate( ttp.impactPointTSCP().theState(),

@@ -105,12 +105,12 @@ const pat::CompositeCandidate& BPHDecayMomentum::composite() const {
 }
 
 
-const std::vector<std::string>& BPHDecayMomentum::daugNames() const {
+const vector<string>& BPHDecayMomentum::daugNames() const {
   return nList;
 }
 
 
-const std::vector<std::string>& BPHDecayMomentum::compNames() const {
+const vector<string>& BPHDecayMomentum::compNames() const {
   return nComp;
 }
 
@@ -144,7 +144,7 @@ const vector<BPHRecoConstCandPtr>& BPHDecayMomentum::daughComp() const {
 
 
 const reco::Candidate* BPHDecayMomentum::getDaug(
-                       const std::string& name ) const {
+                       const string& name ) const {
   // return a simple particle from the name
   // return null pointer if not found
   map<const string,
@@ -153,7 +153,7 @@ const reco::Candidate* BPHDecayMomentum::getDaug(
 }
 
 
-BPHRecoConstCandPtr BPHDecayMomentum::getComp( const std::string& name ) const {
+BPHRecoConstCandPtr BPHDecayMomentum::getComp( const string& name ) const {
   // return a previously reconstructed particle from the name
   // return null pointer if not found
   map<const string,

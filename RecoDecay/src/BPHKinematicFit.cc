@@ -55,10 +55,9 @@ BPHKinematicFit::BPHKinematicFit( const BPHKinematicFit* ptr ):
  updatedFit( false ),
  updatedMom( false ),
  kinTree( 0 ) {
-  std::map<const reco::Candidate*,
-           const reco::Candidate*> iMap;
+  map<const reco::Candidate*,const reco::Candidate*> iMap;
   const vector<const reco::Candidate*>& daug = daughters();
-  const std::vector<Component>& list = ptr->BPHDecayMomentum::componentList();
+  const vector<Component>& list = ptr->BPHDecayMomentum::componentList();
   int i;
   int n = list.size();
   for ( i = 0; i < n; ++i ) {
@@ -81,7 +80,7 @@ BPHKinematicFit::~BPHKinematicFit() {
 //--------------
 // Operations --
 //--------------
-void BPHKinematicFit::add( const std::string& name,
+void BPHKinematicFit::add( const string& name,
                            const reco::Candidate* daug, 
                            double mass, double sigma ) {
   add( name, daug, "cfhpmig", mass, sigma );
@@ -89,9 +88,9 @@ void BPHKinematicFit::add( const std::string& name,
 }
 
 
-void BPHKinematicFit::add( const std::string& name,
+void BPHKinematicFit::add( const string& name,
                            const reco::Candidate* daug, 
-                           const std::string& searchList,
+                           const string& searchList,
                            double mass, double sigma ) {
   BPHDecayVertex::add( name, daug, searchList, mass );
   dMSig[daughters().back()] = sigma;
@@ -140,9 +139,9 @@ void BPHKinematicFit::kinFit() const {
   delete kinTree;
   kinTree = new RefCountedKinematicTree;
   if ( massConst < 0 ) return;
-  const std::vector<const reco::Candidate*>& daug = daughFull();
+  const vector<const reco::Candidate*>& daug = daughFull();
   KinematicParticleFactoryFromTransientTrack pFactory;
-  std::vector<RefCountedKinematicParticle> allParticles;
+  vector<RefCountedKinematicParticle> allParticles;
   int n = daug.size();
   float chi = 0.0;
   float ndf = 0.0;
@@ -173,10 +172,10 @@ void BPHKinematicFit::kinFit() const {
 void BPHKinematicFit::fitMomentum() const {
   if ( massConst < 0 ) {
     math::XYZTLorentzVector tm;
-    const std::vector<const reco::Candidate*>& daug = daughters();
+    const vector<const reco::Candidate*>& daug = daughters();
     int n = daug.size();
     while ( n-- ) tm += daug[n]->p4();
-    const std::vector<BPHRecoConstCandPtr>& comp = daughComp();
+    const vector<BPHRecoConstCandPtr>& comp = daughComp();
     int m = comp.size();
     while ( m-- ) tm += comp[m]->p4();
     totalMomentum = tm;

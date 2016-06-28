@@ -52,14 +52,14 @@ BPHDecayVertex::BPHDecayVertex( const edm::EventSetup* es ):
 BPHDecayVertex::BPHDecayVertex( const BPHDecayVertex* ptr,
                                 const edm::EventSetup* es ):
  evSetup( es ) {
-  const std::vector<Component>& list = ptr->BPHDecayMomentum::componentList();
+  const vector<Component>& list = ptr->BPHDecayMomentum::componentList();
   int i;
   int n = list.size();
   for ( i = 0; i < n; ++i ) {
     const Component& component = list[i];
     searchMap[component.cand] = component.searchList;
   }
-  const std::vector<BPHRecoConstCandPtr>& dComp = daughComp();
+  const vector<BPHRecoConstCandPtr>& dComp = daughComp();
   n = dComp.size();
   while ( n-- ) {
     const map<const reco::Candidate*,string>& dMap = dComp[n]->searchMap;
@@ -71,9 +71,9 @@ BPHDecayVertex::BPHDecayVertex( const BPHDecayVertex* ptr,
 //--------------
 // Destructor --
 //--------------
-void BPHDecayVertex::add( const std::string& name,
+void BPHDecayVertex::add( const string& name,
                           const reco::Candidate* daug, 
-                          const std::string& searchList,
+                          const string& searchList,
                           double mass ) {
   BPHDecayMomentum::add( name, daug, mass );
   searchMap[daug] = searchList;
@@ -162,8 +162,8 @@ void BPHDecayVertex::tTracks() const {
     if ( !rp->charge() ) continue;
     const reco::Track* tp;
     const char* searchList = "cfhp";
-    map<const reco::Candidate*,std::string>::const_iterator iter =
-                                             searchMap.find( rp );
+    map<const reco::Candidate*,string>::const_iterator iter =
+                                                       searchMap.find( rp );
     if ( iter != searchMap.end() ) searchList = iter->second.c_str();
     tp = BPHTrackReference::getTrack( *rp, searchList );
     if ( tp == 0 ) {

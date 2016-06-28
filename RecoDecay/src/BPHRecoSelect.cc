@@ -55,13 +55,11 @@ bool BPHRecoSelect::accept( const reco::Candidate& cand,
 }
 
 
-const reco::Candidate* BPHRecoSelect::get( const std::string& name,
+const reco::Candidate* BPHRecoSelect::get( const string& name,
                                            const BPHRecoBuilder* build ) const {
   if ( build == 0 ) return 0;
-  map<std::string,
-      const reco::Candidate*>& cMap = build->daugMap;
-  map<std::string,
-      const reco::Candidate*>::iterator iter = cMap.find( name );
+  map<string,const reco::Candidate*>& cMap = build->daugMap;
+  map<string,const reco::Candidate*>::iterator iter = cMap.find( name );
   return ( iter != cMap.end() ? iter->second : 0 );
 }
 

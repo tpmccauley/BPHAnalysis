@@ -62,7 +62,7 @@ BPHPlusMinusCandidate::~BPHPlusMinusCandidate() {
 //--------------
 // Operations --
 //--------------
-void BPHPlusMinusCandidate::add( const std::string& name,
+void BPHPlusMinusCandidate::add( const string& name,
                                  const reco::Candidate* daug,
                                  double mass, double sigma ) {
   add( name, daug, "cfhpmig", mass, sigma );
@@ -70,9 +70,9 @@ void BPHPlusMinusCandidate::add( const std::string& name,
 }
 
 
-void BPHPlusMinusCandidate::add( const std::string& name,
+void BPHPlusMinusCandidate::add( const string& name,
                                  const reco::Candidate* daug,
-                                 const std::string& searchList,
+                                 const string& searchList,
                                  double mass, double sigma ) {
   const vector<const reco::Candidate*>& dL = daughters();
   switch ( dL.size() ) {
@@ -92,11 +92,11 @@ void BPHPlusMinusCandidate::add( const std::string& name,
 }
 
 
-std::vector<BPHPlusMinusConstCandPtr> BPHPlusMinusCandidate::build(
-                                      const BPHRecoBuilder& builder,
-                                      const std::string nPos,
-                                      const std::string nNeg,
-                                      double mass, double msig ) {
+vector<BPHPlusMinusConstCandPtr> BPHPlusMinusCandidate::build(
+                                 const BPHRecoBuilder& builder,
+                                 const string nPos,
+                                 const string nNeg,
+                                 double mass, double msig ) {
   vector<BPHPlusMinusConstCandPtr> cList;
   class ChargeSelect: public BPHRecoSelect {
    public:
