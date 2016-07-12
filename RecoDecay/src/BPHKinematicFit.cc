@@ -19,6 +19,7 @@
 #include "RecoVertex/KinematicFitPrimitives/interface/KinematicParticleFactoryFromTransientTrack.h"
 #include "RecoVertex/KinematicFitPrimitives/interface/RefCountedKinematicParticle.h"
 #include "RecoVertex/KinematicFit/interface/KinematicParticleVertexFitter.h"
+#include "RecoVertex/KinematicFit/interface/KinematicConstrainedVertexFitter.h"
 #include "RecoVertex/KinematicFit/interface/KinematicParticleFitter.h"
 #include "RecoVertex/KinematicFit/interface/MassKinematicConstraint.h"
 
@@ -39,12 +40,13 @@ using namespace std;
 // Constructors --
 //----------------
 BPHKinematicFit::BPHKinematicFit():
-  BPHDecayVertex( 0 ),
-  massConst( -1.0 ),
-  massSigma( -1.0 ),
-  updatedFit( false ),
-  updatedMom( false ),
-  kinTree( 0 ) {
+ BPHDecayVertex( 0 ),
+ massConst( -1.0 ),
+ massSigma( -1.0 ),
+ updatedKPs( false ),
+ updatedFit( false ),
+ updatedMom( false ),
+ kinTree( 0 ) {
 }
 
 
@@ -52,6 +54,7 @@ BPHKinematicFit::BPHKinematicFit( const BPHKinematicFit* ptr ):
  BPHDecayVertex( ptr, 0 ),
  massConst( -1.0 ),
  massSigma( -1.0 ),
+ updatedKPs( false ),
  updatedFit( false ),
  updatedMom( false ),
  kinTree( 0 ) {
@@ -116,9 +119,80 @@ double BPHKinematicFit::constrSigma() const {
 }
 
 
+const vector<RefCountedKinematicParticle>& BPHKinematicFit::kinParticles()
+                                                            const {
+  if ( !updatedKPs ) buildParticles();
+  return allParticles;
+}
+
+
+vector<RefCountedKinematicParticle>  BPHKinematicFit::kinParticles(
+                                     const vector<string>& names ) const {
+  if ( !updatedKPs ) buildParticles();
+  set<RefCountedKinematicParticle> pset;
+  vector<RefCountedKinematicParticle> plist;
+  const vector<const reco::Candidate*>& daugs = daughFull();
+  int i;
+  int n = names.size();
+  int m = daugs.size();
+  plist.reserve( m );
+  for ( i = 0; i < n; ++i ) {
+    const string& pname = names[i];
+    if ( pname == "*" ) {
+      int j;
+      for ( j = 0; j < m; ++j ) {
+        RefCountedKinematicParticle& kp = kinMap[daugs[j]];
+        if ( pset.find( kp ) != pset.end() ) continue;
+        plist.push_back( kp );
+        pset .insert   ( kp );
+      }
+      break;
+    }
+    map<const reco::Candidate*,
+        RefCountedKinematicParticle>::const_iterator iter = kinMap.find(
+                                                            getDaug( pname ) );
+    map<const reco::Candidate*,
+        RefCountedKinematicParticle>::const_iterator iend = kinMap.end();
+    if ( iter != iend ) {
+      const RefCountedKinematicParticle& kp = iter->second;
+      if ( pset.find( kp ) != pset.end() ) continue;
+      plist.push_back( kp );
+      pset .insert   ( kp );
+    }
+    else {
+      cout << "BPHKinematicFit::kinParticles: " << pname << " not found"
+           << endl;
+    }
+  }
+  return plist;
+}
+
+
 const RefCountedKinematicTree& BPHKinematicFit::kinematicTree() const {
   if ( !updatedFit ) kinFit();
   return *kinTree;
+}
+
+
+const RefCountedKinematicTree& BPHKinematicFit::kinematicTree(
+                               const string& name,
+                               MultiTrackKinematicConstraint* kc ) const{
+  if ( !updatedFit ) kinFit( name, kc );
+  return *kinTree;
+}
+
+
+void BPHKinematicFit::setKinematicFit( const RefCountedKinematicTree& kt ) {
+  delete kinTree;
+  kinTree = new RefCountedKinematicTree( kt );
+  updatedFit = true;
+  return;
+}
+
+
+void BPHKinematicFit::resetKinematicFit() {
+  setNotUpdated();
+  return;
 }
 
 
@@ -130,18 +204,16 @@ const math::XYZTLorentzVector& BPHKinematicFit::p4() const {
 
 void BPHKinematicFit::setNotUpdated() const {
   BPHDecayVertex::setNotUpdated();
-  updatedFit = updatedMom = false;
+  updatedKPs = updatedFit = updatedMom = false;
   return;
 }
 
 
-void BPHKinematicFit::kinFit() const {
-  delete kinTree;
-  kinTree = new RefCountedKinematicTree;
-  if ( massConst < 0 ) return;
+void BPHKinematicFit::buildParticles() const {
+  kinMap.clear();
+  allParticles.clear();
   const vector<const reco::Candidate*>& daug = daughFull();
   KinematicParticleFactoryFromTransientTrack pFactory;
-  vector<RefCountedKinematicParticle> allParticles;
   int n = daug.size();
   float chi = 0.0;
   float ndf = 0.0;
@@ -151,11 +223,22 @@ void BPHKinematicFit::kinFit() const {
     float s = dMSig.find( cand )->second;
     if ( s < 0 ) s = 1.0e-10;
     reco::TransientTrack* tt = getTransientTrack( cand );
-    if ( tt != 0 ) allParticles.push_back( pFactory.particle( *tt, 
+    if ( tt != 0 ) allParticles.push_back( kinMap[cand] =
+                                           pFactory.particle( *tt, 
                                            m, chi, ndf, s ) );
   }
-  KinematicParticleVertexFitter vtxFitter;
+  updatedKPs = true;
+  return;
+}
+
+
+void BPHKinematicFit::kinFit() const {
+  delete kinTree;
+  kinTree = new RefCountedKinematicTree( 0 );
   updatedFit = true;
+  if ( massConst < 0 ) return;
+  kinParticles();
+  KinematicParticleVertexFitter vtxFitter;
   *kinTree = vtxFitter.fit( allParticles );
   RefCountedKinematicTree& kt = *kinTree;
   if ( kt->isEmpty() ) return;
@@ -169,8 +252,29 @@ void BPHKinematicFit::kinFit() const {
 }
 
 
+void BPHKinematicFit::kinFit( const string& name,
+                              MultiTrackKinematicConstraint* kc ) const {
+  const BPHRecoCandidate* comp = getComp( name ).get();
+  double mass = comp->constrMass();
+  if ( mass < 0 ) return;
+  delete kinTree;
+  kinTree = new RefCountedKinematicTree( 0 );
+  updatedFit = true;
+  kinParticles();
+  const vector<string>& names = comp->daugNames();
+  int nn = names.size();
+  vector<string> nfull( nn + 1 );
+  nfull[nn] = "*";
+  while ( nn-- ) nfull[nn] = name + "/" + names[nn];
+  KinematicConstrainedVertexFitter cvf;
+  *kinTree = cvf.fit( kinParticles( nfull ), kc );
+  return;
+}
+
+
 void BPHKinematicFit::fitMomentum() const {
-  if ( massConst < 0 ) {
+  if ( kinTree == 0 ) kinFit();
+  if ( kinematicTree().get() == 0 ) {
     math::XYZTLorentzVector tm;
     const vector<const reco::Candidate*>& daug = daughters();
     int n = daug.size();
