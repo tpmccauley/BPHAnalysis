@@ -39,7 +39,7 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 
 process.testBPHRecoDecay = cms.EDAnalyzer('TestBPHRecoDecay',
     patMuonLabel = cms.string('slimmedMuons::PAT'),
-    pkCandsLabel = cms.string('packedPFCandidates::PAT'),
+    pcCandsLabel = cms.string('packedPFCandidates::PAT'),
     outDump = cms.string('dump_mini.txt'),
     outHist = cms.string('hist_mini.root')
 )
