@@ -16,6 +16,8 @@
 #include "DataFormats/PatCandidates/interface/GenericParticle.h"
 #include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
 
+#include "RecoVertex/KinematicFit/interface/TwoTrackMassKinematicConstraint.h"
+
 #include <TH1.h>
 #include <TFile.h>
 
@@ -396,6 +398,16 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
   int iBs;
   int nBs = lBs.size();
   outF << nBs << " Bs cand found" << endl;
+  // apply kinematic fit
+  for ( iBs = 0; iBs < nBs; ++iBs ) {
+    // get candidate and cast constness away
+    BPHRecoCandidate* cptr( const_cast<BPHRecoCandidate*>( lBs[iBs].get() ) );
+    if ( !cptr->isValid() ) continue;
+    double jMass = 3.096916;
+    cptr->kinematicTree( "JPsi",
+                         new TwoTrackMassKinematicConstraint( jMass ) );
+    
+  }
   for ( iBs = 0; iBs < nBs; ++iBs ) dumpRecoCand( "Bs",
                                                   lBs[iBs].get() );
   }
@@ -404,31 +416,41 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
 
   if ( nJPsi && nrc ) {
   outF << "build and dump Bu" << endl;
-  BPHRecoBuilder bBp( es );
-  bBp.setMinPDiffererence( 1.0e-5 );
-  bBp.add( "JPsi", lJPsi );
+  BPHRecoBuilder bBu( es );
+  bBu.setMinPDiffererence( 1.0e-5 );
+  bBu.add( "JPsi", lJPsi );
   if ( usePF ) {
-  bBp.add( "Kaon", BPHRecoBuilder::createCollection( pfCands ), 0.493677 );
+  bBu.add( "Kaon", BPHRecoBuilder::createCollection( pfCands ), 0.493677 );
   } else
   if ( usePC ) {
-  bBp.add( "Kaon", BPHRecoBuilder::createCollection( pcCands ), 0.493677 );
+  bBu.add( "Kaon", BPHRecoBuilder::createCollection( pcCands ), 0.493677 );
   } else
   if ( useGP ) {
-  bBp.add( "Kaon", BPHRecoBuilder::createCollection( gpCands ), 0.493677 );
+  bBu.add( "Kaon", BPHRecoBuilder::createCollection( gpCands ), 0.493677 );
   }
   MassSelect mJPsi( 2.946916, 3.246916 );
   KaonNeutralVeto knv;
-  bBp.filter( "JPsi", mJPsi );
-  bBp.filter( "Kaon", tkPt );
-  bBp.filter( "Kaon", knv );
-  Chi2Select chi2Bp( 0.02 );
-  bBp.filter( chi2Bp );
-  vector<BPHRecoConstCandPtr> lBp = BPHRecoCandidate::build( bBp );
-  int iBp;
-  int nBp = lBp.size();
-  outF << nBp << " Bu cand found" << endl;
-  for ( iBp = 0; iBp < nBp; ++iBp ) dumpRecoCand( "Bu",
-                                                  lBp[iBp].get() );
+  bBu.filter( "JPsi", mJPsi );
+  bBu.filter( "Kaon", tkPt );
+  bBu.filter( "Kaon", knv );
+  Chi2Select chi2Bu( 0.02 );
+  bBu.filter( chi2Bu );
+  vector<BPHRecoConstCandPtr> lBu = BPHRecoCandidate::build( bBu );
+  int iBu;
+  int nBu = lBu.size();
+  outF << nBu << " Bu cand found" << endl;
+  // apply kinematic fit
+  for ( iBu = 0; iBu < nBu; ++iBu ) {
+    // get candidate and cast constness away
+    BPHRecoCandidate* cptr( const_cast<BPHRecoCandidate*>( lBu[iBu].get() ) );
+    if ( !cptr->isValid() ) continue;
+    double jMass = 3.096916;
+    cptr->kinematicTree( "JPsi",
+                         new TwoTrackMassKinematicConstraint( jMass ) );
+    
+  }
+  for ( iBu = 0; iBu < nBu; ++iBu ) dumpRecoCand( "Bu",
+                                                  lBu[iBu].get() );
   }
 
   return;
@@ -487,6 +509,17 @@ void TestBPHRecoDecay::dumpRecoCand( const string& name,
        << cand->p4().px() << " "
        << cand->p4().py() << " "
        << cand->p4().pz() << endl;
+
+  const RefCountedKinematicTree& kinTree = cand->kinematicTree();
+  const KinematicParticle* kinPart = ( ( kinTree.get() == 0 ) ||
+                                       ( kinTree->isEmpty() ) ? 0 :
+                                         kinTree->currentParticle().get() );
+  if ( ( kinPart != 0 ) && ( kinPart->currentState().isValid() ) )
+  outF << "****** " << name << " fitted mass: "
+       << kinPart->currentState().mass() << " momentum "
+       << kinPart->currentState().kinematicParameters().momentum().x() << " "
+       << kinPart->currentState().kinematicParameters().momentum().y() << " "
+       << kinPart->currentState().kinematicParameters().momentum().z() << endl;
 
   const reco::Vertex& vx = cand->vertex();
   const reco::Vertex::Point& vp = vx.position();

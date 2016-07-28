@@ -167,7 +167,7 @@ BPHRecoConstCandPtr BPHDecayMomentum::getComp( const string& name ) const {
 
 const vector<BPHDecayMomentum::Component>&
              BPHDecayMomentum::componentList() const {
-  // return a static object filled in the constructor
+  // return an object filled in the constructor
   // to be used in the creation of other bases of BPHRecoCandidate
   return compList;
 }

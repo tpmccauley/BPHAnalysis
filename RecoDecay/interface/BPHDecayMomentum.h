@@ -135,7 +135,7 @@ class BPHDecayMomentum {
 
  private:
 
-  // static object filled in the constructor
+  // object filled in the constructor
   // to be used in the creation of other bases of BPHRecoCandidate
   std::vector<Component> compList;
 
@@ -159,8 +159,7 @@ class BPHDecayMomentum {
   mutable pat::CompositeCandidate compCand;
 
   // create clones of simple particles, store them and their names
-  void clonesList( const std::map<std::string,
-                   Component>& daugMap );
+  void clonesList( const std::map<std::string,Component>& daugMap );
 
   // fill lists of previously reconstructed particles and their names
   // and retrieve cascade decay products
