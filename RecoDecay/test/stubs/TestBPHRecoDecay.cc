@@ -557,6 +557,7 @@ void TestBPHRecoDecay::dumpRecoCand( const string& name,
 //    GlobalVector gv = tsos.globalMomentum();
     outF << "daughter " << i
          << " " << name
+         << " " <<  ( dp->charge() > 0 ? '+' : '-' )
          << " momentum: "
          << dp->px() << " "
          << dp->py() << " "

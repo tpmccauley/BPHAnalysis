@@ -368,7 +368,6 @@ bool BPHRecoBuilder::contained( ComponentSet& compSet,
       if ( sameTrack( cand, cChk ) ) return true;
     }
 
-//    for ( c_iter = cMap.begin(); c_iter != c_iend; ++c_iter ) {
     for ( c_iter = compMap.begin(); c_iter != c_iend; ++c_iter ) {
       const pair<string,BPHRecoConstCandPtr>& entry = *c_iter;
       BPHRecoConstCandPtr cCChk = entry.second;

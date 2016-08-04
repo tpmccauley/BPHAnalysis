@@ -176,7 +176,7 @@ const RefCountedKinematicTree& BPHKinematicFit::kinematicTree() const {
 
 const RefCountedKinematicTree& BPHKinematicFit::kinematicTree(
                                const string& name,
-                               MultiTrackKinematicConstraint* kc ) const{
+                               MultiTrackKinematicConstraint* kc ) const {
   if ( !updatedFit ) kinFit( name, kc );
   return *kinTree;
 }
@@ -264,8 +264,6 @@ void BPHKinematicFit::kinFit() const {
 void BPHKinematicFit::kinFit( const string& name,
                               MultiTrackKinematicConstraint* kc ) const {
   const BPHRecoCandidate* comp = getComp( name ).get();
-  double mass = comp->constrMass();
-  if ( mass < 0 ) return;
   delete kinTree;
   kinTree = new RefCountedKinematicTree( 0 );
   updatedFit = true;

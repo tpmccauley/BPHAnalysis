@@ -28,7 +28,7 @@ using namespace std;
 //-------------------
 // Initializations --
 //-------------------
-//vector<BPHDecayMomentum::Component> BPHDecayMomentum::compList;
+
 
 //----------------
 // Constructors --
