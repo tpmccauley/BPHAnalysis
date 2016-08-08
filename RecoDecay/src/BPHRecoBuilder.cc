@@ -374,7 +374,7 @@ bool BPHRecoBuilder::contained( ComponentSet& compSet,
       const vector<const reco::Candidate*>& dCChk = cCChk->daughFull();
       l = dCChk.size();
       for ( k = 0; k < l; ++k ) {
-        const reco::Candidate* cChk = cCChk->originalReco( dCChk[j] );
+        const reco::Candidate* cChk = cCChk->originalReco( dCChk[k] );
         if ( cand == cChk ) return true;
         if ( sameTrack( cand, cChk ) ) return true;
       }
