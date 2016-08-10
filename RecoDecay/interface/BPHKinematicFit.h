@@ -23,6 +23,7 @@
 #include "RecoVertex/KinematicFitPrimitives/interface/RefCountedKinematicTree.h"
 
 class MultiTrackKinematicConstraint;
+class KinematicConstraint;
 
 //---------------
 // C++ Headers --
@@ -73,12 +74,26 @@ class BPHKinematicFit: public virtual BPHDecayVertex {
   /// perform the kinematic fit and get the result
   virtual const RefCountedKinematicTree& kinematicTree() const;
   virtual const RefCountedKinematicTree& kinematicTree(
+          const std::string& name, double mass, double sigma ) const;
+  virtual const RefCountedKinematicTree& kinematicTree(
+          const std::string& name, double mass ) const;
+  virtual const RefCountedKinematicTree& kinematicTree(
+          const std::string& name,
+          KinematicConstraint* kc ) const;
+  virtual const RefCountedKinematicTree& kinematicTree(
           const std::string& name,
           MultiTrackKinematicConstraint* kc ) const;
 
   /// set or reset the kinematic fit
   virtual void   setKinematicFit( const RefCountedKinematicTree& kt );
   virtual void resetKinematicFit();
+
+  // get current particle
+  virtual bool isEmpty() const;
+  virtual bool isValid() const;
+  virtual const RefCountedKinematicParticle currentParticle   () const;
+  virtual const RefCountedKinematicVertex   currentDecayVertex() const;
+  virtual ParticleMass                      mass              () const;
 
   /// compute total momentum after the fit
   virtual const math::XYZTLorentzVector& p4() const;
@@ -109,14 +124,11 @@ class BPHKinematicFit: public virtual BPHDecayVertex {
   mutable std::map   <const reco::Candidate*,
                       RefCountedKinematicParticle> kinMap;
   mutable std::vector<RefCountedKinematicParticle> allParticles;
-  mutable RefCountedKinematicTree* kinTree;
+  mutable RefCountedKinematicTree kinTree;
   mutable math::XYZTLorentzVector totalMomentum;
 
   // build kin particles, perform the fit and compute the total momentum
   virtual void buildParticles() const;
-  virtual void kinFit() const;
-  virtual void kinFit( const std::string& name,
-                       MultiTrackKinematicConstraint* kc ) const;
   virtual void fitMomentum() const;
 
 };
