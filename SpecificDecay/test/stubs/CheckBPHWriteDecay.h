@@ -1,0 +1,90 @@
+#ifndef TestBaseNtuple_h
+#define TestBaseNtuple_h
+
+#include "BPHAnalysis/RecoDecay/interface/BPHAnalyzerTokenWrapper.h"
+
+#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/EventSetup.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
+
+#include "BPHAnalysis/RecoDecay/interface/BPHTrackReference.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/PatCandidates/interface/GenericParticle.h"
+#include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
+
+#include <vector>
+#include <string>
+#include <iostream>
+#include <fstream>
+
+class TH1F;
+class BPHRecoCandidate;
+
+class CheckBPHWriteDecay: public BPHAnalyzerWrapper<edm::EDAnalyzer> {
+
+ public:
+
+  explicit CheckBPHWriteDecay( const edm::ParameterSet& ps );
+  virtual ~CheckBPHWriteDecay();
+
+  virtual void beginJob();
+  virtual void analyze( const edm::Event& ev, const edm::EventSetup& es );
+  virtual void endJob();
+
+ private:
+
+  std::ostream* osPtr;
+  unsigned int runNumber;
+  unsigned int evtNumber;
+
+/*
+  std::string oniaCandsLabel;
+  std::string   sdCandsLabel;
+  std::string   ssCandsLabel;
+  std::string   buCandsLabel;
+  std::string   bdCandsLabel;
+  std::string   bsCandsLabel;
+  BPHTokenWrapper< std::vector<pat::CompositeCandidate> > oniaCandsToken;
+  BPHTokenWrapper< std::vector<pat::CompositeCandidate> >   sdCandsToken;
+  BPHTokenWrapper< std::vector<pat::CompositeCandidate> >   ssCandsToken;
+  BPHTokenWrapper< std::vector<pat::CompositeCandidate> >   buCandsToken;
+  BPHTokenWrapper< std::vector<pat::CompositeCandidate> >   bdCandsToken;
+  BPHTokenWrapper< std::vector<pat::CompositeCandidate> >   bsCandsToken;
+*/
+  std::vector<std::string> candsLabel;
+  std::vector< BPHTokenWrapper< std::vector<pat::CompositeCandidate> > >
+                           candsToken;
+
+  typedef edm::Ref< std::vector<reco::Vertex> > vertex_ref;
+  typedef edm::Ref< pat::CompositeCandidateCollection > compcc_ref;
+
+  static void dump( std::ostream& os, const pat::CompositeCandidate& cand );
+  template<class T>
+    static void writePosition( std::ostream& os,
+                               const std::string& s, const T& p,
+                               bool endLine = true ) {
+    os << s << p.x() << " "
+            << p.y() << " "
+            << p.z();
+    if ( endLine ) os << std::endl;
+    return;
+  }
+  template<class T>
+  static void writeMomentum( std::ostream& os,
+                               const std::string& s, const T& p,
+                               bool endLine = true ) {
+    os << s << p. pt() << " "
+            << p.eta() << " "
+            << p.phi();
+    if ( endLine ) os << std::endl;
+    return;
+  }
+//  static std::string getParameter( const edm::ParameterSet& ps,
+//                                   const std::string& name );
+
+};
+
+#endif
