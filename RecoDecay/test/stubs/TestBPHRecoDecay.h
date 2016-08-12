@@ -1,7 +1,7 @@
 #ifndef TestBPHRecoDecay_h
 #define TestBPHRecoDecay_h
 
-#include "BPHAnalysis/RecoDecay/interface/AnalyzerTokenWrapper.h"
+#include "BPHAnalysis/RecoDecay/interface/BPHAnalyzerTokenWrapper.h"
 
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -22,7 +22,7 @@
 class TH1F;
 class BPHRecoCandidate;
 
-class TestBPHRecoDecay: public AnalyzerWrapper<edm::EDAnalyzer> {
+class TestBPHRecoDecay: public BPHAnalyzerWrapper<edm::EDAnalyzer> {
 
  public:
 
@@ -42,11 +42,11 @@ class TestBPHRecoDecay: public AnalyzerWrapper<edm::EDAnalyzer> {
   std::string gpCandsLabel;
 
   // token wrappers to allow running both on "old" and "new" CMSSW versions
-  TokenWrapper< pat::MuonCollection                       > patMuonToken;
-  TokenWrapper< std::vector<pat::CompositeCandidate>      > ccCandsToken;
-  TokenWrapper< std::vector<reco::PFCandidate>            > pfCandsToken;
-  TokenWrapper< std::vector<BPHTrackReference::candidate> > pcCandsToken;
-  TokenWrapper< std::vector<pat::GenericParticle>         > gpCandsToken;
+  BPHTokenWrapper< pat::MuonCollection                       > patMuonToken;
+  BPHTokenWrapper< std::vector<pat::CompositeCandidate>      > ccCandsToken;
+  BPHTokenWrapper< std::vector<reco::PFCandidate>            > pfCandsToken;
+  BPHTokenWrapper< std::vector<BPHTrackReference::candidate> > pcCandsToken;
+  BPHTokenWrapper< std::vector<pat::GenericParticle>         > gpCandsToken;
 
   bool usePM;
   bool useCC;

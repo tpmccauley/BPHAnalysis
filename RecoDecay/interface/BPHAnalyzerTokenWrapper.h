@@ -1,6 +1,6 @@
-#ifndef AnalyzerTokenWrapper_H
-#define AnalyzerTokenWrapper_H
-/** \class TokenWrapper
+#ifndef BPHAnalyzerTokenWrapper_H
+#define BPHAnalyzerTokenWrapper_H
+/** \class BPHTokenWrapper
  *
  *  Description: 
  *    common interface to get objects from "old" and "new" CMSSW version
@@ -15,7 +15,7 @@
 //----------------------
 // Base Class Headers --
 //----------------------
-#include "FWCore/Framework/interface/EDAnalyzer.h"
+//#include "FWCore/Framework/interface/EDAnalyzer.h"
 
 //------------------------------------
 // Collaborating Class Declarations --
@@ -33,7 +33,7 @@
 //              ---------------------
 
 template<class Obj>
-class TokenWrapper {
+class BPHTokenWrapper {
  public:
   typedef typename edm::EDGetTokenT<Obj> type;
   bool get( const edm::Event& ev,
@@ -44,10 +44,10 @@ class TokenWrapper {
 };
 
 template<class T>
-class AnalyzerWrapper: public T {
+class BPHAnalyzerWrapper: public T {
  protected:
   template<class Obj>
-  void consume( TokenWrapper<Obj>& token,
+  void consume( BPHTokenWrapper<Obj>& token,
                 const std::string& label ) {
     edm::InputTag tag( label );
     token.token = this->template consumes<Obj>( tag );

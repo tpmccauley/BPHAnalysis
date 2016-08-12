@@ -62,7 +62,7 @@ class BPHDecayVertex: public virtual BPHDecayMomentum {
                     double mass );
 
   /// check for valid reconstructed vertex
-  virtual bool isValid() const;
+  virtual bool isValidVertex() const;
 
   /// get reconstructed vertex
   virtual const reco::Vertex& vertex() const;

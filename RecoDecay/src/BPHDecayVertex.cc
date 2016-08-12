@@ -87,7 +87,7 @@ BPHDecayVertex::~BPHDecayVertex() {
 //--------------
 // Operations --
 //--------------
-bool BPHDecayVertex::isValid() const {
+bool BPHDecayVertex::isValidVertex() const {
   if ( oldVertex ) fitVertex();
   return validVertex;
 }

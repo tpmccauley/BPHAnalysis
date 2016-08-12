@@ -196,7 +196,7 @@ const RefCountedKinematicTree& BPHKinematicFit::kinematicTree(
 const RefCountedKinematicTree& BPHKinematicFit::kinematicTree(
                                const string& name,
                                double mass ) const {
-  if ( massConst < 0 ) {
+  if ( mass < 0 ) {
     kinTree = RefCountedKinematicTree( 0 );
     updatedFit = true;
     return kinTree;
@@ -327,7 +327,7 @@ bool BPHKinematicFit::isEmpty() const {
 }
 
 
-bool BPHKinematicFit::isValid() const {
+bool BPHKinematicFit::isValidFit() const {
   const RefCountedKinematicParticle kPart = currentParticle();
   if ( kPart.get() == 0 ) return false;
   return kPart->currentState().isValid();
@@ -393,7 +393,7 @@ void BPHKinematicFit::buildParticles() const {
 
 
 void BPHKinematicFit::fitMomentum() const {
-  if ( isValid() ) {
+  if ( isValidFit() ) {
     const KinematicState& ks = currentParticle()->currentState();
     GlobalVector tm = ks.globalMomentum();
     double x = tm.x();

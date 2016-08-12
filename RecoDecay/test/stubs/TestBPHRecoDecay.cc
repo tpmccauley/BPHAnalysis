@@ -54,7 +54,8 @@ TestBPHRecoDecay::TestBPHRecoDecay( const edm::ParameterSet& ps ) {
 
   outDump = getParameter( ps, "outDump" );
   outHist = getParameter( ps, "outHist" );
-  fPtr = new ofstream( outDump.c_str() );
+  if ( outDump == "" ) fPtr = &cout;
+  else                 fPtr = new ofstream( outDump.c_str() );
 
 }
 
@@ -85,7 +86,7 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
        << ev.id().event() << " ---------" << endl;
 
   // get object collections
-  // collections are got through "TokenWrapper" interface to allow
+  // collections are got through "BPHTokenWrapper" interface to allow
   // uniform access in different CMSSW versions
 
   int nrc = 0;
@@ -402,12 +403,12 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
   for ( iBs = 0; iBs < nBs; ++iBs ) {
     // get candidate and cast constness away
     BPHRecoCandidate* cptr( const_cast<BPHRecoCandidate*>( lBs[iBs].get() ) );
-    if ( !cptr->isValid() ) continue;
     double jMass = 3.096916;
-    cptr->kinematicTree( "JPsi",
-                         new TwoTrackMassKinematicConstraint( jMass ) );
+    double jWidth = 0.000040;
+    cptr->kinematicTree( "JPsi", jMass, jWidth );
     
   }
+  outF << nBs << " Bs cand found" << endl;
   for ( iBs = 0; iBs < nBs; ++iBs ) dumpRecoCand( "Bs",
                                                   lBs[iBs].get() );
   }
@@ -443,12 +444,11 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
   for ( iBu = 0; iBu < nBu; ++iBu ) {
     // get candidate and cast constness away
     BPHRecoCandidate* cptr( const_cast<BPHRecoCandidate*>( lBu[iBu].get() ) );
-    if ( !cptr->isValid() ) continue;
     double jMass = 3.096916;
-    cptr->kinematicTree( "JPsi",
-                         new TwoTrackMassKinematicConstraint( jMass ) );
-    
+    double jWidth = 0.000040;
+    cptr->kinematicTree( "JPsi", jMass, jWidth );
   }
+  outF << nBu << " Bu cand found" << endl;
   for ( iBu = 0; iBu < nBu; ++iBu ) dumpRecoCand( "Bu",
                                                   lBu[iBu].get() );
   }
@@ -496,30 +496,22 @@ void TestBPHRecoDecay::dumpRecoCand( const string& name,
   }
   else                        type = &dType;
 
-  bool constrMass = ( cand->constrMass() > 0.0 );
-
   outF << "****** " << name << "   cand mass: "
        << cand->composite().mass() << " momentum "
        << cand->composite().px() << " "
        << cand->composite().py() << " "
        << cand->composite().pz() << *type << endl;
 
+  bool validFit = cand->isValidFit();
+  const RefCountedKinematicTree     kt = cand->kinematicTree();
+  const RefCountedKinematicParticle kp = cand->currentParticle();
+  if ( validFit ) {
   outF << "****** " << name << " constr mass: "
        << cand->p4().mass() << " momentum "
        << cand->p4().px() << " "
        << cand->p4().py() << " "
        << cand->p4().pz() << endl;
-
-  const RefCountedKinematicTree& kinTree = cand->kinematicTree();
-  const KinematicParticle* kinPart = ( ( kinTree.get() == 0 ) ||
-                                       ( kinTree->isEmpty() ) ? 0 :
-                                         kinTree->currentParticle().get() );
-  if ( ( kinPart != 0 ) && ( kinPart->currentState().isValid() ) )
-  outF << "****** " << name << " fitted mass: "
-       << kinPart->currentState().mass() << " momentum "
-       << kinPart->currentState().kinematicParameters().momentum().x() << " "
-       << kinPart->currentState().kinematicParameters().momentum().y() << " "
-       << kinPart->currentState().kinematicParameters().momentum().z() << endl;
+  }
 
   const reco::Vertex& vx = cand->vertex();
   const reco::Vertex::Point& vp = vx.position();
@@ -536,11 +528,6 @@ void TestBPHRecoDecay::dumpRecoCand( const string& name,
        << vx.isFake() << " " << vx.isValid() << " - "
        << chi2 << " " << ndof << " " << prob << " - "
        << vp.X() << " " << vp.Y() << " " << vp.Z() << tdca << endl;
-
-  if ( !cand->isValid() ) {
-    outF << "reco::Track missing" << endl;
-    return;
-  }
 
   const vector<string>& dl = cand->daugNames();
   int i;
@@ -580,22 +567,13 @@ void TestBPHRecoDecay::dumpRecoCand( const string& name,
          << dp->composite().pz() << endl;
   }
 
-  if ( !constrMass ) return;
-  const RefCountedKinematicTree& kt = cand->kinematicTree();
-  const RefCountedKinematicVertex& kd = kt->currentDecayVertex();
-  GlobalPoint gp = kd->position(); 
+  if ( validFit ) {
+  const RefCountedKinematicVertex kv = cand->currentDecayVertex();
+  GlobalPoint gp = kv->position(); 
   outF << "   kin fit vertex: "
        << gp.x() << " "
        << gp.y() << " "
        << gp.z() << endl;
-  const KinematicState& ks = kt->currentParticle()->currentState();
-  GlobalVector gv = ks.globalMomentum();
-  outF << "   kin fit momentum: "
-       << ks.mass() << " - "
-       << gv.x() << " "
-       << gv.y() << " "
-       << gv.z() << " - deltaM: "
-       << ks.mass() - cand->constrMass() << endl;
   vector<RefCountedKinematicParticle> dk = kt->finalStateParticles();
   int k;
   int l = dk.size();
@@ -611,6 +589,7 @@ void TestBPHRecoDecay::dumpRecoCand( const string& name,
          << dm.y() << " "
          << dm.z() << endl;
   }
+  }
 
   return;
 
@@ -622,6 +601,7 @@ void TestBPHRecoDecay::fillHisto( const string& name,
   string mass = "mass";
   string mcst = "mcst";
   fillHisto( mass + name, cand->composite().mass() );
+  if ( cand->isValidFit() )
   fillHisto( mcst + name, cand->p4()       .mass() );
 
   const vector<string>& dc = cand->compNames();
@@ -631,7 +611,6 @@ void TestBPHRecoDecay::fillHisto( const string& name,
     const string& daug = dc[i];
     const BPHRecoCandidate* dptr = cand->getComp( daug ).get();
     fillHisto( mass + name + daug, dptr->composite().mass() );
-    fillHisto( mcst + name + daug, dptr->p4()       .mass() );
   }
   return;
 }
