@@ -27,6 +27,7 @@
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "RecoVertex/VertexPrimitives/interface/TransientVertex.h"
 #include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 //---------------
 // C++ Headers --
@@ -167,7 +168,9 @@ void BPHDecayVertex::tTracks() const {
     if ( iter != searchMap.end() ) searchList = iter->second.c_str();
     tp = BPHTrackReference::getTrack( *rp, searchList );
     if ( tp == 0 ) {
-      cout << "no track for reco::(PF)Candidate" << endl;
+      edm::LogPrint( "DataNotFound" )
+                  << "BPHDecayVertex::tTracks: "
+                  << "no track for reco::(PF)Candidate";
       validVertex = false;
       continue;
     }

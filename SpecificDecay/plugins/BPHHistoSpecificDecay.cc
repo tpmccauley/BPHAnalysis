@@ -10,6 +10,7 @@
 #include "MagneticField/Engine/interface/MagneticField.h"
 
 #include "FWCore/Framework/interface/ESHandle.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
 
@@ -539,7 +540,6 @@ BPHHistoSpecificDecay::~BPHHistoSpecificDecay() {
 
 
 void BPHHistoSpecificDecay::beginJob() {
-  cout << "BPHHistoSpecificDecay::beginJob" << endl;
   createHisto( "massPhi"    ,  35, 0.85, 1.20 ); // Phi  mass
   createHisto( "massJPsi"   ,  35, 2.95, 3.30 ); // JPsi mass
   createHisto( "massPsi2"   ,  60, 3.40, 4.00 ); // Psi2 mass
@@ -580,12 +580,12 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
   int iqo;
   int nqo = oniaCands->size();
   for ( iqo = 0; iqo < nqo; ++ iqo ) {
-    cout << "*********** quarkonium " << iqo << "/" << nqo << " ***********"
-         << endl;
+    LogTrace( "DataDump" )
+           << "*********** quarkonium " << iqo << "/" << nqo << " ***********";
     const pat::CompositeCandidate& cand = oniaCands->at( iqo );
     if ( !oniaVertexSelect->accept( cand,
-                                   BPHUserData::getByRef<reco::Vertex>( cand,
-                                   "primaryVertex" ) ) ) continue;
+                                    BPHUserData::getByRef<reco::Vertex>( cand,
+                                    "primaryVertex" ) ) ) continue;
     if ( !oniaDaughterSelect->accept( cand ) ) continue;
     fillHisto( "Full", cand );
     if (  phiBasicSelect->accept( cand ) ) fillHisto( "phi"   , cand );
@@ -602,12 +602,13 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
   int ibu;
   int nbu = buCands->size();
   for ( ibu = 0; ibu < nbu; ++ ibu ) {
-    cout << "*********** Bu " << ibu << "/" << nbu << " ***********"
-         << endl;
+    LogTrace( "DataDump" )
+           << "*********** Bu " << ibu << "/" << nbu << " ***********";
     const pat::CompositeCandidate& cand = buCands->at( ibu );
     const pat::CompositeCandidate* jPsi = BPHUserData::getByRef
          <pat::CompositeCandidate>( cand, "refToJPsi" );
-    cout << "JPsi: " << jPsi << endl;
+    LogTrace( "DataDump" )
+           << "JPsi: " << jPsi;
     if ( jPsi == 0 ) continue;
     if ( !buJPsiBasicSelect   ->accept( *jPsi ) ) continue;
     if ( !buJPsiDaughterSelect->accept( *jPsi ) ) continue;
@@ -629,16 +630,18 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
   int ibd;
   int nbd = bdCands->size();
   for ( ibd = 0; ibd < nbd; ++ ibd ) {
-    cout << "*********** Bd " << ibd << "/" << nbd << " ***********"
-         << endl;
+    LogTrace( "DataDump" )
+           << "*********** Bd " << ibd << "/" << nbd << " ***********";
     const pat::CompositeCandidate& cand = bdCands->at( ibd );
     const pat::CompositeCandidate* jPsi = BPHUserData::getByRef
          <pat::CompositeCandidate>( cand, "refToJPsi" );
-    cout << "JPsi: " << jPsi << endl;
+    LogTrace( "DataDump" )
+           << "JPsi: " << jPsi;
     if ( jPsi == 0 ) continue;
     const pat::CompositeCandidate* kx0 = BPHUserData::getByRef
          <pat::CompositeCandidate>( cand, "refToKx0" );
-    cout << "Kx0: " << kx0 << endl;
+    LogTrace( "DataDump" )
+           << "Kx0: " << kx0;
     if ( kx0 == 0 ) continue;
     if ( !bdJPsiBasicSelect   ->accept( *jPsi ) ) continue;
     if ( !bdKx0BasicSelect    ->accept( * kx0 ) ) continue;
@@ -659,16 +662,18 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
   int ibs;
   int nbs = bsCands->size();
   for ( ibs = 0; ibs < nbs; ++ ibs ) {
-    cout << "*********** Bs " << ibs << "/" << nbs << " ***********"
-         << endl;
+    LogTrace( "DataDump" )
+           << "*********** Bs " << ibs << "/" << nbs << " ***********";
     const pat::CompositeCandidate& cand = bsCands->at( ibs );
     const pat::CompositeCandidate* jPsi = BPHUserData::getByRef
          <pat::CompositeCandidate>( cand, "refToJPsi" );
-    cout << "JPsi: " << jPsi << endl;
+    LogTrace( "DataDump" )
+           << "JPsi: " << jPsi;
     if ( jPsi == 0 ) continue;
     const pat::CompositeCandidate* phi = BPHUserData::getByRef
          <pat::CompositeCandidate>( cand, "refToPhi" );
-    cout << "Phi: " << phi << endl;
+    LogTrace( "DataDump" )
+           << "Phi: " << phi;
     if ( phi == 0 ) continue;
     if ( !bsJPsiBasicSelect   ->accept( *jPsi ) ) continue;
     if ( !bsPhiBasicSelect    ->accept( * phi ) ) continue;
@@ -688,7 +693,6 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
 
 
 void BPHHistoSpecificDecay::endJob() {
-  cout << "BPHHistoSpecificDecay::endJob" << endl;
   TDirectory* currentDir = gDirectory;
   TFile file( outHist.c_str(), "RECREATE" );
   map<string,TH1F*>::iterator iter = histoMap.begin();

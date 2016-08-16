@@ -1,0 +1,23 @@
+#!/bin/sh
+
+export DSRC=$1
+export DEST=$2
+export LIST=$3
+
+export TSTR=`date +%s`
+export FILE=/tmp/moveToHF_${TSTR}.awk
+
+awk -v DSRC=${DSRC} -v DEST=${DEST} 'BEGIN{printf("{s=\0440;")} {printf(" sub(\042"DSRC"/"$1"/"$2"\042,\042"DEST"/"$3"/"$2"\042,s);")} END{print" print s}"}' ${LIST} > ${FILE}
+#awk -v DSRC=${DSRC} -v DEST=${DEST} 'BEGIN{printf("{s=\0440;")} {printf(" sub(\042"DSRC"/"$1"\042,\042"DEST"/"$3"\042,s);")} END{print" print s}"}' ${LIST} > ${FILE}
+###awk -v DSRC=${DSRC} -v DEST=${DEST} '{print "(index(\0440,\042"DSRC"/"$1"/"$2"\042)!=0){s=\0440; sub(\042"DSRC"/"$1"\042,\042"DEST"/"$3"\042,s); print s}"} END{print"(index(\0440,\042"DSRC"\042)==0){print $0}"}' ${LIST} > ${FILE}
+###awk -v DSRC=${DSRC} -v DEST=${DEST} '{print "(index(\0442,\042"DSRC"/"$1"/"$2"\042)==2){s=\0442; sub(\042"DSRC"/"$1"\042,\042"DEST"/"$3"\042,s); print \0441\042 \042s}"} END{print"(index(\0442,\042"DSRC"\042)==0){print $0}"}' ${LIST} > ${FILE}
+
+###awk -v DSRC=${DSRC} -v DEST=${DEST} '{print "(\0441==\042#include\042&&index(\0442,\042"DSRC"/"$1"/"$2"\042)==2){s=\0442; sub(\042"DSRC"/"$1"\042,\042"DEST"/"$3"\042,s); print \0441\042 \042s}"} END{print"(\0441==\042#include\042&&index(\0442,\042"DSRC"\042)==0){print $0}"; print "(\0441!=\042#include\042){print \0440}"}' ${LIST} > ${FILE}
+
+eval `awk -v DSRC=${DSRC} -v DEST=${DEST} -v FILE=${FILE} '{print "rm -f "DEST"/"$3"/"$2"; mkdir -p "DEST"/"$3"; awk -f "FILE" "DSRC"/"$1"/"$2" > "DEST"/"$3"/"$2" ;"}' ${LIST}`
+
+#rm -f ${FILE}
+
+###awk '{print "(\0441==\042#include\042&&index(\0442,\042BPHAnalysis/"$1"/"$2\042)==2){s=\0442; sub(\042BPHAnalysis/"$1"\042,\042HeavyFlavorAnalysis/"$3"\042,s); print \0441\042 \042s}"} END{print"(\0441==\042#include\042&&index(\0442,\042BPHAnalysis\042)==0){print $0}"; print "(\0441!=\042#include\042){print \0440}"}' ${LIST} > ${FILE}
+
+###awk 'BEGIN{print "(\0441==\042#include\042&&index(\0442,\042BPHAnalysis/RecoDecay/interface\042)==2){s=\0442; sub(\042BPHAnalysis/RecoDecay/interface\042,\042HeavyFlavorAnalysis/SpecificDecay/interface\042,s); print \0441\042 \042s}"} END{print"(\0441==\042#include\042&&index(\0442,\042BPHAnalysis\042)==0){print $0}"; print "(\0441!=\042#include\042){print \0440}"}' ${LIST} > ${FILE}

@@ -29,10 +29,6 @@
 
 using namespace std;
 
-//#define SET_LABEL(NAME,PSET) ( NAME = getParameter( PSET, #NAME ) )
-//// SET_LABEL(xyz,ps);
-//// is equivalent to
-//// xyz = getParameter( ps, "xyx" )
 
 CheckBPHWriteDecay::CheckBPHWriteDecay( const edm::ParameterSet& ps ) {
 
@@ -42,20 +38,6 @@ CheckBPHWriteDecay::CheckBPHWriteDecay( const edm::ParameterSet& ps ) {
   if ( ps.exists( "evtNumber" ) )
                    evtNumber = ps.getParameter<unsigned int>( "evtNumber" );
   else             evtNumber = 0;
-/*
-  SET_LABEL( oniaCandsLabel, ps );
-  SET_LABEL(   sdCandsLabel, ps );
-  SET_LABEL(   ssCandsLabel, ps );
-  SET_LABEL(   buCandsLabel, ps );
-  SET_LABEL(   bdCandsLabel, ps );
-  SET_LABEL(   bsCandsLabel, ps );
-  consume< vector<pat::CompositeCandidate> >( oniaCandsToken, oniaCandsLabel );
-  consume< vector<pat::CompositeCandidate> >(   sdCandsToken,   sdCandsLabel );
-  consume< vector<pat::CompositeCandidate> >(   ssCandsToken,   ssCandsLabel );
-  consume< vector<pat::CompositeCandidate> >(   buCandsToken,   buCandsLabel );
-  consume< vector<pat::CompositeCandidate> >(   bdCandsToken,   bdCandsLabel );
-  consume< vector<pat::CompositeCandidate> >(   bsCandsToken,   bsCandsLabel );
-*/
   candsLabel = ps.getParameter< std::vector<std::string> >( "candsLabel" );
   int i;
   int n =
@@ -85,13 +67,14 @@ void CheckBPHWriteDecay::beginJob() {
 void CheckBPHWriteDecay::analyze( const edm::Event& ev,
                                   const edm::EventSetup& es ) {
 
+  ostream& os = *osPtr;
+
   if ( ( runNumber != 0 ) && ( ev.id().run  () != runNumber ) ) return;
   if ( ( evtNumber != 0 ) && ( ev.id().event() != evtNumber ) ) return;
-  cout << "--------- event "
-       << ev.id().run() << " / "
-       << ev.id().event() << " ---------" << endl;
-
-  ostream& os = *osPtr;
+  os << "--------- event "
+     << ev.id().run() << " / "
+     << ev.id().event()
+     << " ---------" << endl;
 
   int il;
   int nl =
@@ -109,91 +92,6 @@ void CheckBPHWriteDecay::analyze( const edm::Event& ev,
       dump( os, cand );
     }
   }
-/*
-  //////////// quarkonia ////////////
-
-  edm::Handle< vector<pat::CompositeCandidate> > oniaCands;
-  oniaCandsToken.get( ev, oniaCands );
-  int iqo;
-  int nqo = oniaCands->size();
-  for ( iqo = 0; iqo < nqo; ++ iqo ) {
-    cout << "*********** quarkonium " << iqo << "/" << nqo << " ***********"
-         << endl;
-    const pat::CompositeCandidate& cand = oniaCands->at( iqo );
-    dump ( cand );
-  }
-  os << "onia " << nqo << endl;
-
-  //////////// Bu ////////////
-
-  edm::Handle< vector<pat::CompositeCandidate> > buCands;
-  buCandsToken.get( ev, buCands );
-  int ibu;
-  int nbu = buCands->size();
-  for ( ibu = 0; ibu < nbu; ++ ibu ) {
-    cout << "*********** Bu " << ibu << "/" << nbu << " ***********"
-         << endl;
-    const pat::CompositeCandidate& cand = buCands->at( ibu );
-    dump ( cand );
-  }
-  os << "Bu " << nbu << endl;
-
-  //////////// Bd ////////////
-
-  edm::Handle< vector<pat::CompositeCandidate> > bdCands;
-  bdCandsToken.get( ev, bdCands );
-  int ibd;
-  int nbd = bdCands->size();
-  for ( ibd = 0; ibd < nbd; ++ ibd ) {
-    cout << "*********** Bd " << ibd << "/" << nbd << " ***********"
-         << endl;
-    const pat::CompositeCandidate& cand = bdCands->at( ibd );
-    dump ( cand );
-  }
-  os << "Bd " << nbd << endl;
-
-  //////////// Sd ////////////
-
-  edm::Handle< vector<pat::CompositeCandidate> > sdCands;
-  sdCandsToken.get( ev, sdCands );
-  int isd;
-  int nsd = sdCands->size();
-  for ( isd = 0; isd < nsd; ++ isd ) {
-    cout << "*********** Sd " << isd << "/" << nsd << " ***********"
-         << endl;
-    const pat::CompositeCandidate& cand = sdCands->at( isd );
-    dump ( cand );
-  }
-  os << "Sd " << nsd << endl;
-
-  //////////// Bs ////////////
-
-  edm::Handle< vector<pat::CompositeCandidate> > bsCands;
-  bsCandsToken.get( ev, bsCands );
-  int ibs;
-  int nbs = bsCands->size();
-  for ( ibs = 0; ibs < nbs; ++ ibs ) {
-    cout << "*********** Bs " << ibs << "/" << nbs << " ***********"
-         << endl;
-    const pat::CompositeCandidate& cand = bsCands->at( ibs );
-    dump ( cand );
-  }
-  os << "Bs " << nbs << endl;
-
-  //////////// Ss ////////////
-
-  edm::Handle< vector<pat::CompositeCandidate> > ssCands;
-  ssCandsToken.get( ev, ssCands );
-  int iss;
-  int nss = ssCands->size();
-  for ( iss = 0; iss < nss; ++ iss ) {
-    cout << "*********** Ss " << iss << "/" << nss << " ***********"
-         << endl;
-    const pat::CompositeCandidate& cand = ssCands->at( iss );
-    dump ( cand );
-  }
-  os << "Ss " << nss << endl;
-*/
   return;
 
 }
@@ -273,12 +171,6 @@ void CheckBPHWriteDecay::dump( std::ostream& os,
 
 }
 
-
-//string CheckBPHWriteDecay::getParameter( const edm::ParameterSet& ps,
-//                                         const string& name ) {
-//  if ( ps.exists( name ) ) return ps.getParameter<string>( name );
-//  return "";
-//}
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 

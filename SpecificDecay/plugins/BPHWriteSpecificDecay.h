@@ -123,9 +123,8 @@ class BPHWriteSpecificDecay: public BPHAnalyzerWrapper<edm::EDProducer> {
       const T& ptr = list[i];
       ccList->push_back( ptr->composite() );
       pat::CompositeCandidate& cc = ccList->back();
-      if ( ( pvrIter = pvRefMap.find( ptr.get() ) ) != pvrIend ) {
-        cc.addUserData ( "primaryVertex", pvrIter->second );
-      }
+      if ( ( pvrIter = pvRefMap.find( ptr.get() ) ) != pvrIend )
+           cc.addUserData ( "primaryVertex", pvrIter->second );
       const std::vector<std::string>& cNames = ptr->compNames();
       int j = 0;
       int m = cNames.size();
@@ -133,27 +132,20 @@ class BPHWriteSpecificDecay: public BPHAnalyzerWrapper<edm::EDProducer> {
         const std::string& compName = cNames[j++];
         const BPHRecoCandidate* cptr = ptr->getComp( compName ).get();
         if ( ( ccrIter = ccRefMap.find( cptr ) ) == ccrIend ) {
-          if ( ( jpoIter = jPsiOMap.find( cptr ) ) != jpoIend ) {
-            cptr = jpoIter->second;
-          }
-          else {
-            cptr = 0;
-          }
+          if ( ( jpoIter = jPsiOMap.find( cptr ) ) != jpoIend )
+               cptr = jpoIter->second;
+          else cptr = 0;
         }
         if ( ( ccrIter = ccRefMap.find( cptr ) ) != ccrIend ) {
           compcc_ref cref = ccrIter->second;
-          if ( cref.isNonnull() ) {
-            cc.addUserData ( "refTo" + compName, cref );
-          }
+          if ( cref.isNonnull() ) cc.addUserData ( "refTo" + compName, cref );
         }
       }
       const BPHPlusMinusCandidate* pmp =
             dynamic_cast<const BPHPlusMinusCandidate*>( ptr.get() );
       if ( pmp != 0 ) cc.addUserData( "cowboy", pmp->isCowboy() );
       if ( ptr->isEmpty() ) {
-        std::cout << name << " empty, write simple vertex" << std::endl;
-        if ( writeVertex )
-        cc.addUserData( "vertex" , ptr->vertex() );
+        if ( writeVertex ) cc.addUserData( "vertex" , ptr->vertex() );
         continue;
       }
       if ( writeVertex ) cc.addUserData( "fitVertex",
@@ -166,7 +158,6 @@ class BPHWriteSpecificDecay: public BPHAnalyzerWrapper<edm::EDProducer> {
                          kinStat.kinematicParameters().momentum() );
 
       }
-      else std::cout << name << " invalid, no mass and momentum" << std::endl;
 
     }
     edm::OrphanHandle<pat::CompositeCandidateCollection> ccHandle =

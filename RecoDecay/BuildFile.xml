@@ -4,6 +4,7 @@
 <use   name="DataFormats/TrackReco"/>
 <use   name="DataFormats/VertexReco"/>
 <use   name="FWCore/Framework"/>
+<use   name="FWCore/MessageLogger"/>
 <use   name="PhysicsTools/CandUtils"/>
 <use   name="RecoVertex/KalmanVertexFit"/>
 <use   name="RecoVertex/KinematicFit"/>
@@ -19,6 +20,7 @@
   <use   name="DataFormats/RecoCandidate"/>
   <use   name="DataFormats/TrackReco"/>
   <use   name="DataFormats/VertexReco"/>
+  <use   name="FWCore/MessageLogger"/>
   <use   name="RecoVertex/KinematicFitPrimitives"/>
   <use   name="TrackingTools/PatternTools"/>
   <lib   name="1"/>

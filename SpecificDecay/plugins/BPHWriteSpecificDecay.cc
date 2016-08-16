@@ -33,7 +33,9 @@
 
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 #include "TrackingTools/PatternTools/interface/TwoTrackMinimumDistance.h"
+
 #include "FWCore/Framework/interface/ESHandle.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 #include <set>
 #include <string>
@@ -115,7 +117,6 @@ void BPHWriteSpecificDecay::beginJob() {
 
 void BPHWriteSpecificDecay::produce( edm::Event& ev,
                                      const edm::EventSetup& es ) {
-  cout << ev.id().run() << " " << ev.id().event() << endl;
   fill( ev, es );
   write( ev, lFull, oniaName );
   write( ev, lSd, sdName );
@@ -658,12 +659,10 @@ void BPHWriteSpecificDecay::setRecoParameters( const edm::ParameterSet& ps ) {
     const map<string,int>::value_type& entry = *pIter++;
     const string& pn = entry.first;
     int           id = entry.second;
-    if ( ps.exists( pn ) ) 
-      cout << " set " << pn << " for " << name << " : " << (
-parMap[rMap[name]][id] =
-       ps.getParameter<double>( pn )
-//;
-)<< endl;
+    if ( ps.exists( pn ) ) edm::LogVerbatim( "Configuration" )
+         << "BPHWriteSpecificDecay::setRecoParameters: set " << pn
+         << " for " << name << " : "
+         << ( parMap[rMap[name]][id] = ps.getParameter<double>( pn ) );
   }
   map<string,int>::const_iterator fIter = fMap.begin();
   map<string,int>::const_iterator fIend = fMap.end();
@@ -671,12 +670,11 @@ parMap[rMap[name]][id] =
     const map<string,int>::value_type& entry = *fIter++;
     const string& fn = entry.first;
     int           id = entry.second;
-    if ( ps.exists( fn ) ) 
-      cout << " set " << fn << " for " << name << " : " << (
-parMap[rMap[name]][id] =
-       ( ps.getParameter<bool>( fn ) ? 1 : -1 )
-//;
-)<< endl;
+    if ( ps.exists( fn ) ) edm::LogVerbatim( "Configuration" )
+         << "BPHWriteSpecificDecay::setRecoParameters: set " << fn
+         << " for " << name << " : "
+         << ( parMap[rMap[name]][id] =
+                                     ( ps.getParameter<bool>( fn ) ? 1 : -1 ) );
   }
 }
 

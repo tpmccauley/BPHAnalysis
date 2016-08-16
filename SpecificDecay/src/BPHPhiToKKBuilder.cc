@@ -48,7 +48,7 @@ BPHPhiToKKBuilder::BPHPhiToKKBuilder(
     ptSel = new BPHParticlePtSelect (  0.7 );
    etaSel = new BPHParticleEtaSelect( 10.0 );
   massSel = new BPHMassSelect( 0.9995, 1.0395 );
-  chi2Sel = 0;
+  chi2Sel = new BPHChi2Select( 0.0 );
   updated = false;
 }
 
@@ -80,7 +80,7 @@ vector<BPHPlusMinusConstCandPtr> BPHPhiToKKBuilder::build() {
   bPhi.filter( kNegName, *etaSel );
 
   bPhi.filter( *massSel );
-  if ( chi2Sel != 0 ) bPhi.filter( *chi2Sel );
+  bPhi.filter( *chi2Sel );
 
   phiList = BPHPlusMinusCandidate::build( bPhi, kPosName, kNegName );
   updated = true;

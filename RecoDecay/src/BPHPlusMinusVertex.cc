@@ -72,7 +72,7 @@ void BPHPlusMinusVertex::setNotUpdated() const {
 
 void BPHPlusMinusVertex::computeApp() const {
   static string msg =
-         "BPHPlusMinusVertex incomplete, no closest approach available";
+  "BPHPlusMinusVertex::computeApp: incomplete, no closest approach available";
   delete inRPhi;
   if ( !chkSize( msg ) ) {
     inRPhi = 0;

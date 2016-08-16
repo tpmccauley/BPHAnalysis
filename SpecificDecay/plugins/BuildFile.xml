@@ -6,6 +6,7 @@
 <use   name="DataFormats/TrackReco"/>
 <use   name="FWCore/Framework"/>
 <use   name="FWCore/ParameterSet"/>
+<use   name="FWCore/MessageLogger"/>
 <flags CXXFLAGS="-Wno-delete-non-virtual-dtor"/>
 <library   file="*.cc" name="HeavyFlavorSpecificDecaysPlugins">
   <flags   EDM_PLUGIN="1"/>

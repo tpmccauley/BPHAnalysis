@@ -49,7 +49,7 @@ BPHKx0ToKPiBuilder::BPHKx0ToKPiBuilder(
     ptSel = new BPHParticlePtSelect (  0.7 );
    etaSel = new BPHParticleEtaSelect( 10.0 );
   massSel = new BPHMassSelect( 0.61, 1.18 );
-  chi2Sel = 0;
+  chi2Sel = new BPHChi2Select( 0.0 );
   updated = false;
 }
 
@@ -81,7 +81,7 @@ vector<BPHPlusMinusConstCandPtr> BPHKx0ToKPiBuilder::build() {
   bKx0.filter( pionName, *etaSel );
 
   bKx0.filter( *massSel );
-  if ( chi2Sel != 0 ) bKx0.filter( *chi2Sel );
+  bKx0.filter( *chi2Sel );
 
   vector<BPHPlusMinusConstCandPtr>
   tmpList = BPHPlusMinusCandidate::build( bKx0, kaonName, pionName );

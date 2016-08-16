@@ -45,7 +45,7 @@ BPHBsToJPsiPhiBuilder::BPHBsToJPsiPhiBuilder( const edm::EventSetup& es,
   jCollection( &jpsiCollection ),
   pCollection( & phiCollection ) {
   jpsiSel = new BPHMassSelect   ( 2.80, 3.40 );
-  mphiSel = new BPHMassSelect   ( 1.01, 1.03 );
+  mphiSel = new BPHMassSelect   ( 1.005, 1.035 );
   massSel = new BPHMassSelect   ( 3.50, 8.00 );
   chi2Sel = new BPHChi2Select   ( 0.02 );
   mFitSel = new BPHMassFitSelect( jPsiName,

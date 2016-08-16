@@ -40,20 +40,6 @@ class CheckBPHWriteDecay: public BPHAnalyzerWrapper<edm::EDAnalyzer> {
   unsigned int runNumber;
   unsigned int evtNumber;
 
-/*
-  std::string oniaCandsLabel;
-  std::string   sdCandsLabel;
-  std::string   ssCandsLabel;
-  std::string   buCandsLabel;
-  std::string   bdCandsLabel;
-  std::string   bsCandsLabel;
-  BPHTokenWrapper< std::vector<pat::CompositeCandidate> > oniaCandsToken;
-  BPHTokenWrapper< std::vector<pat::CompositeCandidate> >   sdCandsToken;
-  BPHTokenWrapper< std::vector<pat::CompositeCandidate> >   ssCandsToken;
-  BPHTokenWrapper< std::vector<pat::CompositeCandidate> >   buCandsToken;
-  BPHTokenWrapper< std::vector<pat::CompositeCandidate> >   bdCandsToken;
-  BPHTokenWrapper< std::vector<pat::CompositeCandidate> >   bsCandsToken;
-*/
   std::vector<std::string> candsLabel;
   std::vector< BPHTokenWrapper< std::vector<pat::CompositeCandidate> > >
                            candsToken;
@@ -82,8 +68,6 @@ class CheckBPHWriteDecay: public BPHAnalyzerWrapper<edm::EDAnalyzer> {
     if ( endLine ) os << std::endl;
     return;
   }
-//  static std::string getParameter( const edm::ParameterSet& ps,
-//                                   const std::string& name );
 
 };
 
