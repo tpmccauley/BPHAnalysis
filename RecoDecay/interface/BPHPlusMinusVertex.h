@@ -22,6 +22,7 @@
 //------------------------------------
 #include "BPHAnalysis/RecoDecay/interface/BPHPlusMinusCandidatePtr.h"
 #include "TrackingTools/PatternTools/interface/ClosestApproachInRPhi.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 //---------------
 // C++ Headers --
@@ -84,7 +85,7 @@ bool BPHPlusMinusVertex::chkName( const T& cont,
                                   const std::string& name,
                                   const std::string& msg ) {
   if ( cont.find( name ) != cont.end() ) return true;
-  std::cout << msg << ", " << name << " not found" << std::endl;
+  edm::LogPrint( "ParticleNotFound" ) << msg << ", " << name << " not found";
   return false;
 }
 
@@ -94,7 +95,7 @@ bool BPHPlusMinusVertex::chkSize( const T& cont,
                                   const std::string& msg ) {
   int n = cont.size();
   if ( n == 2 ) return true;
-  std::cout << msg << ", size = " << n << std::endl;
+  edm::LogPrint( "WrongDataSize" ) << msg << ", size = " << n;
   return false;
 }
 

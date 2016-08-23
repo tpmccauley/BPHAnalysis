@@ -20,6 +20,7 @@
 #include "BPHAnalysis/RecoDecay/interface/BPHMomentumSelect.h"
 #include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
 #include "PhysicsTools/CandUtils/interface/AddFourMomenta.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 //---------------
 // C++ Headers --
@@ -77,12 +78,15 @@ void BPHPlusMinusCandidate::add( const string& name,
   const vector<const reco::Candidate*>& dL = daughters();
   switch ( dL.size() ) {
   case 2:
-    cout << "BPHPlusMinusCandidate complete, add rejected" << endl;
+    edm::LogPrint( "TooManyParticles" )
+                << "BPHPlusMinusCandidate::add: "
+                << "complete, add rejected";
     return;
   case 1:
     if ( ( daug->charge() * dL.front()->charge() ) > 0 ) {
-      cout << "BPHPlusMinusCandidate already containing same sign particle,"
-           << "add rejected" << endl;
+      edm::LogPrint( "TooManyParticles" )
+                  << "BPHPlusMinusCandidate::add: "
+                  << "already containing same sign particle, add rejected";
       return;
     }
   case 0:

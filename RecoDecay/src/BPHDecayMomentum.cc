@@ -17,6 +17,7 @@
 //-------------------------------
 #include "BPHAnalysis/RecoDecay/interface/BPHRecoCandidate.h"
 #include "PhysicsTools/CandUtils/interface/AddFourMomenta.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 //---------------
 // C++ Headers --
@@ -74,8 +75,10 @@ BPHDecayMomentum::~BPHDecayMomentum() {
 void BPHDecayMomentum::add( const string& name,
                             const reco::Candidate* daug, double mass ) {
   if ( dMap.find( name ) != dMap.end() ) {
-    cout << "daughter particle \"" << name << "\" already present, ignored"
-         << endl;
+    edm::LogPrint( "TooManyParticles" )
+                << "BPHDecayMomentum::add: "
+                << "Decay product already inserted with name " << name
+                << " , skipped";
   }
   setNotUpdated();
   reco::Candidate* dnew = daug->clone();

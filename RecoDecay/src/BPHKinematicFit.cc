@@ -24,6 +24,7 @@
 #include "RecoVertex/KinematicFit/interface/MassKinematicConstraint.h"
 #include "RecoVertex/KinematicFit/interface/TwoTrackMassKinematicConstraint.h"
 #include "RecoVertex/KinematicFit/interface/MultiTrackMassKinematicConstraint.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 //---------------
 // C++ Headers --
@@ -68,7 +69,6 @@ BPHKinematicFit::BPHKinematicFit( const BPHKinematicFit* ptr ):
   for ( i = 0; i < n; ++i ) {
     const reco::Candidate* cand = daug[i];
     iMap[originalReco( cand )] = cand;
-    if ( originalReco( cand ) != list[i].cand ) cout << "BPHKinematicFit::BPHKinematicFit(ptr) - PTR MISMATCH" << endl;
   }
   for ( i = 0; i < n; ++i ) {
     const Component& c = list[i];
@@ -169,8 +169,9 @@ vector<RefCountedKinematicParticle> BPHKinematicFit::kinParticles(
       pset .insert   ( kp );
     }
     else {
-      cout << "BPHKinematicFit::kinParticles: " << pname << " not found"
-           << endl;
+      edm::LogPrint( "ParticleNotFound" )
+                  << "BPHKinematicFit::kinParticles: "
+                  << pname << " not found";
     }
   }
   return plist;
@@ -226,7 +227,9 @@ const RefCountedKinematicTree& BPHKinematicFit::kinematicTree(
   if ( name != "" ) {
     const BPHRecoCandidate* comp = getComp( name ).get();
     if ( comp == 0 ) {
-      cout << name << " daughter not found" << endl;
+      edm::LogPrint( "ParticleNotFound" )
+                  << "BPHKinematicFit::kinematicTree: "
+                  << name << " daughter not found";
       return kinTree;
     }
     const vector<string>& names = comp->daugNames();
@@ -264,7 +267,9 @@ const RefCountedKinematicTree& BPHKinematicFit::kinematicTree(
     }
   }
   catch ( std::exception e ) {
-    cout << "kin fit failed, reset" << endl;
+    edm::LogPrint( "FitFailed" )
+                << "BPHKinematicFit::kinematicTree: "
+                << "kin fit reset";
     kinTree = RefCountedKinematicTree( 0 );
   }
   return kinTree;
@@ -282,7 +287,9 @@ const RefCountedKinematicTree& BPHKinematicFit::kinematicTree(
   if ( name != "" ) {
     const BPHRecoCandidate* comp = getComp( name ).get();
     if ( comp == 0 ) {
-      cout << name << " daughter not found" << endl;
+      edm::LogPrint( "ParticleNotFound" )
+                  << "BPHKinematicFit::kinematicTree: "
+                  << name << " daughter not found";
       return kinTree;
     }
     const vector<string>& names = comp->daugNames();
@@ -299,7 +306,9 @@ const RefCountedKinematicTree& BPHKinematicFit::kinematicTree(
     kinTree = cvf.fit( kinParticles( nfull ), kc );
   }
   catch ( std::exception e ) {
-    cout << "kin fit failed, reset" << endl;
+    edm::LogPrint( "FitFailed" )
+                << "BPHKinematicFit::kinematicTree: "
+                << "kin fit reset";
     kinTree = RefCountedKinematicTree( 0 );
   }
   return kinTree;
@@ -404,7 +413,9 @@ void BPHKinematicFit::fitMomentum() const {
     totalMomentum.SetPxPyPzE( x, y, z, e );
   }
   else {
-    cout << "kin fit failed, simple momentum sum computed" << endl;
+    edm::LogPrint( "FitNotFound" )
+                << "BPHKinematicFit::fitMomentum: "
+                << "simple momentum sum computed";
     math::XYZTLorentzVector tm;
     const vector<const reco::Candidate*>& daug = daughters();
     int n = daug.size();

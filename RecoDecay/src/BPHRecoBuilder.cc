@@ -22,6 +22,7 @@
 #include "BPHAnalysis/RecoDecay/interface/BPHRecoCandidate.h"
 #include "BPHAnalysis/RecoDecay/interface/BPHTrackReference.h"
 #include "DataFormats/RecoCandidate/interface/RecoCandidate.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 //---------------
 // C++ Headers --
@@ -217,8 +218,10 @@ void BPHRecoBuilder::add( const string& name,
                           double msig ) {
   BPHRecoSource* rs;
   if ( sourceId.find( name ) != sourceId.end() ) {
-    cout << "Decay product already inserted with name " << name
-         << " , skipped" << endl;
+    edm::LogPrint( "TooManyParticles" )
+                << "BPHRecoBuilder::add: "
+                << "Decay product already inserted with name " << name
+                << " , skipped";
     return;
   }
   rs = new BPHRecoSource;
@@ -237,8 +240,10 @@ void BPHRecoBuilder::add( const string& name,
                           const vector<BPHRecoConstCandPtr>& collection ) {
   BPHCompSource* cs;
   if ( srCompId.find( name ) != srCompId.end() ) {
-    cout << "Decay product already inserted with name " << name
-         << " , skipped" << endl;
+    edm::LogPrint( "TooManyParticles" )
+                << "BPHRecoBuilder::add: "
+                << "Decay product already inserted with name " << name
+                << " , skipped";
     return;
   }
   cs = new BPHCompSource;
