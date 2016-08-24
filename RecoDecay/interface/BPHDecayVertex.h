@@ -60,9 +60,12 @@ class BPHDecayVertex: public virtual BPHDecayMomentum {
                     const reco::Candidate* daug, 
                     const std::string& searchList,
                     double mass );
+  virtual void add( const std::string& name,
+                    const BPHRecoConstCandPtr& comp );
 
   /// check for valid reconstructed vertex
-  virtual bool isValidVertex() const;
+  virtual bool validTracks() const;
+  virtual bool validVertex() const;
 
   /// get reconstructed vertex
   virtual const reco::Vertex& vertex() const;
@@ -101,7 +104,7 @@ class BPHDecayVertex: public virtual BPHDecayMomentum {
   // reconstruction results cache
   mutable bool oldTracks;
   mutable bool oldVertex;
-  mutable bool validVertex;
+  mutable bool validTks;
   mutable std::vector<const    reco::Track*> rTracks;
   mutable std::vector<reco::TransientTrack> trTracks;
   mutable std::map<const reco::Candidate*,const    reco::Track*> tkMap;

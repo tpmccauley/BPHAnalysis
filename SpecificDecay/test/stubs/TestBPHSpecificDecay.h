@@ -1,5 +1,5 @@
-#ifndef TestBaseNtuple_h
-#define TestBaseNtuple_h
+#ifndef TestBPHSpecificDecay_h
+#define TestBPHSpecificDecay_h
 
 #include "BPHAnalysis/RecoDecay/interface/BPHAnalyzerTokenWrapper.h"
 

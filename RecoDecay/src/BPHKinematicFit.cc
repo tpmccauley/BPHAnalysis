@@ -78,8 +78,8 @@ BPHKinematicFit::BPHKinematicFit( const BPHKinematicFit* ptr ):
   int j;
   int m = dComp.size();
   for ( j = 0; j < m; ++j ) {
-    BPHRecoConstCandPtr comp = dComp[j];
-    dMSig.insert( comp->dMSig.begin(), comp->dMSig.end() );
+    const map<const reco::Candidate*,double>& dMap = dComp[j]->dMSig;
+    dMSig.insert( dMap.begin(), dMap.end() );
   }
 }
 
@@ -106,6 +106,15 @@ void BPHKinematicFit::add( const string& name,
                            double mass, double sigma ) {
   BPHDecayVertex::add( name, daug, searchList, mass );
   dMSig[daughters().back()] = sigma;
+  return;
+}
+
+
+void BPHKinematicFit::add( const string& name,
+                           const BPHRecoConstCandPtr& comp ) {
+  BPHDecayVertex::add( name, comp );
+  const map<const reco::Candidate*,double>& dMap = comp->dMSig;
+  dMSig.insert( dMap.begin(), dMap.end() );
   return;
 }
 
@@ -311,7 +320,6 @@ const RefCountedKinematicTree& BPHKinematicFit::kinematicTree(
                 << "kin fit reset";
     kinTree = RefCountedKinematicTree( 0 );
   }
-  return kinTree;
   return kinTree;
 }
 

@@ -72,6 +72,12 @@ BPHDecayVertex::BPHDecayVertex( const BPHDecayVertex* ptr,
 //--------------
 // Destructor --
 //--------------
+BPHDecayVertex::~BPHDecayVertex() {
+}
+
+//--------------
+// Operations --
+//--------------
 void BPHDecayVertex::add( const string& name,
                           const reco::Candidate* daug, 
                           const string& searchList,
@@ -82,15 +88,24 @@ void BPHDecayVertex::add( const string& name,
 }
 
 
-BPHDecayVertex::~BPHDecayVertex() {
+void BPHDecayVertex::add( const string& name,
+                          const BPHRecoConstCandPtr& comp ) {
+  BPHDecayMomentum::add( name, comp );
+  const map<const reco::Candidate*,string>& dMap = comp->searchMap;
+  searchMap.insert( dMap.begin(), dMap.end() );
+  return;
 }
 
-//--------------
-// Operations --
-//--------------
-bool BPHDecayVertex::isValidVertex() const {
+
+bool BPHDecayVertex::validTracks() const {
   if ( oldVertex ) fitVertex();
-  return validVertex;
+  return validTks;
+}
+
+
+bool BPHDecayVertex::validVertex() const {
+  if ( oldVertex ) fitVertex();
+  return fittedVertex.isValid();
 }
 
 
@@ -139,7 +154,7 @@ reco::TransientTrack* BPHDecayVertex::getTransientTrack(
 void BPHDecayVertex::setNotUpdated() const {
   BPHDecayMomentum::setNotUpdated();
   oldTracks = oldVertex = true;
-  validVertex = false;
+  validTks = false;
   return;
 }
 
@@ -155,7 +170,7 @@ void BPHDecayVertex::tTracks() const {
   const vector<const reco::Candidate*>& dL = daughFull();
   int n = dL.size();
   trTracks.reserve( n );
-  validVertex = true;
+  validTks = true;
   while ( n-- ) {
     const reco::Candidate* rp = originalReco( dL[n] );
     tkMap[rp] = 0;
@@ -171,7 +186,7 @@ void BPHDecayVertex::tTracks() const {
       edm::LogPrint( "DataNotFound" )
                   << "BPHDecayVertex::tTracks: "
                   << "no track for reco::(PF)Candidate";
-      validVertex = false;
+      validTks = false;
       continue;
     }
      rTracks.push_back( tp );

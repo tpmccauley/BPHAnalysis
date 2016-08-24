@@ -59,6 +59,8 @@ class BPHKinematicFit: public virtual BPHDecayVertex {
                     const reco::Candidate* daug,
                     const std::string& searchList,
                     double mass = -1.0, double sigma = -1.0 );
+  virtual void add( const std::string& name,
+                    const BPHRecoConstCandPtr& comp );
 
   /// apply a mass constraint
   void setConstraint( double mass, double sigma );

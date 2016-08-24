@@ -96,10 +96,10 @@ void BPHDecayMomentum::add( const string& name,
   setNotUpdated();
   nComp.push_back( name );
   cList.push_back( comp );
+  cMap[name] = comp;
   clonesMap.insert( comp->clonesMap.begin(), comp->clonesMap.end() );
   return;
 }
-
 
 
 const pat::CompositeCandidate& BPHDecayMomentum::composite() const {

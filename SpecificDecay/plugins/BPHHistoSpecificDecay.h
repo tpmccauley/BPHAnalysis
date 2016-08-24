@@ -1,5 +1,5 @@
-#ifndef TestBaseNtuple_h
-#define TestBaseNtuple_h
+#ifndef BPHHistoSpecificDecay_h
+#define BPHHistoSpecificDecay_h
 
 #include "BPHAnalysis/RecoDecay/interface/BPHAnalyzerTokenWrapper.h"
 #include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
@@ -33,6 +33,7 @@ class BPHHistoSpecificDecay: public BPHAnalyzerWrapper<edm::EDAnalyzer> {
 
   class CandidateSelect {
    public:
+    virtual ~CandidateSelect() {}
     virtual bool accept( const pat::CompositeCandidate& cand,
                          const reco::Vertex* pv = 0 ) const = 0 ;
   };
