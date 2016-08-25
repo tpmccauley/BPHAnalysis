@@ -1,0 +1,15 @@
+#!/bin/sh
+
+export DSRC=$1
+export DEST=$2
+export LIST=$3
+
+export TSTR=`date +%s`
+export FILE=/tmp/moveToHF_${TSTR}.awk
+
+awk -v DSRC=${DSRC} -v DEST=${DEST} 'BEGIN{printf("{s=\0440;")} {printf(" sub(\042"DSRC"/"$1"/"$2"\042,\042"DEST"/"$3"/"$2"\042,s);")} END{print" print s}"}' ${LIST} > ${FILE}
+
+eval `awk -v DSRC=${DSRC} -v DEST=${DEST} -v FILE=${FILE} '{print "rm -f "DEST"/"$3"/"$2"; mkdir -p "DEST"/"$3"; awk -f "FILE" "DSRC"/"$1"/"$2" > "DEST"/"$3"/"$2" ;"}' ${LIST}`
+
+rm -f ${FILE}
+

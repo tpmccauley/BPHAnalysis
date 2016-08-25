@@ -1,10 +1,12 @@
 #!/bin/sh
 
-export DIR=`dirname $0`
-export TOP=`dirname ${DIR}`
+export DCOM=`find /bin /usr/bin | grep  dirname | head -1`
+export BCOM=`find /bin /usr/bin | grep basename | head -1`
+export DIR=`${DCOM} $0`
+export TOP=`${DCOM} ${DIR}`
 
 export FILE=${TOP}/RecoDecay/interface/BPHTrackReference.h
-export FTMP=/tmp/`basename ${FILE}``date +%s`
+export FTMP=/tmp/`${BCOM} ${FILE}``date +%s`
 
 export FOUND=`awk 'BEGIN{ff=0;} {cl=index($0,"//"); if(cl==0)cl=length($0);} ((index($0,"dynamic_cast")!=0)&&(index($0,"dynamic_cast")<index($0,"PackedCandidate"))&&(index($0,"PackedCandidate")<cl)){f=1;} ((index($0,"pseudoTrack")!=0)&&(index($0,"pseudoTrack")<cl)){ff=1;} END{print ff;}' ${FILE}`
 

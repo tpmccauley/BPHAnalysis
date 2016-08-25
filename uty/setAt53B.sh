@@ -1,7 +1,8 @@
 #!/bin/sh
 
-export DIR=`dirname $0`
-export TOP=`dirname ${DIR}`
+export DCOM=`find /bin /usr/bin | grep dirname | head -1`
+export DIR=`${DCOM} $0`
+export TOP=`${DCOM} ${DIR}`
 
 eval `find ${TOP} | grep '_53B$' | awk -F_ '{printf("cp "$0" "$1); for(i=2;i<NF;++i) printf("_"$i); print ";"}'`
 

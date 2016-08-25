@@ -1,13 +1,15 @@
 #!/bin/sh
 
-export INCF=$1
+export FILE=$1
+export INCF=$2
 export INCN=`echo ${INCF} | awk -F/ '{print $NF}' | awk -F. '{print $1}'`
 
-export DIR=`dirname $0`
-export TOP=`dirname ${DIR}`
+export DCOM=`find /bin /usr/bin | grep  dirname | head -1`
+export BCOM=`find /bin /usr/bin | grep basename | head -1`
+export DIR=`${DCOM} $0`
+export TOP=`${DCOM} ${DIR}`
 
-export FILE=${TOP}/RecoDecay/interface/BPHTrackReference.h
-export FTMP=/tmp/`basename ${FILE}``date +%s`
+export FTMP=/tmp/`${BCOM} ${FILE}``date +%s`
 
 export FOUND=`awk -v INCN=${INCN} 'BEGIN{ff=0;} {cl=index($0,"//"); if(cl==0)cl=length($0);} ((index($0,"#include")!=0)&&(index($0,INCN)!=0)&&(index($0,INCN)<cl)){ff=1;} END{print ff;}' ${FILE}`
 
