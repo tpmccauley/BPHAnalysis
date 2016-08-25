@@ -78,25 +78,6 @@ BPHDecayVertex::~BPHDecayVertex() {
 //--------------
 // Operations --
 //--------------
-void BPHDecayVertex::add( const string& name,
-                          const reco::Candidate* daug, 
-                          const string& searchList,
-                          double mass ) {
-  BPHDecayMomentum::add( name, daug, mass );
-  searchMap[daug] = searchList;
-  return;
-}
-
-
-void BPHDecayVertex::add( const string& name,
-                          const BPHRecoConstCandPtr& comp ) {
-  BPHDecayMomentum::add( name, comp );
-  const map<const reco::Candidate*,string>& dMap = comp->searchMap;
-  searchMap.insert( dMap.begin(), dMap.end() );
-  return;
-}
-
-
 bool BPHDecayVertex::validTracks() const {
   if ( oldVertex ) fitVertex();
   return validTks;
@@ -148,6 +129,25 @@ reco::TransientTrack* BPHDecayVertex::getTransientTrack(
             reco::TransientTrack*>::const_iterator iend = ttMap.end();
   if ( iter == iend ) iter = ttMap.find( originalReco( cand ) );
   return ( iter != iend ? iter->second : 0 );
+}
+
+
+void BPHDecayVertex::addV( const string& name,
+                           const reco::Candidate* daug, 
+                           const string& searchList,
+                           double mass ) {
+  BPHDecayMomentum::addP( name, daug, mass );
+  searchMap[daug] = searchList;
+  return;
+}
+
+
+void BPHDecayVertex::addV( const string& name,
+                           const BPHRecoConstCandPtr& comp ) {
+  BPHDecayMomentum::addP( name, comp );
+  const map<const reco::Candidate*,string>& dMap = comp->searchMap;
+  searchMap.insert( dMap.begin(), dMap.end() );
+  return;
 }
 
 

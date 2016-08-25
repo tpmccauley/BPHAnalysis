@@ -49,19 +49,6 @@ class BPHKinematicFit: public virtual BPHDecayVertex {
   /** Operations
    */
   /// 
-  /// add a simple particle giving it a name
-  /// particles are cloned, eventually specifying a different mass
-  /// and a sigma
-  virtual void add( const std::string& name,
-                    const reco::Candidate* daug,
-                    double mass = -1.0, double sigma = -1.0 );
-  virtual void add( const std::string& name,
-                    const reco::Candidate* daug,
-                    const std::string& searchList,
-                    double mass = -1.0, double sigma = -1.0 );
-  virtual void add( const std::string& name,
-                    const BPHRecoConstCandPtr& comp );
-
   /// apply a mass constraint
   void setConstraint( double mass, double sigma );
   /// retrieve the constraint
@@ -104,6 +91,19 @@ class BPHKinematicFit: public virtual BPHDecayVertex {
   BPHKinematicFit();
   // pointer used to retrieve informations from other bases
   BPHKinematicFit( const BPHKinematicFit* ptr );
+
+  /// add a simple particle giving it a name
+  /// particles are cloned, eventually specifying a different mass
+  /// and a sigma
+  virtual void addK( const std::string& name,
+                     const reco::Candidate* daug,
+                     double mass = -1.0, double sigma = -1.0 );
+  virtual void addK( const std::string& name,
+                     const reco::Candidate* daug,
+                     const std::string& searchList,
+                     double mass = -1.0, double sigma = -1.0 );
+  virtual void addK( const std::string& name,
+                     const BPHRecoConstCandPtr& comp );
 
   // utility function used to cash reconstruction results
   virtual void setNotUpdated() const;
