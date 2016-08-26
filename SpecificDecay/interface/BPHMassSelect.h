@@ -15,7 +15,7 @@
 // Base Class Headers --
 //----------------------
 #include "BPHAnalysis/RecoDecay/interface/BPHMomentumSelect.h"
-class BPHDecayMomentum;
+#include "BPHAnalysis/RecoDecay/interface/BPHDecayMomentum.h"
 
 //------------------------------------
 // Collaborating Class Declarations --
@@ -37,24 +37,31 @@ class BPHMassSelect: public BPHMomentumSelect {
 
   /** Constructor
    */
-  BPHMassSelect( double minMass, double maxMass );
+  BPHMassSelect( double minMass, double maxMass ):
+   mMin( minMass ),
+   mMax( maxMass ) {
+  }
 
   /** Destructor
    */
-  virtual ~BPHMassSelect();
+  virtual ~BPHMassSelect() {
+  }
 
   /** Operations
    */
-  /// accept particle
-  virtual bool accept( const BPHDecayMomentum& cand ) const;
+  /// select particle
+  virtual bool accept( const BPHDecayMomentum& cand ) const {
+    double mass = cand.composite().mass();
+    return ( ( mass > mMin ) && ( mass < mMax ) );
+  }
 
   /// set mass cuts
-  void setMassMin( double m );
-  void setMassMax( double m );
+  void setMassMin( double m ) { mMin = m; return; }
+  void setMassMax( double m ) { mMax = m; return; }
 
   /// get current mass cuts
-  double getMassMin() const;
-  double getMassMax() const;
+  double getMassMin() const { return mMin; }
+  double getMassMax() const { return mMax; }
 
  private:
 

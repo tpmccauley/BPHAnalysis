@@ -48,7 +48,7 @@ class BPHKinematicFit: public virtual BPHDecayVertex {
 
   /** Operations
    */
-  /// 
+
   /// apply a mass constraint
   void setConstraint( double mass, double sigma );
   /// retrieve the constraint
@@ -98,10 +98,13 @@ class BPHKinematicFit: public virtual BPHDecayVertex {
   virtual void addK( const std::string& name,
                      const reco::Candidate* daug,
                      double mass = -1.0, double sigma = -1.0 );
+  /// add a simple particle and specify a criterion to search for
+  /// the associated track
   virtual void addK( const std::string& name,
                      const reco::Candidate* daug,
                      const std::string& searchList,
                      double mass = -1.0, double sigma = -1.0 );
+  /// add a previously reconstructed particle giving it a name
   virtual void addK( const std::string& name,
                      const BPHRecoConstCandPtr& comp );
 

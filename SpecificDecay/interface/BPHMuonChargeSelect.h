@@ -15,12 +15,12 @@
 //----------------------
 // Base Class Headers --
 //----------------------
-#include "BPHAnalysis/RecoDecay/interface/BPHRecoSelect.h"
+#include "BPHAnalysis/SpecificDecay/interface/BPHParticleChargeSelect.h"
 
 //------------------------------------
 // Collaborating Class Declarations --
 //------------------------------------
-
+#include "DataFormats/PatCandidates/interface/Muon.h"
 
 //---------------
 // C++ Headers --
@@ -31,22 +31,25 @@
 //              -- Class Interface --
 //              ---------------------
 
-class BPHMuonChargeSelect: public BPHRecoSelect {
+class BPHMuonChargeSelect: public BPHParticleChargeSelect {
 
  public:
 
   /** Constructor
    */
-  BPHMuonChargeSelect( int c );
+  BPHMuonChargeSelect( int c ): BPHParticleChargeSelect( c ) {}
 
   /** Destructor
    */
-  virtual ~BPHMuonChargeSelect();
+  virtual ~BPHMuonChargeSelect() {}
 
   /** Operations
    */
-  /// 
-  virtual bool accept( const reco::Candidate& cand ) const;
+  /// select muon
+  virtual bool accept( const reco::Candidate& cand ) const {
+    if ( reinterpret_cast<const pat::Muon*>( &cand ) == 0 ) return false;
+    return BPHParticleChargeSelect::accept( cand );
+  };
 
  private:
 

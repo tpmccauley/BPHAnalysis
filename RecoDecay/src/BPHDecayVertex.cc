@@ -136,7 +136,7 @@ void BPHDecayVertex::addV( const string& name,
                            const reco::Candidate* daug, 
                            const string& searchList,
                            double mass ) {
-  BPHDecayMomentum::addP( name, daug, mass );
+  addP( name, daug, mass );
   searchMap[daug] = searchList;
   return;
 }
@@ -144,7 +144,7 @@ void BPHDecayVertex::addV( const string& name,
 
 void BPHDecayVertex::addV( const string& name,
                            const BPHRecoConstCandPtr& comp ) {
-  BPHDecayMomentum::addP( name, comp );
+  addP( name, comp );
   const map<const reco::Candidate*,string>& dMap = comp->searchMap;
   searchMap.insert( dMap.begin(), dMap.end() );
   return;

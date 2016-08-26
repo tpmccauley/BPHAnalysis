@@ -87,6 +87,7 @@ class BPHDecayVertex: public virtual BPHDecayMomentum {
                      const reco::Candidate* daug, 
                      const std::string& searchList,
                      double mass );
+  /// add a previously reconstructed particle giving it a name
   virtual void addV( const std::string& name,
                      const BPHRecoConstCandPtr& comp );
 

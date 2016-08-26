@@ -363,7 +363,7 @@ void BPHKinematicFit::addK( const string& name,
                             const reco::Candidate* daug, 
                             const string& searchList,
                             double mass, double sigma ) {
-  BPHDecayVertex::addV( name, daug, searchList, mass );
+  addV( name, daug, searchList, mass );
   dMSig[daughters().back()] = sigma;
   return;
 }
@@ -371,7 +371,7 @@ void BPHKinematicFit::addK( const string& name,
 
 void BPHKinematicFit::addK( const string& name,
                             const BPHRecoConstCandPtr& comp ) {
-  BPHDecayVertex::addV( name, comp );
+  addV( name, comp );
   const map<const reco::Candidate*,double>& dMap = comp->dMSig;
   dMSig.insert( dMap.begin(), dMap.end() );
   return;
