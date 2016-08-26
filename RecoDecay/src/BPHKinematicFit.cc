@@ -188,11 +188,11 @@ const RefCountedKinematicTree& BPHKinematicFit::kinematicTree(
   ParticleMass mc = mass;
   if ( nn == 2 ) {
     TwoTrackMassKinematicConstraint   kinConst( mc );
-    return kinematicTree( "", &kinConst );
+    return kinematicTree( name, &kinConst );
   }
   else {
     MultiTrackMassKinematicConstraint kinConst( mc, nn );
-    return kinematicTree( "", &kinConst );
+    return kinematicTree( name, &kinConst );
   }
 }
 
@@ -245,7 +245,7 @@ const RefCountedKinematicTree& BPHKinematicFit::kinematicTree(
       kinTree = vtxFitter.fit( kTail );
     }
     else {
-      return ( kinTree = compTree );
+      kinTree = compTree;
     }
   }
   catch ( std::exception e ) {
