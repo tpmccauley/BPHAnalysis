@@ -20,7 +20,7 @@
 //------------------------------------
 // Collaborating Class Declarations --
 //------------------------------------
-
+#include "DataFormats/RecoCandidate/interface/RecoCandidate.h"
 
 //---------------
 // C++ Headers --

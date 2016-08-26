@@ -15,12 +15,11 @@
 // Base Class Headers --
 //----------------------
 #include "BPHAnalysis/RecoDecay/interface/BPHMomentumSelect.h"
-#include "BPHAnalysis/RecoDecay/interface/BPHDecayMomentum.h"
 
 //------------------------------------
 // Collaborating Class Declarations --
 //------------------------------------
-
+#include "BPHAnalysis/RecoDecay/interface/BPHDecayMomentum.h"
 
 //---------------
 // C++ Headers --

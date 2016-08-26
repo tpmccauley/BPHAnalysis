@@ -57,8 +57,6 @@ class BPHMuonChargeSelect: public BPHParticleChargeSelect {
   BPHMuonChargeSelect           ( const BPHMuonChargeSelect& x );
   BPHMuonChargeSelect& operator=( const BPHMuonChargeSelect& x );
 
-  int charge;
-
 };
 
 
