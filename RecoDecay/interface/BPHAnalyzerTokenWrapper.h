@@ -55,7 +55,7 @@ class BPHAnalyzerWrapper: public T {
   }
   template<class Obj>
   void consume( BPHTokenWrapper<Obj>& tw,
-                edm::InputTag& tag ) {
+                const edm::InputTag& tag ) {
     tw.token = this->template consumes<Obj>( tag );
     return;
   }
