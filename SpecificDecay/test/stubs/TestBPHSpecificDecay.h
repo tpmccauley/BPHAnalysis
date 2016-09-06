@@ -3,7 +3,6 @@
 
 #include "BPHAnalysis/RecoDecay/interface/BPHAnalyzerTokenWrapper.h"
 
-#include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
@@ -22,7 +21,8 @@
 class TH1F;
 class BPHRecoCandidate;
 
-class TestBPHSpecificDecay: public BPHAnalyzerWrapper<edm::EDAnalyzer> {
+class TestBPHSpecificDecay:
+      public BPHAnalyzerWrapper<BPHModuleWrapper::one_analyzer> {
 
  public:
 

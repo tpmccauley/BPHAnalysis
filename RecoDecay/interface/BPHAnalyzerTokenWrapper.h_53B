@@ -15,12 +15,14 @@
 //----------------------
 // Base Class Headers --
 //----------------------
-//#include "FWCore/Framework/interface/EDAnalyzer.h"
+
 
 //------------------------------------
 // Collaborating Class Declarations --
 //------------------------------------
 #include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/EDProducer.h"
 
 //---------------
 // C++ Headers --
@@ -30,6 +32,14 @@
 //              ---------------------
 //              -- Class Interface --
 //              ---------------------
+
+class BPHModuleWrapper {
+ public:
+  typedef edm::EDAnalyzer    one_analyzer;
+  typedef edm::EDProducer    one_producer;
+  typedef edm::EDAnalyzer stream_analyzer;
+  typedef edm::EDProducer stream_producer;
+};
 
 template<class Obj>
 class BPHTokenWrapper {
