@@ -1,10 +1,10 @@
 #ifndef BPHAnalyzerTokenWrapper_H
 #define BPHAnalyzerTokenWrapper_H
-/** \class BPHTokenWrapper
+/** \classes BPHModuleWrapper, BPHTokenWrapper and BPHAnalyzerWrapper
  *
  *  Description: 
- *    common interface to get objects from "old" and "new" CMSSW version
- *    in an uniform way
+ *    common interfaces to define modules and get objects
+ *    from "old" and "new" CMSSW version in an uniform way
  *
  *  $Date: 2016-04-15 17:47:56 $
  *  $Revision: 1.1 $
