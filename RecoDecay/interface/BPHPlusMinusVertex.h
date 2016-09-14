@@ -1,13 +1,11 @@
-#ifndef BPHPlusMinusVertex_H
-#define BPHPlusMinusVertex_H
+#ifndef BPHAnalysis_RecoDecay_BPHPlusMinusVertex_h
+#define BPHAnalysis_RecoDecay_BPHPlusMinusVertex_h
 /** \class BPHPlusMinusVertex
  *
  *  Description: 
  *     class for reconstructed decay vertices to opposite charge
  *     particle pairs
  *
- *  $Date: 2015-07-03 17:45:25 $
- *  $Revision: 1.1 $
  *  \author Paolo Ronchese INFN Padova
  *
  */
@@ -99,5 +97,5 @@ bool BPHPlusMinusVertex::chkSize( const T& cont,
   return false;
 }
 
-#endif // BPHPlusMinusVertex_H
+#endif
 

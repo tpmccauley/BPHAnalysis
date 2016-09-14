@@ -1,13 +1,10 @@
-#ifndef BPHOniaToMuMuBuilder_H
-#define BPHOniaToMuMuBuilder_H
+#ifndef BPHAnalysis_SpecificDecay_BPHOniaToMuMuBuilder_h
+#define BPHAnalysis_SpecificDecay_BPHOniaToMuMuBuilder_h
 /** \class BPHOniaToMuMuBuilder
  *
  *  Description: 
  *     Class to build Psi(1,2) and Upsilon(1,2,3) candidates
  *
- *
- *  $Date: 2015-07-24 11:29:20 $
- *  $Revision: 1.1 $
  *  \author Paolo Ronchese INFN Padova
  *
  */
@@ -135,5 +132,5 @@ class BPHOniaToMuMuBuilder {
 };
 
 
-#endif // BPHOniaToMuMuBuilder_H
+#endif
 

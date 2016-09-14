@@ -1,12 +1,10 @@
-#ifndef BPHDecayVertex_H
-#define BPHDecayVertex_H
+#ifndef BPHAnalysis_RecoDecay_BPHDecayVertex_h
+#define BPHAnalysis_RecoDecay_BPHDecayVertex_h
 /** \class BPHDecayVertex
  *
  *  Description: 
- *     mid-level base class to reconstruct decay vertex
+ *     Mid-level base class to reconstruct decay vertex
  *
- *  $Date: 2015-07-03 13:49:53 $
- *  $Revision: 1.1 $
  *  \author Paolo Ronchese INFN Padova
  *
  */
@@ -119,5 +117,5 @@ class BPHDecayVertex: public virtual BPHDecayMomentum {
 };
 
 
-#endif // BPHDecayVertex_H
+#endif
 

@@ -1,5 +1,5 @@
-#ifndef BPHRecoBuilder_H
-#define BPHRecoBuilder_H
+#ifndef BPHAnalysis_RecoDecay_BPHRecoBuilder_h
+#define BPHAnalysis_RecoDecay_BPHRecoBuilder_h
 /** \class BPHRecoBuilder
  *
  *  Description: 
@@ -7,8 +7,6 @@
  *     starting from reco::Candidate collections and applying
  *     selection cuts to decay products and reconstructed candidates
  *
- *  $Date: 2015-07-06 11:20:00 $
- *  $Revision: 1.1 $
  *  \author Paolo Ronchese INFN Padova
  *
  */
@@ -279,5 +277,5 @@ void BPHRecoBuilder::add( const std::string& name,
 }
 
 
-#endif // BPHRecoBuilder_H
+#endif
 

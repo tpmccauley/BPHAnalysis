@@ -1,12 +1,10 @@
-#ifndef BPHMassFitSelect_H
-#define BPHMassFitSelect_H
+#ifndef BPHAnalysis_SpecificDecay_BPHMassFitSelect_h
+#define BPHAnalysis_SpecificDecay_BPHMassFitSelect_h
 /** \class BPHMassFitSelect
  *
  *  Description: 
  *     Class for candidate selection by invariant mass (at kinematic fit level)
  *
- *  $Date: 2016-08-11 15:49:00 $
- *  $Revision: 1.1 $
  *  \author Paolo Ronchese INFN Padova
  *
  */
@@ -147,5 +145,5 @@ class BPHMassFitSelect: public BPHFitSelect, public BPHMassCuts {
 };
 
 
-#endif // BPHMassFitSelect_H
+#endif
 

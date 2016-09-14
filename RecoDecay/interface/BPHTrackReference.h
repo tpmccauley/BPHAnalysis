@@ -1,12 +1,11 @@
-#ifndef BPHTrackReference_H
-#define BPHTrackReference_H
+#ifndef BPHAnalysis_RecoDecay_BPHTrackReference_h
+#define BPHAnalysis_RecoDecay_BPHTrackReference_h
 /** \class BPHTrackReference
  *
  *  Description: 
+ *     class to have uniform access to reco::Track
+ *     for different particle objects
  *
- *
- *  $Date: 2015-11-19 10:59:18 $
- *  $Revision: 1.1 $
  *  \author Paolo Ronchese INFN Padova
  *
  */
@@ -258,5 +257,5 @@ class BPHTrackReference {
 };
 
 
-#endif // BPHTrackReference_H
+#endif
 

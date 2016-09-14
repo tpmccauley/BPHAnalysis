@@ -1,5 +1,5 @@
-#ifndef BPHRecoCandidatePtr_H
-#define BPHRecoCandidatePtr_H
+#ifndef BPHAnalysis_RecoDecay_BPHRecoCandidatePtr_h
+#define BPHAnalysis_RecoDecay_BPHRecoCandidatePtr_h
 
 #include "BPHAnalysis/RecoDecay/interface/BPHGenericPtr.h"
 class BPHRecoCandidate;

@@ -1,13 +1,10 @@
-#ifndef BPHKx0ToKPiBuilder_H
-#define BPHKx0ToKPiBuilder_H
+#ifndef BPHAnalysis_SpecificDecay_BPHKx0ToKPiBuilder_h
+#define BPHAnalysis_SpecificDecay_BPHKx0ToKPiBuilder_h
 /** \class BPHKx0ToKPiBuilder
  *
  *  Description: 
  *     Class to build K*0 to K+ pi- candidates
  *
- *
- *  $Date: 2015-07-24 11:29:20 $
- *  $Revision: 1.1 $
  *  \author Paolo Ronchese INFN Padova
  *
  */
@@ -103,5 +100,5 @@ class BPHKx0ToKPiBuilder {
 };
 
 
-#endif // BPHKx0ToKPiBuilder_H
+#endif
 

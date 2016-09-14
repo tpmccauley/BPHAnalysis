@@ -1,12 +1,10 @@
-#ifndef BPHMassSelect_H
-#define BPHMassSelect_H
+#ifndef BPHAnalysis_SpecificDecay_BPHMassSelect_h
+#define BPHAnalysis_SpecificDecay_BPHMassSelect_h
 /** \class BPHMassSelect
  *
  *  Description: 
  *     Class for candidate selection by invariant mass (at momentum sum level)
  *
- *  $Date: 2016-05-03 14:47:26 $
- *  $Revision: 1.1 $
  *  \author Paolo Ronchese INFN Padova
  *
  */
@@ -61,5 +59,5 @@ class BPHMassSelect: public BPHMomentumSelect, public BPHMassCuts {
 };
 
 
-#endif // BPHMassSelect_H
+#endif
 

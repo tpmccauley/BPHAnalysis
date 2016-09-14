@@ -1,5 +1,5 @@
-#ifndef BPHWriteSpecificDecay_h
-#define BPHWriteSpecificDecay_h
+#ifndef BPHAnalysis_SpecificDecay_BPHWriteSpecificDecay_h
+#define BPHAnalysis_SpecificDecay_BPHWriteSpecificDecay_h
 
 #include "BPHAnalysis/RecoDecay/interface/BPHAnalyzerTokenWrapper.h"
 

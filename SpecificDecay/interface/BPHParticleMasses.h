@@ -1,13 +1,10 @@
-#ifndef BPHParticleMasses_H
-#define BPHParticleMasses_H
+#ifndef BPHAnalysis_SpecificDecay_BPHParticleMasses_h
+#define BPHAnalysis_SpecificDecay_BPHParticleMasses_h
 /** \class BPHParticleMasses
  *
  *  Description: 
  *     Class to contain particle masses
  *
- *
- *  $Date: 2016-08-02 15:44:55 $
- *  $Revision: 1.1 $
  *  \author Paolo Ronchese INFN Padova
  *
  */
@@ -65,5 +62,5 @@ class BPHParticleMasses {
 };
 
 
-#endif // BPHParticleMasses_H
+#endif
 

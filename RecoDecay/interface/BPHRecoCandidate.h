@@ -1,5 +1,5 @@
-#ifndef BPHRecoCandidate_H
-#define BPHRecoCandidate_H
+#ifndef BPHAnalysis_RecoDecay_BPHRecoCandidate_h
+#define BPHAnalysis_RecoDecay_BPHRecoCandidate_h
 /** \class BPHRecoCandidate
  *
  *  Description: 
@@ -10,8 +10,6 @@
  *       BPHDecayVertex   : vertex reconstruction
  *       BPHKinematicFit  : kinematic fit and fitted momentum sum
  *
- *  $Date: 2015-07-03 10:08:22 $
- *  $Revision: 1.1 $
  *  \author Paolo Ronchese INFN Padova
  *
  */
@@ -126,5 +124,5 @@ void BPHRecoCandidate::fill( std::vector<
   return;
 }
 
-#endif // BPHRecoCandidate_H
+#endif
 

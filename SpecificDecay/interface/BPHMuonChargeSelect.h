@@ -1,13 +1,10 @@
-#ifndef BPHMuonChargeSelect_H
-#define BPHMuonChargeSelect_H
+#ifndef BPHAnalysis_SpecificDecay_BPHMuonChargeSelect_h
+#define BPHAnalysis_SpecificDecay_BPHMuonChargeSelect_h
 /** \class BPHMuonChargeSelect
  *
  *  Description: 
  *     Class for muon selection by charge
  *
- *
- *  $Date: 2016-05-03 14:57:34 $
- *  $Revision: 1.1 $
  *  \author Paolo Ronchese INFN Padova
  *
  */
@@ -60,5 +57,5 @@ class BPHMuonChargeSelect: public BPHParticleChargeSelect {
 };
 
 
-#endif // BPHMuonChargeSelect_H
+#endif
 

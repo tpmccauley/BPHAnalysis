@@ -1,13 +1,10 @@
-#ifndef BPHMuonPtSelect_H
-#define BPHMuonPtSelect_H
+#ifndef BPHAnalysis_SpecificDecay_BPHMuonPtSelect_h
+#define BPHAnalysis_SpecificDecay_BPHMuonPtSelect_h
 /** \class BPHMuonPtSelect
  *
  *  Description: 
  *     Class for muon selection by Pt
  *
- *
- *  $Date: 2016-05-03 14:57:34 $
- *  $Revision: 1.1 $
  *  \author Paolo Ronchese INFN Padova
  *
  */
@@ -60,5 +57,5 @@ class BPHMuonPtSelect: public BPHParticlePtSelect {
 };
 
 
-#endif // BPHMuonPtSelect_H
+#endif
 

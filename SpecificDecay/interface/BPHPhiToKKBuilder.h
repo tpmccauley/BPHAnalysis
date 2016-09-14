@@ -1,13 +1,10 @@
-#ifndef BPHPhiToKKBuilder_H
-#define BPHPhiToKKBuilder_H
+#ifndef BPHAnalysis_SpecificDecay_BPHPhiToKKBuilder_h
+#define BPHAnalysis_SpecificDecay_BPHPhiToKKBuilder_h
 /** \class BPHPhiToKKBuilder
  *
  *  Description: 
  *     Class to build Phi to K+ K- candidates
  *
- *
- *  $Date: 2015-07-24 11:29:20 $
- *  $Revision: 1.1 $
  *  \author Paolo Ronchese INFN Padova
  *
  */
@@ -103,5 +100,5 @@ class BPHPhiToKKBuilder {
 };
 
 
-#endif // BPHPhiToKKBuilder_H
+#endif
 

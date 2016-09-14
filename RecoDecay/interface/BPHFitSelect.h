@@ -1,13 +1,10 @@
-#ifndef BPHFitSelect_H
-#define BPHFitSelect_H
+#ifndef BPHAnalysis_RecoDecay_BPHFitSelect_h
+#define BPHAnalysis_RecoDecay_BPHFitSelect_h
 /** \class BPHFitSelect
  *
  *  Description: 
  *     Base class for candidate selection at kinematic fit level
  *
- *
- *  $Date: 2015-07-06 18:38:16 $
- *  $Revision: 1.1 $
  *  \author Paolo Ronchese INFN Padova
  *
  */
@@ -57,5 +54,5 @@ class BPHFitSelect {
 };
 
 
-#endif // BPHFitSelect_H
+#endif
 

@@ -1,13 +1,10 @@
-#ifndef BPHParticleChargeSelect_H
-#define BPHParticleChargeSelect_H
+#ifndef BPHAnalysis_SpecificDecay_BPHParticleChargeSelect_h
+#define BPHAnalysis_SpecificDecay_BPHParticleChargeSelect_h
 /** \class BPHParticleChargeSelect
  *
  *  Description: 
  *     Class for particle selection by charge
  *
- *
- *  $Date: 2016-05-03 14:57:34 $
- *  $Revision: 1.1 $
  *  \author Paolo Ronchese INFN Padova
  *
  */
@@ -73,5 +70,5 @@ class BPHParticleChargeSelect: public BPHRecoSelect {
 };
 
 
-#endif // BPHParticleChargeSelect_H
+#endif
 

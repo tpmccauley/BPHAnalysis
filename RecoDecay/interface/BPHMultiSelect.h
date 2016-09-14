@@ -1,13 +1,10 @@
-#ifndef BPHMultiSelect_H
-#define BPHMultiSelect_H
+#ifndef BPHAnalysis_RecoDecay_BPHMultiSelect_h
+#define BPHAnalysis_RecoDecay_BPHMultiSelect_h
 /** \class BPHMultiSelect
  *
  *  Description: 
  *     Class to combine multiple selection (OR mode)
  *
- *
- *  $Date: 2015-07-06 18:40:19 $
- *  $Revision: 1.1 $
  *  \author Paolo Ronchese INFN Padova
  *
  */
@@ -140,5 +137,5 @@ template<>
 bool BPHMultiSelect<BPHVertexSelect>::accept(
                                         const BPHDecayVertex& cand ) const;
 
-#endif // BPHMultiSelect_H
+#endif
 

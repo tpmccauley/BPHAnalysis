@@ -1,13 +1,10 @@
-#ifndef BPHParticlePtSelect_H
-#define BPHParticlePtSelect_H
+#ifndef BPHAnalysis_SpecificDecay_BPHParticlePtSelect_h
+#define BPHAnalysis_SpecificDecay_BPHParticlePtSelect_h
 /** \class BPHParticlePtSelect
  *
  *  Description: 
  *     Class for particle selection by Pt
  *
- *
- *  $Date: 2016-05-03 14:57:34 $
- *  $Revision: 1.1 $
  *  \author Paolo Ronchese INFN Padova
  *
  */
@@ -67,5 +64,5 @@ class BPHParticlePtSelect: public BPHRecoSelect {
 };
 
 
-#endif // BPHParticlePtSelect_H
+#endif
 

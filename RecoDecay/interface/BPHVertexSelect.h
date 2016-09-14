@@ -1,13 +1,10 @@
-#ifndef BPHVertexSelect_H
-#define BPHVertexSelect_H
+#ifndef BPHAnalysis_RecoDecay_BPHVertexSelect_h
+#define BPHAnalysis_RecoDecay_BPHVertexSelect_h
 /** \class BPHVertexSelect
  *
  *  Description: 
  *     Base class for candidate selection at vertex reconstruction level
  *
- *
- *  $Date: 2015-07-06 18:34:25 $
- *  $Revision: 1.1 $
  *  \author Paolo Ronchese INFN Padova
  *
  */
@@ -57,5 +54,5 @@ class BPHVertexSelect {
 };
 
 
-#endif // BPHVertexSelect_H
+#endif
 

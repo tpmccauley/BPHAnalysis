@@ -1,5 +1,5 @@
-#ifndef BPHGenericPtr_H
-#define BPHGenericPtr_H
+#ifndef BPHAnalysis_RecoDecay_BPHGenericPtr_h
+#define BPHAnalysis_RecoDecay_BPHGenericPtr_h
 
 #include <memory>
 template <class T>

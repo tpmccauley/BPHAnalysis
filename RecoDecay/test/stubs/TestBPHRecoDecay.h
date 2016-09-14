@@ -1,5 +1,5 @@
-#ifndef TestBPHRecoDecay_h
-#define TestBPHRecoDecay_h
+#ifndef BPHAnalysis_RecoDecay_TestBPHRecoDecay_h
+#define BPHAnalysis_RecoDecay_TestBPHRecoDecay_h
 
 #include "BPHAnalysis/RecoDecay/interface/BPHAnalyzerTokenWrapper.h"
 

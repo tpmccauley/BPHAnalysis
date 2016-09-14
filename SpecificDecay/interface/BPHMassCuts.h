@@ -1,5 +1,5 @@
-#ifndef BPHMassCuts_H
-#define BPHMassCuts_H
+#ifndef BPHAnalysis_SpecificDecay_BPHMassCuts_h
+#define BPHAnalysis_SpecificDecay_BPHMassCuts_h
 /** \class BPHMassCuts
  *
  *  Description: 
@@ -8,8 +8,6 @@
  *     (at momentum sum or kinemtic fit level) are to be implemented
  *     in derived classes
  *
- *  $Date: 2016-05-03 14:47:26 $
- *  $Revision: 1.1 $
  *  \author Paolo Ronchese INFN Padova
  *
  */
@@ -68,5 +66,5 @@ class BPHMassCuts {
 };
 
 
-#endif // BPHMassCuts_H
+#endif
 

@@ -1,13 +1,10 @@
-#ifndef BPHMuonEtaSelect_H
-#define BPHMuonEtaSelect_H
+#ifndef BPHAnalysis_SpecificDecay_BPHMuonEtaSelect_h
+#define BPHAnalysis_SpecificDecay_BPHMuonEtaSelect_h
 /** \class BPHMuonEtaSelect
  *
  *  Descrietaion: 
  *     Class for muon selection by eta
  *
- *
- *  $Date: 2016-05-03 14:57:34 $
- *  $Revision: 1.1 $
  *  \author Paolo Ronchese INFN Padova
  *
  */
@@ -60,5 +57,5 @@ class BPHMuonEtaSelect: public BPHParticleEtaSelect {
 };
 
 
-#endif // BPHMuonEtaSelect_H
+#endif
 

@@ -1,13 +1,10 @@
-#ifndef BPHRecoSelect_H
-#define BPHRecoSelect_H
+#ifndef BPHAnalysis_RecoDecay_BPHRecoSelect_h
+#define BPHAnalysis_RecoDecay_BPHRecoSelect_h
 /** \class BPHRecoSelect
  *
  *  Description: 
  *     Base class for daughter particle selection
  *
- *
- *  $Date: 2015-07-06 18:40:19 $
- *  $Revision: 1.1 $
  *  \author Paolo Ronchese INFN Padova
  *
  */
@@ -72,5 +69,5 @@ class BPHRecoSelect {
 };
 
 
-#endif // BPHRecoSelect_H
+#endif
 

@@ -1,5 +1,5 @@
-#ifndef BPHHistoSpecificDecay_h
-#define BPHHistoSpecificDecay_h
+#ifndef BPHAnalysis_SpecificDecay_BPHHistoSpecificDecay_h
+#define BPHAnalysis_SpecificDecay_BPHHistoSpecificDecay_h
 
 #include "BPHAnalysis/RecoDecay/interface/BPHAnalyzerTokenWrapper.h"
 #include "DataFormats/PatCandidates/interface/CompositeCandidate.h"

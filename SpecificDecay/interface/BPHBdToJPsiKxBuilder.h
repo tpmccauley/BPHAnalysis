@@ -1,13 +1,10 @@
-#ifndef BPHBdToJPsiKxBuilder_H
-#define BPHBdToJPsiKxBuilder_H
+#ifndef BPHAnalysis_SpecificDecay_BPHBdToJPsiKxBuilder_h
+#define BPHAnalysis_SpecificDecay_BPHBdToJPsiKxBuilder_h
 /** \class BPHBdToJPsiKxBuilder
  *
  *  Description: 
  *     Class to build B0 to JPsi K*0 candidates
  *
- *
- *  $Date: 2015-07-24 11:29:20 $
- *  $Revision: 1.1 $
  *  \author Paolo Ronchese INFN Padova
  *
  */
@@ -112,5 +109,5 @@ class BPHBdToJPsiKxBuilder {
 };
 
 
-#endif // BPHBdToJPsiKxBuilder_H
+#endif
 

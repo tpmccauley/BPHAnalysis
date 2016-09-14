@@ -1,12 +1,10 @@
-#ifndef BPHKinematicFit_H
-#define BPHKinematicFit_H
+#ifndef BPHAnalysis_RecoDecay_BPHKinematicFit_h
+#define BPHAnalysis_RecoDecay_BPHKinematicFit_h
 /** \class BPHKinematicFit
  *
  *  Description: 
+ *     Highest-level base class to encapsulate kinematic fit operations
  *
- *
- *  $Date: 2015-07-03 17:02:36 $
- *  $Revision: 1.1 $
  *  \author Paolo Ronchese INFN Padova
  *     high-level base class to perform a kinematic fit
  */
@@ -136,5 +134,5 @@ class BPHKinematicFit: public virtual BPHDecayVertex {
 };
 
 
-#endif // BPHKinematicFit_H
+#endif
 

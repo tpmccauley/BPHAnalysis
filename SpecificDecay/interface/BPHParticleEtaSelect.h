@@ -1,13 +1,10 @@
-#ifndef BPHParticleEtaSelect_H
-#define BPHParticleEtaSelect_H
+#ifndef BPHAnalysis_SpecificDecay_BPHParticleEtaSelect_h
+#define BPHAnalysis_SpecificDecay_BPHParticleEtaSelect_h
 /** \class BPHParticleEtaSelect
  *
  *  Descrietaion: 
  *     Class for particle selection by eta
  *
- *
- *  $Date: 2016-05-03 14:57:34 $
- *  $Revision: 1.1 $
  *  \author Paolo Ronchese INFN Padova
  *
  */
@@ -67,5 +64,5 @@ class BPHParticleEtaSelect: public BPHRecoSelect {
 };
 
 
-#endif // BPHParticleEtaSelect_H
+#endif
 

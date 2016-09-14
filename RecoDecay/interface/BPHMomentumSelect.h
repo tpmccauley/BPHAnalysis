@@ -1,12 +1,10 @@
-#ifndef BPHMomentumSelect_H
-#define BPHMomentumSelect_H
+#ifndef BPHAnalysis_RecoDecay_BPHMomentumSelect_h
+#define BPHAnalysis_RecoDecay_BPHMomentumSelect_h
 /** \class BPHMomentumSelect
  *
  *  Description: 
  *     Base class for candidate selection at momentum sum level
  *
- *  $Date: 2015-07-06 18:32:01 $
- *  $Revision: 1.1 $
  *  \author Paolo Ronchese INFN Padova
  *
  */
@@ -56,5 +54,5 @@ class BPHMomentumSelect {
 };
 
 
-#endif // BPHMomentumSelect_H
+#endif
 

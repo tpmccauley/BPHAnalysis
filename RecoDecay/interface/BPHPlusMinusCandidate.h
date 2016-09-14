@@ -1,13 +1,11 @@
-#ifndef BPHPlusMinusCandidate_H
-#define BPHPlusMinusCandidate_H
+#ifndef BPHAnalysis_RecoDecay_BPHPlusMinusCandidate_h
+#define BPHAnalysis_RecoDecay_BPHPlusMinusCandidate_h
 /** \class BPHPlusMinusCandidate
  *
  *  Description: 
  *     class for reconstructed decay candidates to opposite charge
  *     particle pairs
  *
- *  $Date: 2015-07-03 16:33:59 $
- *  $Revision: 1.1 $
  *  \author Paolo Ronchese INFN Padova
  *
  */
@@ -99,5 +97,5 @@ class BPHPlusMinusCandidate: public BPHRecoCandidate,
 };
 
 
-#endif // BPHPlusMinusCandidate_H
+#endif
 

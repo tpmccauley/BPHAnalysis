@@ -1,12 +1,10 @@
-#ifndef BPHChi2Select_H
-#define BPHChi2Select_H
+#ifndef BPHAnalysis_SpecificDecay_BPHChi2Select_h
+#define BPHAnalysis_SpecificDecay_BPHChi2Select_h
 /** \class BPHChi2Select
  *
  *  Description: 
  *     Class for candidate selection by chisquare (at vertex fit level)
  *
- *  $Date: 2016-05-03 14:47:26 $
- *  $Revision: 1.1 $
  *  \author Paolo Ronchese INFN Padova
  *
  */
@@ -70,5 +68,5 @@ class BPHChi2Select: public BPHVertexSelect {
 };
 
 
-#endif // BPHChi2Select_H
+#endif
 
