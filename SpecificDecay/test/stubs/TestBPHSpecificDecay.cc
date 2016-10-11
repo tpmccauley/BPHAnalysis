@@ -68,8 +68,6 @@ TestBPHSpecificDecay::TestBPHSpecificDecay( const edm::ParameterSet& ps ) {
 
   SET_LABEL( outDump, ps );
   SET_LABEL( outHist, ps );
-//  outDump = getParameter( ps, "outDump" );
-//  outHist = getParameter( ps, "outHist" );
   if ( outDump == "" ) fPtr = &cout;
   else                 fPtr = new ofstream( outDump.c_str() );
 
@@ -90,7 +88,7 @@ void TestBPHSpecificDecay::fillDescriptions(
    desc.add<string>( "gpCandsLabel", "" );
    desc.add<string>( "outDump", "dump.txt" );
    desc.add<string>( "outHist", "hist.root" );
-   descriptions.add( "testBPHRecoDecay", desc );
+   descriptions.add( "testBPHSpecificDecay", desc );
    return;
 }
 
@@ -336,18 +334,28 @@ void TestBPHSpecificDecay::analyze( const edm::Event& ev,
   outF << nBu << " Bu cand found" << endl;
   for ( iBu = 0; iBu < nBu; ++iBu ) dumpRecoCand( "Bu",
                                                   lBu[iBu].get() );
+  // the following is an example of decay reconstruction starting from
+  // specific reco::Candidates
+  // here the final decay products are taken from already reconstructed B+,
+  // so there's no physical sense in the operation
   for ( iBu = 0; iBu < nBu; ++iBu ) {
     const BPHRecoCandidate* bu = lBu[iBu].get();
+    const reco::Candidate* mPos = bu->originalReco(
+                                  bu->getDaug( "JPsi/MuPos" ) );
+    const reco::Candidate* mNeg = bu->originalReco(
+                                  bu->getDaug( "JPsi/MuNeg" ) );
+    const reco::Candidate* kaon = bu->originalReco(
+                                  bu->getDaug( "kaon"       ) );
     BPHRecoCandidatePtr njp( new BPHPlusMinusCandidate( &es ) );
-    njp->add( "MuPos", bu->originalReco( bu->getDaug( "JPsi/MuPos" ) ),
+    njp->add( "MuPos", mPos,
               BPHParticleMasses::muonMass,
               BPHParticleMasses::muonMSigma );
-    njp->add( "MuNeg", bu->originalReco( bu->getDaug( "JPsi/MuNeg" ) ),
+    njp->add( "MuNeg", mNeg,
               BPHParticleMasses::muonMass,
               BPHParticleMasses::muonMSigma );
     BPHRecoCandidate nbu( &es );
     nbu.add( "JPsi", njp );
-    nbu.add( "Kaon", bu->originalReco( bu->getDaug( "Kaon" ) ),
+    nbu.add( "Kaon", kaon,
              BPHParticleMasses::kaonMass,
              BPHParticleMasses::kaonMSigma );
     nbu.kinematicTree( "JPsi",

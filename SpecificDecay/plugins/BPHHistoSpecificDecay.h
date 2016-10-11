@@ -9,6 +9,9 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/Common/interface/Ref.h"
 
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+
 #include <string>
 
 class TH1F;
@@ -26,6 +29,8 @@ class BPHHistoSpecificDecay:
 
   explicit BPHHistoSpecificDecay( const edm::ParameterSet& ps );
   virtual ~BPHHistoSpecificDecay();
+
+  static void fillDescriptions( edm::ConfigurationDescriptions& descriptions );
 
   virtual void beginJob();
   virtual void analyze( const edm::Event& ev, const edm::EventSetup& es );
@@ -52,8 +57,14 @@ class BPHHistoSpecificDecay:
   BPHTokenWrapper< std::vector<pat::CompositeCandidate> >   buCandsToken;
   BPHTokenWrapper< std::vector<pat::CompositeCandidate> >   bdCandsToken;
   BPHTokenWrapper< std::vector<pat::CompositeCandidate> >   bsCandsToken;
+  bool useOnia;
+  bool useSd;
+  bool useSs;
+  bool useBu;
+  bool useBd;
+  bool useBs;
 
-  std::string outHist;
+  edm::Service<TFileService> fs;
   std::map<std::string,TH1F*> histoMap;
 
   CandidateSelect*  phiBasicSelect;
@@ -78,9 +89,6 @@ class BPHHistoSpecificDecay:
   CandidateSelect* bsJPsiDaughterSelect;
 
   double buKPtMin;
-
-  static std::string getParameter( const edm::ParameterSet& ps,
-                                   const std::string& name );
 
   void fillHisto   ( const std::string& name,
                      const pat::CompositeCandidate& cand );

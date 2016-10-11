@@ -162,7 +162,6 @@ vector<RefCountedKinematicParticle> BPHKinematicFit::kinParticles(
 const RefCountedKinematicTree& BPHKinematicFit::kinematicTree() const {
   if ( oldFit ) return kinematicTree( "", massConst, massSigma );
   return kinTree;
-  
 }
 
 

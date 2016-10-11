@@ -38,6 +38,8 @@ class BPHWriteSpecificDecay:
   explicit BPHWriteSpecificDecay( const edm::ParameterSet& ps );
   virtual ~BPHWriteSpecificDecay();
 
+  static void fillDescriptions( edm::ConfigurationDescriptions& descriptions );
+
   virtual void beginJob();
   virtual void produce( edm::Event& ev, const edm::EventSetup& es );
   virtual void fill( edm::Event& ev, const edm::EventSetup& es );
@@ -74,13 +76,31 @@ class BPHWriteSpecificDecay:
   std::string   bdName;
   std::string   bsName;
 
-  enum recoType { Pmm , Psi1, Psi2, Ups , Ups1, Ups2, Ups3,
+  enum recoType { Onia, Pmm , Psi1, Psi2, Ups , Ups1, Ups2, Ups3,
                   Kx0, Pkk, Bu, Bd, Bs };
   enum  parType { ptMin, etaMax,
                   mPsiMin, mPsiMax, mKx0Min, mKx0Max, mPhiMin, mPhiMax, 
                   massMin, massMax, probMin, mFitMin, mFitMax,
-                  constrMass, constrSigma, constrMJPsi };
-  std::map< int, std::map<int,double> >  parMap;
+                  constrMass, constrSigma, constrMJPsi, writeCandidate };
+  std::map<std::string,recoType> rMap;
+  std::map<std::string, parType> pMap;
+  std::map<std::string, parType> fMap;
+  std::map< recoType, std::map<parType,double> > parMap;
+
+  bool recoOnia;
+  bool recoKx0;
+  bool recoPkk;
+  bool recoBu;
+  bool recoBd;
+  bool recoBs;
+
+  bool writeOnia;
+  bool writeKx0;
+  bool writePkk;
+  bool writeBu;
+  bool writeBd;
+  bool writeBs;
+
   bool writeVertex;
   bool writeMomentum;
 
@@ -98,8 +118,6 @@ class BPHWriteSpecificDecay:
   typedef edm::Ref< pat::CompositeCandidateCollection > compcc_ref;
   std::map<const BPHRecoCandidate*,compcc_ref> ccRefMap;
 
-  static std::string getParameter( const edm::ParameterSet& ps,
-                                   const std::string& name );
   void setRecoParameters( const edm::ParameterSet& ps );
 
   template <class T>

@@ -30,11 +30,10 @@
 
 using namespace std;
 
-#define SET_LABEL(NAME,PSET) ( NAME = getParameter( PSET, #NAME ) )
+#define SET_LABEL(NAME,PSET) ( NAME = PSET.getParameter<string>( #NAME ) )
 // SET_LABEL(xyz,ps);
 // is equivalent to
-// xyz = getParameter( ps, "xyx" )
-
+// xyz = ps.getParameter<string>( "xyx" )
 
 class BPHUserData {
  public:
@@ -362,20 +361,24 @@ class BPHFittedVertexSelect: public BPHHistoSpecificDecay::CandidateSelect {
 
 BPHHistoSpecificDecay::BPHHistoSpecificDecay( const edm::ParameterSet& ps ) {
 
-  SET_LABEL( oniaCandsLabel, ps );
-  SET_LABEL(   sdCandsLabel, ps );
-  SET_LABEL(   ssCandsLabel, ps );
-  SET_LABEL(   buCandsLabel, ps );
-  SET_LABEL(   bdCandsLabel, ps );
-  SET_LABEL(   bsCandsLabel, ps );
-  consume< vector<pat::CompositeCandidate> >( oniaCandsToken, oniaCandsLabel );
-  consume< vector<pat::CompositeCandidate> >(   sdCandsToken,   sdCandsLabel );
-  consume< vector<pat::CompositeCandidate> >(   ssCandsToken,   ssCandsLabel );
-  consume< vector<pat::CompositeCandidate> >(   buCandsToken,   buCandsLabel );
-  consume< vector<pat::CompositeCandidate> >(   bdCandsToken,   bdCandsLabel );
-  consume< vector<pat::CompositeCandidate> >(   bsCandsToken,   bsCandsLabel );
-
-  outHist = getParameter( ps, "outHist" );
+  useOnia = ( SET_LABEL( oniaCandsLabel, ps ) != "" );
+  useSd   = ( SET_LABEL(   sdCandsLabel, ps ) != "" );
+  useSs   = ( SET_LABEL(   ssCandsLabel, ps ) != "" );
+  useBu   = ( SET_LABEL(   buCandsLabel, ps ) != "" );
+  useBd   = ( SET_LABEL(   bdCandsLabel, ps ) != "" );
+  useBs   = ( SET_LABEL(   bsCandsLabel, ps ) != "" );
+  if ( useOnia ) consume< vector<pat::CompositeCandidate> >( oniaCandsToken,
+                                                             oniaCandsLabel );
+  if ( useSd   ) consume< vector<pat::CompositeCandidate> >(   sdCandsToken,
+                                                               sdCandsLabel );
+  if ( useSs   ) consume< vector<pat::CompositeCandidate> >(   ssCandsToken,
+                                                               ssCandsLabel );
+  if ( useBu   ) consume< vector<pat::CompositeCandidate> >(   buCandsToken,
+                                                               buCandsLabel );
+  if ( useBd   ) consume< vector<pat::CompositeCandidate> >(   bdCandsToken,
+                                                               bdCandsLabel );
+  if ( useBs   ) consume< vector<pat::CompositeCandidate> >(   bsCandsToken,
+                                                               bsCandsLabel );
 
   static const BPHSoftMuonSelect sms;
 
@@ -539,6 +542,20 @@ BPHHistoSpecificDecay::~BPHHistoSpecificDecay() {
 }
 
 
+void BPHHistoSpecificDecay::fillDescriptions(
+                            edm::ConfigurationDescriptions& descriptions ) {
+   edm::ParameterSetDescription desc;
+   desc.add<string>( "oniaCandsLabel", "" );
+   desc.add<string>(   "sdCandsLabel", "" );
+   desc.add<string>(   "ssCandsLabel", "" );
+   desc.add<string>(   "buCandsLabel", "" );
+   desc.add<string>(   "bdCandsLabel", "" );
+   desc.add<string>(   "bsCandsLabel", "" );
+   descriptions.add( "process.bphHistoSpecificDecay", desc );
+   return;
+}
+
+
 void BPHHistoSpecificDecay::beginJob() {
   createHisto( "massPhi"    ,  35, 0.85, 1.20 ); // Phi  mass
   createHisto( "massJPsi"   ,  35, 2.95, 3.30 ); // JPsi mass
@@ -575,10 +592,13 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
   //////////// quarkonia ////////////
 
   edm::Handle< vector<pat::CompositeCandidate> > oniaCands;
-  oniaCandsToken.get( ev, oniaCands );
-
   int iqo;
-  int nqo = oniaCands->size();
+  int nqo = 0;
+  if ( useOnia ) {
+    oniaCandsToken.get( ev, oniaCands );
+    nqo = oniaCands->size();
+  }
+
   for ( iqo = 0; iqo < nqo; ++ iqo ) {
     LogTrace( "DataDump" )
            << "*********** quarkonium " << iqo << "/" << nqo << " ***********";
@@ -597,10 +617,13 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
   //////////// Bu ////////////
 
   edm::Handle< vector<pat::CompositeCandidate> > buCands;
-  buCandsToken.get( ev, buCands );
-
   int ibu;
-  int nbu = buCands->size();
+  int nbu = 0;
+  if ( useBu ) {
+    buCandsToken.get( ev, buCands );
+    nbu = buCands->size();
+  }
+
   for ( ibu = 0; ibu < nbu; ++ ibu ) {
     LogTrace( "DataDump" )
            << "*********** Bu " << ibu << "/" << nbu << " ***********";
@@ -625,10 +648,13 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
   //////////// Bd ////////////
 
   edm::Handle< vector<pat::CompositeCandidate> > bdCands;
-  bdCandsToken.get( ev, bdCands );
-
   int ibd;
-  int nbd = bdCands->size();
+  int nbd = 0;
+  if ( useBd ) {
+    bdCandsToken.get( ev, bdCands );
+    nbd = bdCands->size();
+  }
+
   for ( ibd = 0; ibd < nbd; ++ ibd ) {
     LogTrace( "DataDump" )
            << "*********** Bd " << ibd << "/" << nbd << " ***********";
@@ -657,10 +683,13 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
   //////////// Bs ////////////
 
   edm::Handle< vector<pat::CompositeCandidate> > bsCands;
-  bsCandsToken.get( ev, bsCands );
-
   int ibs;
-  int nbs = bsCands->size();
+  int nbs = 0;
+  if ( useBs ) {
+    bsCandsToken.get( ev, bsCands );
+    nbs = bsCands->size();
+  }
+
   for ( ibs = 0; ibs < nbs; ++ ibs ) {
     LogTrace( "DataDump" )
            << "*********** Bs " << ibs << "/" << nbs << " ***********";
@@ -693,20 +722,7 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
 
 
 void BPHHistoSpecificDecay::endJob() {
-  TDirectory* currentDir = gDirectory;
-  TFile file( outHist.c_str(), "RECREATE" );
-  map<string,TH1F*>::iterator iter = histoMap.begin();
-  map<string,TH1F*>::iterator iend = histoMap.end();
-  while ( iter != iend ) iter++->second->Write();
-  currentDir->cd();
   return;
-}
-
-
-string BPHHistoSpecificDecay::getParameter( const edm::ParameterSet& ps,
-                                            const string& name ) {
-  if ( ps.exists( name ) ) return ps.getParameter<string>( name );
-  return "";
 }
 
 
@@ -731,7 +747,8 @@ void BPHHistoSpecificDecay::fillHisto( const string& name, float x ) {
 
 void BPHHistoSpecificDecay::createHisto( const string& name,
                                          int nbin, float hmin, float hmax ) {
-  histoMap[name] = new TH1F( name.c_str(), name.c_str(), nbin, hmin, hmax );
+  histoMap[name] = fs->make<TH1F>( name.c_str(), name.c_str(),
+                                   nbin, hmin, hmax );
   return;
 }
 

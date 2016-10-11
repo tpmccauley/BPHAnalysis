@@ -97,5 +97,6 @@ bool BPHPlusMinusVertex::chkSize( const T& cont,
   return false;
 }
 
+
 #endif
 
