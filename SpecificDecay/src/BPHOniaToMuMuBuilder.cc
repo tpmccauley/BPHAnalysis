@@ -122,7 +122,8 @@ vector<BPHPlusMinusConstCandPtr> BPHOniaToMuMuBuilder::getList(
                                  oniaType type,
                                  BPHRecoSelect    * dSel,
                                  BPHMomentumSelect* mSel,
-                                 BPHVertexSelect  * vSel ) {
+                                 BPHVertexSelect  * vSel,
+                                 BPHFitSelect     * kSel ) {
   extractList( type );
   vector<BPHPlusMinusConstCandPtr>& list = oniaList[type];
   int i;
@@ -139,6 +140,7 @@ vector<BPHPlusMinusConstCandPtr> BPHOniaToMuMuBuilder::getList(
     if ( ( dSel != 0 ) && ( !dSel->accept( *muNeg ) ) ) continue;
     if ( ( mSel != 0 ) && ( !mSel->accept( *ptr   ) ) ) continue;
     if ( ( vSel != 0 ) && ( !vSel->accept( *ptr   ) ) ) continue;
+    if ( ( kSel != 0 ) && ( !kSel->accept( *ptr   ) ) ) continue;
     lsub.push_back( list[i] );
   }
   return lsub;
@@ -147,15 +149,15 @@ vector<BPHPlusMinusConstCandPtr> BPHOniaToMuMuBuilder::getList(
 
 BPHPlusMinusConstCandPtr BPHOniaToMuMuBuilder::getOriginalCandidate( 
                          const BPHRecoCandidate& cand ) {
+  const reco::Candidate* mp = cand.originalReco( cand.getDaug( muPosName ) );
+  const reco::Candidate* mn = cand.originalReco( cand.getDaug( muNegName ) );
   int nc = fullList.size();
   int ic;
   for ( ic = 0; ic < nc; ++ ic ) {
     BPHPlusMinusConstCandPtr pmp = fullList[ic];
     const BPHPlusMinusCandidate* pmc = pmp.get();
-    if ( pmc->originalReco( pmc->getDaug( muPosName ) ) !=
-         cand.originalReco( cand.getDaug( muPosName ) ) ) continue;
-    if ( pmc->originalReco( pmc->getDaug( muNegName ) ) !=
-         cand.originalReco( cand.getDaug( muNegName ) ) ) continue;
+    if ( pmc->originalReco( pmc->getDaug( muPosName ) ) != mp ) continue;
+    if ( pmc->originalReco( pmc->getDaug( muNegName ) ) != mn ) continue;
     return pmp;
   }
   return BPHPlusMinusConstCandPtr( 0 );

@@ -20,6 +20,7 @@
 #include "BPHAnalysis/RecoDecay/interface/BPHRecoSelect.h"
 #include "BPHAnalysis/RecoDecay/interface/BPHMomentumSelect.h"
 #include "BPHAnalysis/RecoDecay/interface/BPHVertexSelect.h"
+#include "BPHAnalysis/RecoDecay/interface/BPHFitSelect.h"
 class BPHRecoBuilder;
 class BPHDecayMomentum;
 class BPHDecayVertex;
@@ -83,6 +84,7 @@ class BPHMultiSelect: public T {
   virtual bool accept( const reco::Candidate & cand ) const { return false; }
   virtual bool accept( const BPHDecayMomentum& cand ) const { return false; }
   virtual bool accept( const BPHDecayVertex  & cand ) const { return false; }
+  virtual bool accept( const BPHKinematicFit & cand ) const { return false; }
 
  private:
 
@@ -124,18 +126,21 @@ class BPHMultiSelect: public T {
 };
 
 template<>
-bool BPHMultiSelect<BPHRecoSelect>::accept(
+bool BPHMultiSelect<BPHRecoSelect    >::accept(
                                       const reco::Candidate& cand,
                                       const BPHRecoBuilder* build ) const;
 template<>
-bool BPHMultiSelect<BPHRecoSelect>::accept(
+bool BPHMultiSelect<BPHRecoSelect    >::accept(
                                       const reco::Candidate& cand ) const;
 template<>
 bool BPHMultiSelect<BPHMomentumSelect>::accept(
                                           const BPHDecayMomentum& cand ) const;
 template<>
-bool BPHMultiSelect<BPHVertexSelect>::accept(
+bool BPHMultiSelect<BPHVertexSelect  >::accept(
                                         const BPHDecayVertex& cand ) const;
+template<>
+bool BPHMultiSelect<BPHFitSelect     >::accept(
+                                        const BPHKinematicFit& cand ) const;
 
 #endif
 
