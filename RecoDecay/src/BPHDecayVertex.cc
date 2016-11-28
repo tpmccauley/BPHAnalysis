@@ -95,7 +95,8 @@ bool BPHDecayVertex::validTracks() const {
 
 bool BPHDecayVertex::validVertex() const {
   if ( oldVertex ) fitVertex();
-  return fittedVertex.isValid();
+  return validTks && fittedVertex.isValid();
+//  return fittedVertex.isValid();
 }
 
 
