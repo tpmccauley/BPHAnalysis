@@ -71,6 +71,9 @@ class BPHDecayVertex: public virtual BPHDecayMomentum {
   /// get TransientTrack for a daughter
   reco::TransientTrack* getTransientTrack( const reco::Candidate* cand ) const;
 
+  /// retrieve track search list
+  const std::string& getTrackSearchList( const reco::Candidate* cand ) const;
+
  protected:
 
   // constructor

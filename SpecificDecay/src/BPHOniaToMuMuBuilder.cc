@@ -293,8 +293,10 @@ void BPHOniaToMuMuBuilder::extractList( oniaType type ) {
   list.reserve( n );
   for ( i = 0; i < n; ++i ) {
     BPHPlusMinusConstCandPtr ptr = fullList[i];
-    const reco::Candidate* muPos = ptr->originalReco( ptr->getDaug( "MuPos" ) );
-    const reco::Candidate* muNeg = ptr->originalReco( ptr->getDaug( "MuNeg" ) );
+    const reco::Candidate* mcPos = ptr->getDaug( "MuPos" );
+    const reco::Candidate* mcNeg = ptr->getDaug( "MuNeg" );
+    const reco::Candidate* muPos = ptr->originalReco( mcPos );
+    const reco::Candidate* muNeg = ptr->originalReco( mcNeg );
     if ( !par.massSel->accept( *ptr   ) ) continue;
     if ( !par.  ptSel->accept( *muPos ) ) continue;
     if ( !par. etaSel->accept( *muPos ) ) continue;
@@ -302,8 +304,10 @@ void BPHOniaToMuMuBuilder::extractList( oniaType type ) {
     if ( !par. etaSel->accept( *muNeg ) ) continue;
     if ( !par.chi2Sel->accept( *ptr   ) ) continue;
     BPHPlusMinusCandidate* np = new BPHPlusMinusCandidate( evSetup );
-    np->add( "MuPos", muPos, BPHParticleMasses::muonMass );
-    np->add( "MuNeg", muNeg, BPHParticleMasses::muonMass );
+    np->add( "MuPos", muPos, ptr->getTrackSearchList( mcPos ),
+             BPHParticleMasses::muonMass );
+    np->add( "MuNeg", muNeg, ptr->getTrackSearchList( mcNeg ),
+             BPHParticleMasses::muonMass );
     if ( par.mass > 0.0 )
     np->setConstraint( par.mass, par.sigma );
     list.push_back( BPHPlusMinusConstCandPtr( np ) );
