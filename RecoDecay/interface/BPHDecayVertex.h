@@ -32,6 +32,8 @@ namespace reco {
 // C++ Headers --
 //---------------
 #include <vector>
+#include <map>
+#include <string>
 
 //              ---------------------
 //              -- Class Interface --
