@@ -54,17 +54,17 @@ class BPHTrackReference {
   /// get associated reco::Track calling a sequence of functions
   /// until a track is found; the list of functions to call is given
   /// as a string where each character identify a function:
-  /// c :  reco ::       Candidate :: get<reco::TrackRef> ()
-  /// f :  reco ::     PFCandidate ::           trackRef  ()
-  /// h :   pat :: GenericParticle ::           track     ()
-  /// b :  reco ::       Candidate ::       bestTrack     ()
-  /// p :   pat :: PackedCandidate ::     pseudoTrack     ()
-  /// m :   pat ::            Muon ::     pfCandidateRef  ()
-  /// n :   pat ::            Muon ::   muonBestTrack     ()
-  /// i :   pat ::            Muon ::      innerTrack     ()
-  /// g :   pat ::            Muon ::     globalTrack     ()
-  /// s :   pat ::            Muon ::      standAloneMuon ()
-  /// e :   pat ::        Electron ::     pfCandidateRef  ()
+  /// c :  reco ::       Candidate ::      get<reco::TrackRef> ()
+  /// f :  reco ::     PFCandidate ::                trackRef  ()
+  /// h :   pat :: GenericParticle ::                track     ()
+  /// b :  reco ::       Candidate ::            bestTrack     ()
+  /// p :   pat :: PackedCandidate ::          pseudoTrack     ()
+  /// m :   pat ::            Muon ::pfCandidateRef::trackRef  ()
+  /// n :   pat ::            Muon ::        muonBestTrack     ()
+  /// i :   pat ::            Muon ::           innerTrack     ()
+  /// g :   pat ::            Muon ::          globalTrack     ()
+  /// s :   pat ::            Muon ::           standAloneMuon ()
+  /// e :   pat ::        Electron ::pfCandidateRef::trackRef  ()
   static const reco::Track* getTrack( const reco::Candidate& rc,
                             const char* modeList = "cfhbpmnigse",
                                   char* modeFlag = 0 ) {
