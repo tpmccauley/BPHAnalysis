@@ -415,7 +415,7 @@ void BPHWriteSpecificDecay::fill( edm::Event& ev,
       }
     }
 
-    // if not found, as ofr other type of inut data, 
+    // if not found, as for other type of inut data, 
     // try to get the nearest primary vertex in z direction
     if ( pVtx == 0 ) {
       const reco::Vertex::Point& sVtp = ptr->vertex().position();
