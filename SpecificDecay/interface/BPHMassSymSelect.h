@@ -61,7 +61,7 @@ class BPHMassSymSelect: public BPHMomentumSelect {
 
     pc->setMass( np->p4().mass() );
     nc->setMass( pp->p4().mass() );
-    const reco::Candidate::LorentzVector  s4 = pc->p4() + nc->p4();
+    const reco::Candidate::LorentzVector s4 = pc->p4() + nc->p4();
     double mass = s4.mass();
 
     delete pc;
