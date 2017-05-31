@@ -198,7 +198,7 @@ void BPHDecayVertex::tTracks() const {
     map<const reco::Candidate*,string>::const_iterator iter =
                                                        searchMap.find( rp );
     if ( iter != searchMap.end() ) searchList = iter->second.c_str();
-    tp = BPHTrackReference::getTrack( *rp, searchList );
+    tp = BPHTrackReference::getTrack( *originalReco( rp ), searchList );
     if ( tp == 0 ) {
       edm::LogPrint( "DataNotFound" )
                   << "BPHDecayVertex::tTracks: "
@@ -221,8 +221,17 @@ void BPHDecayVertex::fitVertex() const {
   if ( oldTracks ) tTracks();
   if ( trTracks.size() < 2 ) return;
   KalmanVertexFitter kvf( true );
-  TransientVertex tv = kvf.vertex( trTracks );
-  fittedVertex = tv;
+  try {
+    TransientVertex tv = kvf.vertex( trTracks );
+    fittedVertex = tv;
+  }
+  catch ( std::exception e ) {
+    reco::Vertex tv;
+    fittedVertex = tv;
+    edm::LogPrint( "FitFailed" )
+                << "BPHDecayVertex::fitVertex: "
+                << "vertex fit failed";
+  }
   return;
 }
 

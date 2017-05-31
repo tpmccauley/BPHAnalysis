@@ -65,6 +65,8 @@ class BPHKinematicFit: public virtual BPHDecayVertex {
   virtual const RefCountedKinematicTree& kinematicTree(
           const std::string& name, double mass ) const;
   virtual const RefCountedKinematicTree& kinematicTree(
+          const std::string& name ) const;
+  virtual const RefCountedKinematicTree& kinematicTree(
           const std::string& name, KinematicConstraint* kc ) const;
   virtual const RefCountedKinematicTree& kinematicTree(
           const std::string& name, MultiTrackKinematicConstraint* kc ) const;

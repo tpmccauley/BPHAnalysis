@@ -193,7 +193,7 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
     MuonChargeSelect( int c ): charge ( c ) {}
     ~MuonChargeSelect() {}
     virtual bool accept( const reco::Candidate& cand ) const {
-      const pat::Muon* p = reinterpret_cast<const pat::Muon*>( &cand );
+      const pat::Muon* p = dynamic_cast<const pat::Muon*>( &cand );
       if ( p == 0 ) return false;
       return ( ( charge * cand.charge() ) > 0 );
     }
@@ -207,7 +207,7 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
     MuonPtSelect( float pt ): ptCut( pt ) {}
     ~MuonPtSelect() {}
     virtual bool accept( const reco::Candidate& cand ) const {
-      const pat::Muon* p = reinterpret_cast<const pat::Muon*>( &cand );
+      const pat::Muon* p = dynamic_cast<const pat::Muon*>( &cand );
       if ( p == 0 ) return false;
       return ( p->p4().pt() > ptCut );
     }
@@ -221,7 +221,7 @@ void TestBPHRecoDecay::analyze( const edm::Event& ev,
     MuonEtaSelect( float eta ): etaCut( eta ) {}
     ~MuonEtaSelect() {}
     virtual bool accept( const reco::Candidate& cand ) const {
-      const pat::Muon* p = reinterpret_cast<const pat::Muon*>( &cand );
+      const pat::Muon* p = dynamic_cast<const pat::Muon*>( &cand );
       if ( p == 0 ) return false;
       return ( fabs( p->p4().eta() ) < etaCut );
     }

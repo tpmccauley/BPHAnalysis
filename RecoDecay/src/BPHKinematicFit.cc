@@ -168,6 +168,7 @@ const RefCountedKinematicTree& BPHKinematicFit::kinematicTree() const {
 const RefCountedKinematicTree& BPHKinematicFit::kinematicTree(
                                const string& name,
                                double mass, double sigma ) const {
+  if ( mass  < 0 ) return kinematicTree( name );
   if ( sigma < 0 ) return kinematicTree( name, mass );
   ParticleMass mc = mass;
   MassKinematicConstraint kinConst( mc, sigma );
@@ -193,6 +194,13 @@ const RefCountedKinematicTree& BPHKinematicFit::kinematicTree(
     MultiTrackMassKinematicConstraint kinConst( mc, nn );
     return kinematicTree( name, &kinConst );
   }
+}
+
+
+const RefCountedKinematicTree& BPHKinematicFit::kinematicTree(
+                               const string& name ) const {
+  KinematicConstraint* kc = 0;
+  return kinematicTree( name, kc );
 }
 
 
@@ -233,9 +241,11 @@ const RefCountedKinematicTree& BPHKinematicFit::kinematicTree(
     KinematicParticleVertexFitter vtxFitter;
     RefCountedKinematicTree compTree = vtxFitter.fit( kComp );
     if ( compTree->isEmpty() ) return kinTree;
-    KinematicParticleFitter kinFitter;
-    compTree = kinFitter.fit( kc, compTree );
-    if ( compTree->isEmpty() ) return kinTree;
+    if ( kc != 0 ) {
+      KinematicParticleFitter kinFitter;
+      compTree = kinFitter.fit( kc, compTree );
+      if ( compTree->isEmpty() ) return kinTree;
+    }
     compTree->movePointerToTheTop();
     if ( kTail.size() ) {
       RefCountedKinematicParticle compPart = compTree->currentParticle();

@@ -44,7 +44,7 @@ class BPHMuonChargeSelect: public BPHParticleChargeSelect {
    */
   /// select muon
   virtual bool accept( const reco::Candidate& cand ) const {
-    if ( reinterpret_cast<const pat::Muon*>( &cand ) == 0 ) return false;
+    if ( dynamic_cast<const pat::Muon*>( &cand ) == 0 ) return false;
     return BPHParticleChargeSelect::accept( cand );
   };
 
