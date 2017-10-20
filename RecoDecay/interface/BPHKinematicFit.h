@@ -70,16 +70,21 @@ class BPHKinematicFit: public virtual BPHDecayVertex {
           const std::string& name, KinematicConstraint* kc ) const;
   virtual const RefCountedKinematicTree& kinematicTree(
           const std::string& name, MultiTrackKinematicConstraint* kc ) const;
+  virtual bool isEmpty() const;
+  virtual bool isValidFit() const;
 
   /// reset the kinematic fit
   virtual void resetKinematicFit() const;
 
+
   // get current particle
-  virtual bool isEmpty() const;
-  virtual bool isValidFit() const;
   virtual const RefCountedKinematicParticle currentParticle   () const;
   virtual const RefCountedKinematicVertex   currentDecayVertex() const;
-  virtual ParticleMass                      mass              () const;
+
+  // get top particle
+  virtual const RefCountedKinematicParticle topParticle   () const;
+  virtual const RefCountedKinematicVertex   topDecayVertex() const;
+  virtual ParticleMass                      mass          () const;
 
   /// compute total momentum after the fit
   virtual const math::XYZTLorentzVector& p4() const;

@@ -320,7 +320,7 @@ bool BPHKinematicFit::isEmpty() const {
 
 
 bool BPHKinematicFit::isValidFit() const {
-  const RefCountedKinematicParticle kPart = currentParticle();
+  const RefCountedKinematicParticle kPart = topParticle();
   if ( kPart.get() == 0 ) return false;
   return kPart->currentState().isValid();
 }
@@ -338,8 +338,21 @@ const RefCountedKinematicVertex BPHKinematicFit::currentDecayVertex() const {
 }
 
 
+const RefCountedKinematicParticle BPHKinematicFit::topParticle() const {
+  if ( isEmpty() ) return RefCountedKinematicParticle( 0 );
+  return kinTree->topParticle();
+}
+
+
+const RefCountedKinematicVertex BPHKinematicFit::topDecayVertex() const {
+  if ( isEmpty() ) return RefCountedKinematicVertex( 0 );
+  kinTree->movePointerToTheTop();
+  return kinTree->currentDecayVertex();
+}
+
+
 ParticleMass BPHKinematicFit::mass() const {
-  const RefCountedKinematicParticle kPart = currentParticle();
+  const RefCountedKinematicParticle kPart = topParticle();
   if ( kPart.get() == 0 ) return -1.0;
   const KinematicState kStat = kPart->currentState();
   if ( kStat.isValid() ) return kStat.mass();
