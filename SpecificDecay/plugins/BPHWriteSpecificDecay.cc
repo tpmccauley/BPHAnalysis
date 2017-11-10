@@ -24,6 +24,8 @@
 #include "BPHAnalysis/SpecificDecay/interface/BPHBuToJPsiKBuilder.h"
 #include "BPHAnalysis/SpecificDecay/interface/BPHBsToJPsiPhiBuilder.h"
 #include "BPHAnalysis/SpecificDecay/interface/BPHBdToJPsiKxBuilder.h"
+#include "BPHAnalysis/SpecificDecay/interface/BPHK0sToPiPiBuilder.h"
+#include "BPHAnalysis/SpecificDecay/interface/BPHLambda0ToPPiBuilder.h"
 
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/TrackReco/interface/Track.h"
@@ -57,12 +59,18 @@ BPHWriteSpecificDecay::BPHWriteSpecificDecay( const edm::ParameterSet& ps ) {
   usePF = ( SET_PAR( string, pfCandsLabel, ps ) != "" );
   usePC = ( SET_PAR( string, pcCandsLabel, ps ) != "" );
   useGP = ( SET_PAR( string, gpCandsLabel, ps ) != "" );
+  useK0 = ( SET_PAR( string, k0CandsLabel, ps ) != "" );
+  useL0 = ( SET_PAR( string, l0CandsLabel, ps ) != "" );
+  useKS = ( SET_PAR( string, kSCandsLabel, ps ) != "" );
+  useLS = ( SET_PAR( string, lSCandsLabel, ps ) != "" );
   SET_PAR( string, oniaName, ps );
   SET_PAR( string,   sdName, ps );
   SET_PAR( string,   ssName, ps );
   SET_PAR( string,   buName, ps );
   SET_PAR( string,   bdName, ps );
   SET_PAR( string,   bsName, ps );
+  SET_PAR( string,   k0Name, ps );
+  SET_PAR( string,   l0Name, ps );
 
   SET_PAR( bool, writeMomentum, ps );
   SET_PAR( bool, writeVertex  , ps );
@@ -80,6 +88,8 @@ BPHWriteSpecificDecay::BPHWriteSpecificDecay( const edm::ParameterSet& ps ) {
   rMap["Bu"     ] = Bu;
   rMap["Bd"     ] = Bd;
   rMap["Bs"     ] = Bs;
+  rMap["K0s"    ] = K0s;
+  rMap["Lambda0"] = Lambda0;
 
   pMap["ptMin"      ] = ptMin;
   pMap["etaMax"     ] = etaMax;
@@ -100,12 +110,14 @@ BPHWriteSpecificDecay::BPHWriteSpecificDecay( const edm::ParameterSet& ps ) {
   fMap["constrMJPsi"   ] = constrMJPsi;
   fMap["writeCandidate"] = writeCandidate;
 
-  recoOnia = 
-  recoKx0  = writeKx0  =
-  recoPkk  = writePkk  =
-  recoBu   = writeBu   =
-  recoBd   = writeBd   =
-  recoBs   = writeBs   = false;
+  recoOnia    =
+  recoKx0     = writeKx0     =
+  recoPkk     = writePkk     =
+  recoBu      = writeBu      =
+  recoBd      = writeBd      =
+  recoBs      = writeBs      =
+  recoK0s     = writeK0s     =
+  recoLambda0 = writeLambda0 = false;
 
   writeOnia = true;
   const vector<edm::ParameterSet> recoSelect =
@@ -134,13 +146,27 @@ BPHWriteSpecificDecay::BPHWriteSpecificDecay( const edm::ParameterSet& ps ) {
                                                                 pcCandsLabel );
   if ( useGP ) consume< vector<pat::GenericParticle        > >( gpCandsToken,
                                                                 gpCandsLabel );
+  if ( useK0 ) consume< vector<reco::VertexCompositeCandidate> >
+                                                              ( k0CandsToken,
+                                                                k0CandsLabel );
+  if ( useL0 ) consume< vector<reco::VertexCompositeCandidate> >
+                                                              ( l0CandsToken,
+                                                                l0CandsLabel );
+  if ( useKS ) consume< vector<reco::VertexCompositePtrCandidate> >
+                                                              ( kSCandsToken,
+                                                                kSCandsLabel );
+  if ( useLS ) consume< vector<reco::VertexCompositePtrCandidate> >
+                                                              ( lSCandsToken,
+                                                                lSCandsLabel );
 
-  if ( writeOnia ) produces<pat::CompositeCandidateCollection>( oniaName );
-  if ( writeKx0  ) produces<pat::CompositeCandidateCollection>(   sdName );
-  if ( writePkk  ) produces<pat::CompositeCandidateCollection>(   ssName );
-  if ( writeBu   ) produces<pat::CompositeCandidateCollection>(   buName );
-  if ( writeBd   ) produces<pat::CompositeCandidateCollection>(   bdName );
-  if ( writeBs   ) produces<pat::CompositeCandidateCollection>(   bsName );
+  if ( writeOnia    ) produces<pat::CompositeCandidateCollection>( oniaName );
+  if ( writeKx0     ) produces<pat::CompositeCandidateCollection>(   sdName );
+  if ( writePkk     ) produces<pat::CompositeCandidateCollection>(   ssName );
+  if ( writeBu      ) produces<pat::CompositeCandidateCollection>(   buName );
+  if ( writeBd      ) produces<pat::CompositeCandidateCollection>(   bdName );
+  if ( writeBs      ) produces<pat::CompositeCandidateCollection>(   bsName );
+  if ( writeK0s     ) produces<pat::CompositeCandidateCollection>(   k0Name );
+  if ( writeLambda0 ) produces<pat::CompositeCandidateCollection>(   l0Name );
 
 }
 
@@ -158,12 +184,18 @@ void BPHWriteSpecificDecay::fillDescriptions(
    desc.add<string>( "pfCandsLabel", "" );
    desc.add<string>( "pcCandsLabel", "" );
    desc.add<string>( "gpCandsLabel", "" );
+   desc.add<string>( "k0CandsLabel", "" );
+   desc.add<string>( "l0CandsLabel", "" );
+   desc.add<string>( "kSCandsLabel", "" );
+   desc.add<string>( "lSCandsLabel", "" );
    desc.add<string>( "oniaName", "oniaCand" );
    desc.add<string>(   "sdName",  "kx0Cand" );
    desc.add<string>(   "ssName",  "phiCand" );
    desc.add<string>(   "buName", "buFitted" );
    desc.add<string>(   "bdName", "bdFitted" );
    desc.add<string>(   "bsName", "bsFitted" );
+   desc.add<string>(   "k0Name", "k0Fitted" );
+   desc.add<string>(   "l0Name", "l0Fitted" );
    desc.add<bool>( "writeVertex"  , true );
    desc.add<bool>( "writeMomentum", true );
    edm::ParameterSetDescription dpar;
@@ -200,12 +232,14 @@ void BPHWriteSpecificDecay::beginJob() {
 void BPHWriteSpecificDecay::produce( edm::Event& ev,
                                      const edm::EventSetup& es ) {
   fill( ev, es );
-  if ( writeOnia ) write( ev, lFull, oniaName );
-  if ( writeKx0  ) write( ev, lSd  ,   sdName );
-  if ( writePkk  ) write( ev, lSs  ,   ssName );
-  if ( writeBu   ) write( ev, lBu  ,   buName );
-  if ( writeBd   ) write( ev, lBd  ,   bdName );
-  if ( writeBs   ) write( ev, lBs  ,   bsName );
+  if ( writeOnia    ) write( ev, lFull, oniaName );
+  if ( writeKx0     ) write( ev, lSd  ,   sdName );
+  if ( writePkk     ) write( ev, lSs  ,   ssName );
+  if ( writeBu      ) write( ev, lBu  ,   buName );
+  if ( writeBd      ) write( ev, lBd  ,   bdName );
+  if ( writeBs      ) write( ev, lBs  ,   bsName );
+  if ( writeK0s     ) write( ev, lK0  ,   k0Name );
+  if ( writeLambda0 ) write( ev, lL0  ,   l0Name );
   return;
 }
 
@@ -220,6 +254,8 @@ void BPHWriteSpecificDecay::fill( edm::Event& ev,
   lBu.clear();
   lBd.clear();
   lBs.clear();
+  lK0.clear();
+  lL0.clear();
   jPsiOMap.clear();
   pvRefMap.clear();
   ccRefMap.clear();
@@ -266,6 +302,30 @@ void BPHWriteSpecificDecay::fill( edm::Event& ev,
   edm::Handle<pat::MuonCollection> patMuon;
   if ( usePM ) {
     patMuonToken.get( ev, patMuon );
+  }
+
+  // get K0 reco::VertexCompositeCandidate collection (in full AOD)
+  edm::Handle< std::vector<reco::VertexCompositeCandidate> > k0Cand;
+  if ( useK0 ) {
+    k0CandsToken.get( ev, k0Cand );
+  }
+
+  // get Lambda0 reco::VertexCompositeCandidate collection (in full AOD)
+  edm::Handle< std::vector<reco::VertexCompositeCandidate> > l0Cand;
+  if ( useL0 ) {
+    l0CandsToken.get( ev, l0Cand );
+  }
+
+  // get K0 reco::VertexCompositePtrCandidate collection (in MiniAOD)
+  edm::Handle< std::vector<reco::VertexCompositePtrCandidate> > kSCand;
+  if ( useKS ) {
+    kSCandsToken.get( ev, kSCand );
+  }
+
+  // get K0 reco::VertexCompositePtrCandidate collection (in MiniAOD)
+  edm::Handle< std::vector<reco::VertexCompositePtrCandidate> > lSCand;
+  if ( useLS ) {
+    lSCandsToken.get( ev, lSCand );
   }
 
   // get muons from pat::CompositeCandidate objects describing onia;
@@ -703,6 +763,73 @@ void BPHWriteSpecificDecay::fill( edm::Event& ev,
 
   }
 
+  // build K0
+
+  BPHK0sToPiPiBuilder* k0s = 0;
+  if ( recoK0s ) {
+    if ( useK0 ) k0s = new BPHK0sToPiPiBuilder( es, k0Cand.product(), "cfp" );
+    else
+    if ( useKS ) k0s = new BPHK0sToPiPiBuilder( es, kSCand.product(), "cfp" );
+  }
+  if ( k0s != 0 ) {
+    rIter = parMap.find( K0s );
+    if ( rIter != rIend ) {
+      const map<parType,double>& pMap = rIter->second;
+      map<parType,double>::const_iterator pIter = pMap.begin();
+      map<parType,double>::const_iterator pIend = pMap.end();
+      while ( pIter != pIend ) {
+        const map<parType,double>::value_type& pEntry = *pIter++;
+        parType id = pEntry.first;
+        double  pv = pEntry.second;
+        switch( id ) {
+        case ptMin      : k0s->setPtMin  ( pv ); break;
+        case etaMax     : k0s->setEtaMax ( pv ); break;
+        case massMin    : k0s->setMassMin( pv ); break;
+        case massMax    : k0s->setMassMax( pv ); break;
+        case probMin    : k0s->setProbMin( pv ); break;
+        case constrMass : k0s->setConstr ( pv, k0s->getConstrSigma() ); break;
+        case constrSigma: k0s->setConstr ( k0s->getConstrMass() , pv ); break;
+        case writeCandidate: writeK0s =  ( pv > 0 ); break;
+        default: break;
+        }
+      }
+    }
+    lK0 = k0s->build();
+  }
+
+  // build Lambda0
+  BPHLambda0ToPPiBuilder* l0s = 0;
+  if ( recoLambda0 ) {
+    if ( useL0 ) l0s = new BPHLambda0ToPPiBuilder( es, l0Cand.product(), "cfp" );
+    else
+    if ( useLS ) l0s = new BPHLambda0ToPPiBuilder( es, lSCand.product(), "cfp" );
+  }
+  if ( l0s != 0 ) {
+    rIter = parMap.find( Lambda0 );
+    if ( rIter != rIend ) {
+      const map<parType,double>& pMap = rIter->second;
+      map<parType,double>::const_iterator pIter = pMap.begin();
+      map<parType,double>::const_iterator pIend = pMap.end();
+      while ( pIter != pIend ) {
+        const map<parType,double>::value_type& pEntry = *pIter++;
+        parType id = pEntry.first;
+        double  pv = pEntry.second;
+        switch( id ) {
+        case ptMin      : l0s->setPtMin  ( pv ); break;
+        case etaMax     : l0s->setEtaMax ( pv ); break;
+        case massMin    : l0s->setMassMin( pv ); break;
+        case massMax    : l0s->setMassMax( pv ); break;
+        case probMin    : l0s->setProbMin( pv ); break;
+        case constrMass : l0s->setConstr ( pv, l0s->getConstrSigma() ); break;
+        case constrSigma: l0s->setConstr ( l0s->getConstrMass() , pv ); break;
+        case writeCandidate: writeLambda0 = ( pv > 0 ); break;
+        default: break;
+        }
+      }
+    }
+    lL0 = l0s->build();
+  }
+
   return;
 
 }
@@ -718,19 +845,21 @@ void BPHWriteSpecificDecay::setRecoParameters( const edm::ParameterSet& ps ) {
   const string& name = ps.getParameter<string>( "name" );
   bool writeCandidate = ps.getParameter<bool>( "writeCandidate" );
   switch( rMap[name] ) {
-  case Onia: recoOnia = true; writeOnia = writeCandidate; break;
+  case Onia   : recoOnia     = true; writeOnia    = writeCandidate; break;
   case Pmm:
   case Psi1:
   case Psi2:
   case Ups:
   case Ups1:
   case Ups2:
-  case Ups3: recoOnia = true;                             break;
-  case Kx0 : recoKx0  = true; writeKx0  = writeCandidate; break;
-  case Pkk : recoPkk  = true; writePkk  = writeCandidate; break;
-  case Bu  : recoBu   = true; writeBu   = writeCandidate; break;
-  case Bd  : recoBd   = true; writeBd   = writeCandidate; break;
-  case Bs  : recoBs   = true; writeBs   = writeCandidate; break;
+  case Ups3   : recoOnia     = true;                                break;
+  case Kx0    : recoKx0      = true; writeKx0     = writeCandidate; break;
+  case Pkk    : recoPkk      = true; writePkk     = writeCandidate; break;
+  case Bu     : recoBu       = true; writeBu      = writeCandidate; break;
+  case Bd     : recoBd       = true; writeBd      = writeCandidate; break;
+  case Bs     : recoBs       = true; writeBs      = writeCandidate; break;
+  case K0s    : recoK0s      = true; writeK0s     = writeCandidate; break;
+  case Lambda0: recoLambda0  = true; writeLambda0 = writeCandidate; break;
   }
 
   map<string,parType>::const_iterator pIter = pMap.begin();

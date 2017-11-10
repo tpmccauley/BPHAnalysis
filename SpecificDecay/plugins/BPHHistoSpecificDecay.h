@@ -3,6 +3,7 @@
 
 #include "BPHAnalysis/RecoDecay/interface/BPHAnalyzerTokenWrapper.h"
 #include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
+#include "DataFormats/Common/interface/TriggerResults.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
@@ -45,53 +46,87 @@ class BPHHistoSpecificDecay:
 
  private:
 
-  std::string oniaCandsLabel;
-  std::string   sdCandsLabel;
-  std::string   ssCandsLabel;
-  std::string   buCandsLabel;
-  std::string   bdCandsLabel;
-  std::string   bsCandsLabel;
+  std::string trigResultsLabel;
+  std::string   oniaCandsLabel;
+  std::string     sdCandsLabel;
+  std::string     ssCandsLabel;
+  std::string     buCandsLabel;
+  std::string     bdCandsLabel;
+  std::string     bsCandsLabel;
+  std::string     k0CandsLabel;
+  std::string     l0CandsLabel;
+  BPHTokenWrapper< edm::TriggerResults > trigResultsToken;
   BPHTokenWrapper< std::vector<pat::CompositeCandidate> > oniaCandsToken;
   BPHTokenWrapper< std::vector<pat::CompositeCandidate> >   sdCandsToken;
   BPHTokenWrapper< std::vector<pat::CompositeCandidate> >   ssCandsToken;
   BPHTokenWrapper< std::vector<pat::CompositeCandidate> >   buCandsToken;
   BPHTokenWrapper< std::vector<pat::CompositeCandidate> >   bdCandsToken;
   BPHTokenWrapper< std::vector<pat::CompositeCandidate> >   bsCandsToken;
+  BPHTokenWrapper< std::vector<pat::CompositeCandidate> >   k0CandsToken;
+  BPHTokenWrapper< std::vector<pat::CompositeCandidate> >   l0CandsToken;
+  bool useTrig;
   bool useOnia;
   bool useSd;
   bool useSs;
   bool useBu;
   bool useBd;
   bool useBs;
+  bool useK0;
+  bool useL0;
 
   edm::Service<TFileService> fs;
   std::map<std::string,TH1F*> histoMap;
 
-  CandidateSelect*  phiBasicSelect;
-  CandidateSelect* jPsiBasicSelect;
-  CandidateSelect* psi2BasicSelect;
-  CandidateSelect*  upsBasicSelect;
+  CandidateSelect*  phiIBasicSelect;
+  CandidateSelect* jPsiIBasicSelect;
+  CandidateSelect* psi2IBasicSelect;
+  CandidateSelect*  upsIBasicSelect;
+  CandidateSelect*  phiBBasicSelect;
+  CandidateSelect* jPsiBBasicSelect;
+  CandidateSelect* psi2BBasicSelect;
+  CandidateSelect*  upsBBasicSelect;
   CandidateSelect* oniaVertexSelect;
   CandidateSelect* oniaDaughterSelect;
 
-  CandidateSelect* buJPsiBasicSelect;
-  CandidateSelect* buVertexSelect;
-  CandidateSelect* buJPsiDaughterSelect;
+  CandidateSelect* npJPsiBasicSelect;
+  CandidateSelect* npJPsiDaughterSelect;
 
-  CandidateSelect* bdJPsiBasicSelect;
-  CandidateSelect* bdKx0BasicSelect;
-  CandidateSelect* bdVertexSelect;
-  CandidateSelect* bdJPsiDaughterSelect;
+  CandidateSelect* buIBasicSelect;
+  CandidateSelect* buIJPsiBasicSelect;
+  CandidateSelect* buIVertexSelect;
+  CandidateSelect* buIJPsiDaughterSelect;
+  CandidateSelect* buDBasicSelect;
+  CandidateSelect* buDJPsiBasicSelect;
+  CandidateSelect* buDVertexSelect;
+  CandidateSelect* buDJPsiDaughterSelect;
 
-  CandidateSelect* bsJPsiBasicSelect;
-  CandidateSelect* bsPhiBasicSelect;
-  CandidateSelect* bsVertexSelect;
-  CandidateSelect* bsJPsiDaughterSelect;
+  CandidateSelect* bdIBasicSelect;
+  CandidateSelect* bdIJPsiBasicSelect;
+  CandidateSelect* bdIKx0BasicSelect;
+  CandidateSelect* bdIVertexSelect;
+  CandidateSelect* bdIJPsiDaughterSelect;
+  CandidateSelect* bdDBasicSelect;
+  CandidateSelect* bdDJPsiBasicSelect;
+  CandidateSelect* bdDKx0BasicSelect;
+  CandidateSelect* bdDVertexSelect;
+  CandidateSelect* bdDJPsiDaughterSelect;
 
-  double buKPtMin;
+  CandidateSelect* bsIBasicSelect;
+  CandidateSelect* bsIJPsiBasicSelect;
+  CandidateSelect* bsIPhiBasicSelect;
+  CandidateSelect* bsIVertexSelect;
+  CandidateSelect* bsIJPsiDaughterSelect;
+  CandidateSelect* bsDBasicSelect;
+  CandidateSelect* bsDJPsiBasicSelect;
+  CandidateSelect* bsDPhiBasicSelect;
+  CandidateSelect* bsDVertexSelect;
+  CandidateSelect* bsDJPsiDaughterSelect;
+
+  double buIKPtMin;
+  double buDKPtMin;
 
   void fillHisto   ( const std::string& name,
-                     const pat::CompositeCandidate& cand );
+                     const pat::CompositeCandidate& cand, char svType );
   void fillHisto   ( const std::string& name, float x );
   void createHisto ( const std::string& name,
                      int nbin, float hmin, float hmax );

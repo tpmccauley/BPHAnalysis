@@ -117,5 +117,23 @@ recoSelect = cms.VPSet(
         massFitMin = cms.double( 5.00 ),
         massFitMax = cms.double( 6.00 ),
         constrMJPsi = cms.bool( True )
+    ),
+    cms.PSet( name = cms.string( 'K0s' ),
+          ptMin = cms.double( 0.0 ),
+         etaMax = cms.double( 10.0 ),
+        massMin = cms.double( 0.0 ),
+        massMax = cms.double( 20.0 ),
+        probMin = cms.double( -1.0 ),
+        constrMass  = cms.double( -1.0 ),
+        constrSigma = cms.double( -1.0 )
+    ),
+    cms.PSet( name = cms.string( 'Lambda0' ),
+          ptMin = cms.double( 0.0 ),
+         etaMax = cms.double( 10.0 ),
+        massMin = cms.double( 0.0 ),
+        massMax = cms.double( 20.0 ),
+        probMin = cms.double( -1.0 ),
+        constrMass  = cms.double( -1.0 ),
+        constrSigma = cms.double( -1.0 )
     )
 )
