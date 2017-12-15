@@ -15,6 +15,7 @@
 //-------------------------------
 #include "BPHAnalysis/RecoDecay/interface/BPHRecoBuilder.h"
 #include "BPHAnalysis/RecoDecay/interface/BPHPlusMinusCandidate.h"
+#include "HeavyFlavorAnalysis/RecoDecay/interface/BPHTrackReference.h"
 #include "BPHAnalysis/SpecificDecay/interface/BPHParticlePtSelect.h"
 #include "BPHAnalysis/SpecificDecay/interface/BPHParticleEtaSelect.h"
 #include "BPHAnalysis/SpecificDecay/interface/BPHMassSelect.h"
@@ -23,6 +24,25 @@
 #include "BPHAnalysis/SpecificDecay/interface/BPHParticleMasses.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
+
+class BPHKx0ToKPiBuilder::DZSelect: public BPHRecoSelect {
+ public:
+  DZSelect( const std::string& nKaon, float dzMax ): name( nKaon ),
+                                                     dzm ( dzMax ) {}
+  virtual ~DZSelect() {}
+  virtual bool accept( const reco::Candidate& cand,
+                       const BPHRecoBuilder* build ) const {
+    const reco::Candidate& kaon = *get( name, build );
+    const reco::Track* kp = BPHTrackReference::getTrack( cand, "cfhp" );
+    const reco::Track* kk = BPHTrackReference::getTrack( kaon, "cfhp" );
+    if ( kp == 0 ) return false;
+    if ( kk == 0 ) return false;
+    return ( fabs( kk->dz() - kp->dz() ) < dzm );
+  }
+ private:
+  std::string name;
+  float dzm;
+};
 
 //---------------
 // C++ Headers --
@@ -51,6 +71,7 @@ BPHKx0ToKPiBuilder::BPHKx0ToKPiBuilder(
    etaSel = new BPHParticleEtaSelect( 10.0 );
   massSel = new BPHMassSelect( 0.75, 1.05 );
   chi2Sel = new BPHChi2Select( 0.0 );
+    dzSel = new DZSelect( kaonName, 1.0 );
   updated = false;
 }
 
@@ -62,6 +83,7 @@ BPHKx0ToKPiBuilder::~BPHKx0ToKPiBuilder() {
   delete  etaSel;
   delete massSel;
   delete chi2Sel;
+  delete   dzSel;
 }
 
 //--------------
@@ -80,6 +102,8 @@ vector<BPHPlusMinusConstCandPtr> BPHKx0ToKPiBuilder::build() {
   bKx0.filter( pionName, *ptSel );
   bKx0.filter( kaonName, *etaSel );
   bKx0.filter( pionName, *etaSel );
+  bKx0.filter( pionName, * dzSel );
+
   BPHMassSymSelect mTmpSel( kaonName, pionName, massSel );
   bKx0.filter( mTmpSel );
 

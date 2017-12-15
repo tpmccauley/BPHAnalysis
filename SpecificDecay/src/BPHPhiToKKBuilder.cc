@@ -15,11 +15,31 @@
 //-------------------------------
 #include "BPHAnalysis/RecoDecay/interface/BPHRecoBuilder.h"
 #include "BPHAnalysis/RecoDecay/interface/BPHPlusMinusCandidate.h"
+#include "HeavyFlavorAnalysis/RecoDecay/interface/BPHTrackReference.h"
 #include "BPHAnalysis/SpecificDecay/interface/BPHParticlePtSelect.h"
 #include "BPHAnalysis/SpecificDecay/interface/BPHParticleEtaSelect.h"
 #include "BPHAnalysis/SpecificDecay/interface/BPHMassSelect.h"
 #include "BPHAnalysis/SpecificDecay/interface/BPHChi2Select.h"
 #include "BPHAnalysis/SpecificDecay/interface/BPHParticleMasses.h"
+
+class BPHPhiToKKBuilder::DZSelect: public BPHRecoSelect {
+ public:
+  DZSelect( const std::string& nKPos, float dzMax ): name( nKPos ),
+                                                     dzm ( dzMax ) {}
+  virtual ~DZSelect() {}
+  virtual bool accept( const reco::Candidate& cand,
+                       const BPHRecoBuilder* build ) const {
+    const reco::Candidate& cpos = *get( name, build );
+    const reco::Track* kn = BPHTrackReference::getTrack( cand, "cfhp" );
+    const reco::Track* kp = BPHTrackReference::getTrack( cpos, "cfhp" );
+    if ( kn == 0 ) return false;
+    if ( kp == 0 ) return false;
+    return ( fabs( kp->dz() - kn->dz() ) < dzm );
+  }
+ private:
+  std::string name;
+  float dzm;
+};
 
 //---------------
 // C++ Headers --
@@ -47,6 +67,7 @@ BPHPhiToKKBuilder::BPHPhiToKKBuilder(
    etaSel = new BPHParticleEtaSelect( 10.0 );
   massSel = new BPHMassSelect( 1.0, 1.04 );
   chi2Sel = new BPHChi2Select( 0.0 );
+    dzSel = new DZSelect( kPosName, 1.0 );
   updated = false;
 }
 
@@ -58,6 +79,7 @@ BPHPhiToKKBuilder::~BPHPhiToKKBuilder() {
   delete  etaSel;
   delete massSel;
   delete chi2Sel;
+  delete   dzSel;
 }
 
 //--------------
@@ -76,6 +98,7 @@ vector<BPHPlusMinusConstCandPtr> BPHPhiToKKBuilder::build() {
   bPhi.filter( kNegName, *ptSel );
   bPhi.filter( kPosName, *etaSel );
   bPhi.filter( kNegName, *etaSel );
+  bPhi.filter( kNegName, * dzSel );
 
   bPhi.filter( *massSel );
   bPhi.filter( *chi2Sel );

@@ -91,6 +91,10 @@ class BPHKx0ToKPiBuilder {
   BPHParticleEtaSelect* etaSel;
   BPHMassSelect* massSel;
   BPHChi2Select* chi2Sel;
+
+  class DZSelect;
+  DZSelect* dzSel;
+
   double cMass;
   double cSigma;
   bool updated;
