@@ -45,8 +45,8 @@ class BPHPhiToKKBuilder {
   /** Constructor
    */
   BPHPhiToKKBuilder( const edm::EventSetup& es,
-       const BPHRecoBuilder::BPHGenericCollection* kPosCollection,
-       const BPHRecoBuilder::BPHGenericCollection* kNegCollection );
+       const BPHRecoBuilder::BPHGenericCollection* pCollection,
+       const BPHRecoBuilder::BPHGenericCollection* nCollection );
 
   /** Destructor
    */
@@ -63,6 +63,7 @@ class BPHPhiToKKBuilder {
   void setMassMin( double m   );
   void setMassMax( double m   );
   void setProbMin( double p   );
+// mass constraint: foreseen but actually not implemented
   void setConstr ( double mass, double sigma );
 
   /// get current cuts
@@ -71,6 +72,7 @@ class BPHPhiToKKBuilder {
   double getMassMin() const;
   double getMassMax() const;
   double getProbMin() const;
+// mass constraint: foreseen but actually not implemented
   double getConstrMass () const;
   double getConstrSigma() const;
 
@@ -87,16 +89,26 @@ class BPHPhiToKKBuilder {
   const BPHRecoBuilder::BPHGenericCollection* posCollection;
   const BPHRecoBuilder::BPHGenericCollection* negCollection;
 
-  BPHParticlePtSelect *  ptSel;
-  BPHParticleEtaSelect* etaSel;
-  BPHMassSelect* massSel;
-  BPHChi2Select* chi2Sel;
+  double ptMin;
+  double etaMax;
+  double massMin;
+  double massMax;
+  double probMin;
 
-  class DZSelect;
-  DZSelect* dzSel;
+// old code left for example/reference
 
+//  BPHParticlePtSelect *  ptSel;
+//  BPHParticleEtaSelect* etaSel;
+//  BPHMassSelect* massSel;
+//  BPHChi2Select* chi2Sel;
+
+//  class DZSelect;
+//  DZSelect* dzSel;
+
+// mass constraint: foreseen but actually not implemented
   double cMass;
   double cSigma;
+
   bool updated;
 
   std::vector<BPHPlusMinusConstCandPtr> phiList;
