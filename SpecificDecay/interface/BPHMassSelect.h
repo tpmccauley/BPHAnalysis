@@ -47,7 +47,7 @@ class BPHMassSelect: public BPHMomentumSelect, public BPHMassCuts {
   /// select particle
   virtual bool accept( const BPHDecayMomentum& cand ) const {
     double mass = cand.composite().mass();
-    return ( ( mass > mMin ) && ( mass < mMax ) );
+    return ( ( mass >= mMin ) && ( mass <= mMax ) );
   }
 
  private:

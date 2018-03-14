@@ -74,7 +74,7 @@ class BPHMassFitSelect: public BPHFitSelect, public BPHMassCuts {
     case mtkf: cand.kinematicTree( cName, mtkc          ); break;
     }
     double mass = cand.p4().mass();
-    return ( ( mass > mMin ) && ( mass < mMax ) );
+    return ( ( mass >= mMin ) && ( mass <= mMax ) );
   }
 
   /// set fit constraint

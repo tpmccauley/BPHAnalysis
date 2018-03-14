@@ -44,7 +44,7 @@ class BPHParticleEtaSelect: public BPHRecoSelect {
    */
   /// select particle
   virtual bool accept( const reco::Candidate& cand ) const {
-    return ( fabs( cand.p4().eta() ) < etaMax );
+    return ( fabs( cand.p4().eta() ) <= etaMax );
   }
 
   /// set eta max

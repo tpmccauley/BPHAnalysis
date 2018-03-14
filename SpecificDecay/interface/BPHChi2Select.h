@@ -48,7 +48,7 @@ class BPHChi2Select: public BPHVertexSelect {
     const reco::Vertex& v = cand.vertex();
     if ( v.isFake() ) return false;
     if ( !v.isValid() ) return false;
-    return ( TMath::Prob( v.chi2(), lround( v.ndof() ) ) > probMin );
+    return ( TMath::Prob( v.chi2(), lround( v.ndof() ) ) >= probMin );
   }
 
   /// set prob min

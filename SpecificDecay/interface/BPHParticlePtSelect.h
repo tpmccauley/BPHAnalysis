@@ -44,7 +44,7 @@ class BPHParticlePtSelect: public BPHRecoSelect {
    */
   /// select particle
   virtual bool accept( const reco::Candidate& cand ) const {
-    return ( cand.p4().pt() > ptMin );
+    return ( cand.p4().pt() >= ptMin );
   }
 
   /// set pt min
