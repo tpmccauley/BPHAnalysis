@@ -22,6 +22,7 @@
 #include "BPHAnalysis/RecoDecay/interface/BPHPlusMinusCandidate.h"
 
 #include "DataFormats/Candidate/interface/VertexCompositeCandidate.h"
+#include "BPHAnalysis/RecoDecay/interface/BPHVertexCompositePtrCandidate.h"
 
 #include "FWCore/Framework/interface/Event.h"
 

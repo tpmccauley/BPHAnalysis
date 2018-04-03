@@ -1,0 +1,71 @@
+#ifndef BPHAnalysis_RecoDecay_BPHAnalyzerTokenWrapper_h
+#define BPHAnalysis_RecoDecay_BPHAnalyzerTokenWrapper_h
+/** \classes BPHModuleWrapper, BPHTokenWrapper and BPHAnalyzerWrapper
+ *
+ *  Description: 
+ *    Common interfaces to define modules and get objects
+ *    from "old" and "new" CMSSW version in an uniform way
+ *
+ *  \author Paolo Ronchese INFN Padova
+ *
+ */
+
+//----------------------
+// Base Class Headers --
+//----------------------
+
+
+//------------------------------------
+// Collaborating Class Declarations --
+//------------------------------------
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/EDProducer.h"
+
+//---------------
+// C++ Headers --
+//---------------
+#include <string>
+
+//              ---------------------
+//              -- Class Interface --
+//              ---------------------
+
+class BPHModuleWrapper {
+ public:
+  typedef edm::EDAnalyzer    one_analyzer;
+  typedef edm::EDProducer    one_producer;
+  typedef edm::EDAnalyzer stream_analyzer;
+  typedef edm::EDProducer stream_producer;
+};
+
+template<class Obj>
+class BPHTokenWrapper {
+ public:
+  typedef typename edm::InputTag type;
+  bool get( const edm::Event& ev,
+            edm::Handle<Obj>& obj ) {
+    return ev.getByLabel( token, obj );
+  }
+  type token;
+};
+
+template<class T>
+class BPHAnalyzerWrapper: public T {
+ protected:
+  template<class Obj>
+  void consume( BPHTokenWrapper<Obj>& tw,
+                const std::string& label ) {
+    tw.token = edm::InputTag( label );
+    return;
+  }
+  template<class Obj>
+  void consume( BPHTokenWrapper<Obj>& tw,
+                const edm::InputTag& tag ) {
+    tw.token = tag;
+    return;
+  }
+};
+
+#endif
+

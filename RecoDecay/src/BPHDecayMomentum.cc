@@ -14,7 +14,7 @@
 // Collaborating Class Headers --
 //-------------------------------
 #include "BPHAnalysis/RecoDecay/interface/BPHRecoCandidate.h"
-#include "PhysicsTools/CandUtils/interface/AddFourMomenta.h"
+#include "BPHAnalysis/RecoDecay/interface/BPHAddFourMomenta.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 //---------------

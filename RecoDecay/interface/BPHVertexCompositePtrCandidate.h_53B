@@ -1,0 +1,39 @@
+#ifndef BPHAnalysis_RecoDecay_BPHVertexCompositePtrCandidate_h
+#define BPHAnalysis_RecoDecay_BPHVertexCompositePtrCandidate_h
+/** \class BPHVertexCompositePtrCandidate
+ *
+ *  Description: 
+ *    Common interfaces to wrap VertexCompositePtrCandidate objects
+ *    from "old" and "new" CMSSW version in an uniform way
+ *
+ *  \author Paolo Ronchese INFN Padova
+ *
+ */
+
+//----------------------
+// Base Class Headers --
+//----------------------
+
+
+//------------------------------------
+// Collaborating Class Declarations --
+//------------------------------------
+#include "DataFormats/Candidate/interface/VertexCompositeCandidate.h"
+
+//---------------
+// C++ Headers --
+//---------------
+
+
+//              ---------------------
+//              -- Class Interface --
+//              ---------------------
+
+namespace reco {
+  class BPHVertexCompositePtrCandidate: public reco::VertexCompositeCandidate {
+  };
+  typedef BPHVertexCompositePtrCandidate VertexCompositePtrCandidate;
+}
+
+#endif
+

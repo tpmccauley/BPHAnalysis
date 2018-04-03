@@ -12,6 +12,9 @@
 #include "BPHAnalysis/RecoDecay/interface/BPHRecoCandidate.h"
 #include "BPHAnalysis/RecoDecay/interface/BPHTrackReference.h"
 
+#include "DataFormats/Candidate/interface/VertexCompositeCandidate.h"
+#include "BPHAnalysis/RecoDecay/interface/BPHVertexCompositePtrCandidate.h"
+
 #include "DataFormats/Common/interface/Ref.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/TrackReco/interface/Track.h"
