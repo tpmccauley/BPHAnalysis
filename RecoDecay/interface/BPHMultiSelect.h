@@ -78,6 +78,9 @@ class BPHMultiSelect: public T {
     return;
   }
 
+  /// component count
+  unsigned int count() { return selectList.size(); }
+
   /// accept function
   virtual bool accept( const reco::Candidate & cand,
                        const BPHRecoBuilder*  build ) const { return false; }

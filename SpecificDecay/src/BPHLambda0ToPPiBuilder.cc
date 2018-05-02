@@ -247,8 +247,8 @@ void BPHLambda0ToPPiBuilder::setMassMax( double m ) {
 
 void BPHLambda0ToPPiBuilder::setProbMin( double p ) {
   updated = false;
-  if ( chi2Sel == 0 ) new BPHChi2Select( p );
-  else chi2Sel->setProbMin( p );
+  delete chi2Sel;
+  chi2Sel = ( p < 0.0 ? 0 : new BPHChi2Select( p ) );
   return;
 }
 
@@ -282,7 +282,7 @@ double BPHLambda0ToPPiBuilder::getMassMax() const {
 
 
 double BPHLambda0ToPPiBuilder::getProbMin() const {
-  return chi2Sel->getProbMin();
+  return ( chi2Sel == 0 ? -1.0 : chi2Sel->getProbMin() );
 }
 
 

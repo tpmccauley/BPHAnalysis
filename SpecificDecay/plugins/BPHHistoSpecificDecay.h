@@ -55,6 +55,8 @@ class BPHHistoSpecificDecay:
   std::string     bsCandsLabel;
   std::string     k0CandsLabel;
   std::string     l0CandsLabel;
+  std::string     b0CandsLabel;
+  std::string     lbCandsLabel;
   BPHTokenWrapper< edm::TriggerResults > trigResultsToken;
   BPHTokenWrapper< std::vector<pat::CompositeCandidate> > oniaCandsToken;
   BPHTokenWrapper< std::vector<pat::CompositeCandidate> >   sdCandsToken;
@@ -64,6 +66,8 @@ class BPHHistoSpecificDecay:
   BPHTokenWrapper< std::vector<pat::CompositeCandidate> >   bsCandsToken;
   BPHTokenWrapper< std::vector<pat::CompositeCandidate> >   k0CandsToken;
   BPHTokenWrapper< std::vector<pat::CompositeCandidate> >   l0CandsToken;
+  BPHTokenWrapper< std::vector<pat::CompositeCandidate> >   b0CandsToken;
+  BPHTokenWrapper< std::vector<pat::CompositeCandidate> >   lbCandsToken;
   bool useTrig;
   bool useOnia;
   bool useSd;
@@ -73,6 +77,8 @@ class BPHHistoSpecificDecay:
   bool useBs;
   bool useK0;
   bool useL0;
+  bool useB0;
+  bool useLb;
 
   edm::Service<TFileService> fs;
   std::map<std::string,TH1F*> histoMap;
@@ -121,6 +127,28 @@ class BPHHistoSpecificDecay:
   CandidateSelect* bsDPhiBasicSelect;
   CandidateSelect* bsDVertexSelect;
   CandidateSelect* bsDJPsiDaughterSelect;
+
+  CandidateSelect* b0IBasicSelect;
+  CandidateSelect* b0IJPsiBasicSelect;
+  CandidateSelect* b0IK0sBasicSelect;
+  CandidateSelect* b0IVertexSelect;
+  CandidateSelect* b0IJPsiDaughterSelect;
+  CandidateSelect* b0DBasicSelect;
+  CandidateSelect* b0DJPsiBasicSelect;
+  CandidateSelect* b0DK0sBasicSelect;
+  CandidateSelect* b0DVertexSelect;
+  CandidateSelect* b0DJPsiDaughterSelect;
+
+  CandidateSelect* lbIBasicSelect;
+  CandidateSelect* lbIJPsiBasicSelect;
+  CandidateSelect* lbILambda0BasicSelect;
+  CandidateSelect* lbIVertexSelect;
+  CandidateSelect* lbIJPsiDaughterSelect;
+  CandidateSelect* lbDBasicSelect;
+  CandidateSelect* lbDJPsiBasicSelect;
+  CandidateSelect* lbDLambda0BasicSelect;
+  CandidateSelect* lbDVertexSelect;
+  CandidateSelect* lbDJPsiDaughterSelect;
 
   double buIKPtMin;
   double buDKPtMin;

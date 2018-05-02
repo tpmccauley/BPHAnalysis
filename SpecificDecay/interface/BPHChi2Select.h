@@ -45,6 +45,7 @@ class BPHChi2Select: public BPHVertexSelect {
    */
   /// select vertex
   virtual bool accept( const BPHDecayVertex& cand ) const {
+    if ( probMin < 0.0 ) return true;
     const reco::Vertex& v = cand.vertex();
     if ( v.isFake() ) return false;
     if ( !v.isValid() ) return false;

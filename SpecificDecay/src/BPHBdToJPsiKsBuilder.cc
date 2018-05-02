@@ -8,7 +8,7 @@
 //-----------------------
 // This Class' Header --
 //-----------------------
-#include "BPHAnalysis/SpecificDecay/interface/BPHBdToJPsiKxBuilder.h"
+#include "BPHAnalysis/SpecificDecay/interface/BPHBdToJPsiKsBuilder.h"
 
 //-------------------------------
 // Collaborating Class Headers --
@@ -34,22 +34,22 @@ using namespace std;
 //----------------
 // Constructors --
 //----------------
-BPHBdToJPsiKxBuilder::BPHBdToJPsiKxBuilder( const edm::EventSetup& es,
+BPHBdToJPsiKsBuilder::BPHBdToJPsiKsBuilder( const edm::EventSetup& es,
     const std::vector<BPHPlusMinusConstCandPtr>& jpsiCollection,
-    const std::vector<BPHPlusMinusConstCandPtr>&  kx0Collection ):
+    const std::vector<BPHPlusMinusConstCandPtr>&  k0sCollection ):
   jPsiName( "JPsi" ),
-   kx0Name(  "Kx0" ),
+   k0sName(  "K0s" ),
   evSetup( &es ),
   jCollection( &jpsiCollection ),
-  kCollection( & kx0Collection ) {
+  kCollection( & k0sCollection ) {
   jpsiSel = new BPHMassSelect   ( 2.80, 3.40 );
-  mkx0Sel = new BPHMassSelect   ( 0.80, 1.00 );
+  mk0sSel = new BPHMassSelect   ( 0.00, 2.00 );
   massSel = new BPHMassSelect   ( 3.50, 8.00 );
-  chi2Sel = new BPHChi2Select   ( 0.02 );
+  probMin = 0.02;
   mFitSel = new BPHMassFitSelect( jPsiName,
                                   BPHParticleMasses::jPsiMass,
                                   BPHParticleMasses::jPsiMWidth,
-                                  5.00, 6.00 );
+                                  5.00, 6.00 );	
   massConstr = true;
   minPDiff = 1.0e-4;
   updated = false;
@@ -58,51 +58,52 @@ BPHBdToJPsiKxBuilder::BPHBdToJPsiKxBuilder( const edm::EventSetup& es,
 //--------------
 // Destructor --
 //--------------
-BPHBdToJPsiKxBuilder::~BPHBdToJPsiKxBuilder() {
+BPHBdToJPsiKsBuilder::~BPHBdToJPsiKsBuilder() {
   delete jpsiSel;
-  delete mkx0Sel;
+  delete mk0sSel;
   delete massSel;
-  delete chi2Sel;
   delete mFitSel;
 }
 
 //--------------
 // Operations --
 //--------------
-vector<BPHRecoConstCandPtr> BPHBdToJPsiKxBuilder::build() {
+vector<BPHRecoConstCandPtr> BPHBdToJPsiKsBuilder::build() {
 
   if ( updated ) return bdList;
 
   BPHRecoBuilder bBd( *evSetup );
   bBd.setMinPDiffererence( minPDiff );
   bBd.add( jPsiName, *jCollection );
-  bBd.add(  kx0Name, *kCollection );
+  bBd.add(  k0sName, *kCollection );
+
   bBd.filter( jPsiName, *jpsiSel );
-  bBd.filter(  kx0Name, *mkx0Sel );
+  bBd.filter(  k0sName, *mk0sSel );
 
   bBd.filter( *massSel );
-  if ( chi2Sel != 0 )
-  bBd.filter( *chi2Sel );
-  if ( massConstr ) bBd.filter( *mFitSel );
 
-  bdList = BPHRecoCandidate::build( bBd );
+  vector<BPHRecoConstCandPtr> tmpList = BPHRecoCandidate::build( bBd );
 //
 //  Apply kinematic constraint on the JPsi mass.
-//  The operation is already performed when apply the mass selection,
-//  so it's not repeated. The following code is left as example
-//  for similar operations
 //
-//  int iBd;
-//  int nBd = ( massConstr ? bdList.size() : 0 );
-//  for ( iBd = 0; iBd < nBd; ++iBd ) {
-//    BPHRecoCandidate* cptr( const_cast<BPHRecoCandidate*>(
-//                            bdList[iBd].get() ) );
-//    BPHRecoConstCandPtr jpsi = cptr->getComp( jPsiName );
-//    double jMass = jpsi->constrMass();
-//    if ( jMass < 0 ) continue;
-//    double sigma = jpsi->constrSigma();
-//    cptr->kinematicTree( jPsiName, jMass, sigma );
-//  }
+  int iBd;
+  int nBd = tmpList.size();
+  bdList.reserve( nBd );
+  for ( iBd = 0; iBd < nBd; ++iBd ) {
+    BPHRecoConstCandPtr cand = tmpList[iBd];
+    BPHRecoCandidate* cptr( const_cast<BPHRecoCandidate*>( cand.get() ) );
+    cptr->setIndependentFit( k0sName );    // fit for K0s reconstruction
+                                           // indipendent from other particles
+//    cout << "apply mfit selection " << cptr << endl;
+    if ( !mFitSel->accept( *cptr ) ) continue;
+//    cout << "mfit selection done" << endl;
+    const RefCountedKinematicVertex tdv = cptr->topDecayVertex();
+    if ( tdv.get() == 0 ) continue;
+    if ( !tdv->vertexIsValid() ) continue;
+    reco::Vertex vtx( *tdv );
+    if ( TMath::Prob( vtx.chi2(), lround( vtx.ndof() ) ) >= probMin )
+    bdList.push_back( cand );
+  }
   updated = true;
 
   return bdList;
@@ -110,123 +111,122 @@ vector<BPHRecoConstCandPtr> BPHBdToJPsiKxBuilder::build() {
 }
 
 /// set cuts
-void BPHBdToJPsiKxBuilder::setJPsiMassMin( double m ) {
+void BPHBdToJPsiKsBuilder::setJPsiMassMin( double m ) {
   updated = false;
   jpsiSel->setMassMin( m );
   return;
 }
 
 
-void BPHBdToJPsiKxBuilder::setJPsiMassMax( double m ) {
+void BPHBdToJPsiKsBuilder::setJPsiMassMax( double m ) {
   updated = false;
   jpsiSel->setMassMax( m );
   return;
 }
 
 
-void BPHBdToJPsiKxBuilder::setKxMassMin( double m ) {
+void BPHBdToJPsiKsBuilder::setK0MassMin( double m ) {
   updated = false;
-  mkx0Sel->setMassMin( m );
+  mk0sSel->setMassMin( m );
   return;
 }
 
 
-void BPHBdToJPsiKxBuilder::setKxMassMax( double m ) {
+void BPHBdToJPsiKsBuilder::setK0MassMax( double m ) {
   updated = false;
-  mkx0Sel->setMassMax( m );
+  mk0sSel->setMassMax( m );
   return;
 }
 
 
-void BPHBdToJPsiKxBuilder::setMassMin( double m ) {
+void BPHBdToJPsiKsBuilder::setMassMin( double m ) {
   updated = false;
   massSel->setMassMin( m );
   return;
 }
 
 
-void BPHBdToJPsiKxBuilder::setMassMax( double m ) {
+void BPHBdToJPsiKsBuilder::setMassMax( double m ) {
   updated = false;
   massSel->setMassMax( m );
   return;
 }
 
 
-void BPHBdToJPsiKxBuilder::setProbMin( double p ) {
+void BPHBdToJPsiKsBuilder::setProbMin( double p ) {
   updated = false;
-  delete chi2Sel;
-  chi2Sel = ( p < 0.0 ? 0 : new BPHChi2Select( p ) );
+  probMin = p;
   return;
 }
 
 
-void BPHBdToJPsiKxBuilder::setMassFitMin( double m ) {
+void BPHBdToJPsiKsBuilder::setMassFitMin( double m ) {
   updated = false;
   mFitSel->setMassMin( m );
   return;
 }
 
 
-void BPHBdToJPsiKxBuilder::setMassFitMax( double m ) {
+void BPHBdToJPsiKsBuilder::setMassFitMax( double m ) {
   updated = false;
   mFitSel->setMassMax( m );
   return;
 }
 
 
-void BPHBdToJPsiKxBuilder::setConstr( bool flag ) {
+void BPHBdToJPsiKsBuilder::setConstr( bool flag ) {
   updated = false;
   massConstr = flag;
   return;
 }
 
 /// get current cuts
-double BPHBdToJPsiKxBuilder::getJPsiMassMin() const {
+double BPHBdToJPsiKsBuilder::getJPsiMassMin() const {
   return jpsiSel->getMassMin();
 }
 
 
-double BPHBdToJPsiKxBuilder::getJPsiMassMax() const {
+double BPHBdToJPsiKsBuilder::getJPsiMassMax() const {
   return jpsiSel->getMassMax();
 }
 
 
-double BPHBdToJPsiKxBuilder::getKxMassMin() const {
-  return mkx0Sel->getMassMin();
+double BPHBdToJPsiKsBuilder::getK0MassMin() const {
+  return mk0sSel->getMassMin();
 }
 
 
-double BPHBdToJPsiKxBuilder::getKxMassMax() const {
-  return mkx0Sel->getMassMax();
+double BPHBdToJPsiKsBuilder::getK0MassMax() const {
+  return mk0sSel->getMassMax();
 }
 
 
-double BPHBdToJPsiKxBuilder::getMassMin() const {
+double BPHBdToJPsiKsBuilder::getMassMin() const {
   return massSel->getMassMin();
 }
 
 
-double BPHBdToJPsiKxBuilder::getMassMax() const {
+double BPHBdToJPsiKsBuilder::getMassMax() const {
   return massSel->getMassMax();
 }
 
 
-double BPHBdToJPsiKxBuilder::getProbMin() const {
-  return ( chi2Sel == 0 ? -1.0 : chi2Sel->getProbMin() );
+double BPHBdToJPsiKsBuilder::getProbMin() const {
+  return probMin;
 }
 
 
-double BPHBdToJPsiKxBuilder::getMassFitMin() const {
+double BPHBdToJPsiKsBuilder::getMassFitMin() const {
   return mFitSel->getMassMin();
 }
 
 
-double BPHBdToJPsiKxBuilder::getMassFitMax() const {
+double BPHBdToJPsiKsBuilder::getMassFitMax() const {
   return mFitSel->getMassMax();
 }
 
 
-bool BPHBdToJPsiKxBuilder::getConstr() const {
+bool BPHBdToJPsiKsBuilder::getConstr() const {
   return massConstr;
 }
 

@@ -94,11 +94,14 @@ class BPHWriteSpecificDecay:
   std::string   bsName;
   std::string   k0Name;
   std::string   l0Name;
+  std::string   b0Name;
+  std::string   lbName;
 
   enum recoType { Onia, Pmm , Psi1, Psi2, Ups , Ups1, Ups2, Ups3,
-                  Kx0, Pkk, Bu, Bd, Bs, K0s, Lambda0 };
+                  Kx0, Pkk, Bu, Bd, Bs, K0s, Lambda0, B0, Lambdab };
   enum  parType { ptMin, etaMax,
-                  mPsiMin, mPsiMax, mKx0Min, mKx0Max, mPhiMin, mPhiMax, 
+                  mPsiMin, mPsiMax, mKx0Min, mKx0Max, mPhiMin, mPhiMax,
+                  mK0sMin, mK0sMax, mLambda0Min, mLambda0Max,
                   massMin, massMax, probMin, mFitMin, mFitMax,
                   constrMass, constrSigma, constrMJPsi, writeCandidate };
   std::map<std::string,recoType> rMap;
@@ -114,6 +117,8 @@ class BPHWriteSpecificDecay:
   bool recoBs;
   bool recoK0s;
   bool recoLambda0;
+  bool recoB0;
+  bool recoLambdab;
 
   bool writeOnia;
   bool writeKx0;
@@ -123,6 +128,8 @@ class BPHWriteSpecificDecay:
   bool writeBs;
   bool writeK0s;
   bool writeLambda0;
+  bool writeB0;
+  bool writeLambdab;
 
   bool writeVertex;
   bool writeMomentum;
@@ -136,6 +143,8 @@ class BPHWriteSpecificDecay:
   std::vector<BPHRecoConstCandPtr> lBs;
   std::vector<BPHPlusMinusConstCandPtr> lK0;
   std::vector<BPHPlusMinusConstCandPtr> lL0;
+  std::vector<BPHRecoConstCandPtr> lB0;
+  std::vector<BPHRecoConstCandPtr> lLb;
 
   std::map<const BPHRecoCandidate*,const BPHRecoCandidate*> jPsiOMap;
   typedef edm::Ref< std::vector<reco::Vertex> > vertex_ref;

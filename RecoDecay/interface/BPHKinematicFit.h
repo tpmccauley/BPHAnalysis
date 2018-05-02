@@ -26,7 +26,10 @@ class KinematicConstraint;
 //---------------
 // C++ Headers --
 //---------------
+#include <string>
+#include <vector>
 #include <map>
+#include <set>
 
 //              ---------------------
 //              -- Class Interface --
@@ -52,6 +55,8 @@ class BPHKinematicFit: public virtual BPHDecayVertex {
   /// retrieve the constraint
   double constrMass() const;
   double constrSigma() const;
+  /// set a decaying daughter as an unique particle fitted independently
+  void setIndependentFit( const std::string& name, bool flag = true );
 
   /// get kinematic particles
   virtual const std::vector<RefCountedKinematicParticle>& kinParticles() const;
@@ -75,7 +80,6 @@ class BPHKinematicFit: public virtual BPHDecayVertex {
 
   /// reset the kinematic fit
   virtual void resetKinematicFit() const;
-
 
   // get current particle
   virtual const RefCountedKinematicParticle currentParticle   () const;
@@ -124,18 +128,43 @@ class BPHKinematicFit: public virtual BPHDecayVertex {
   // map linking daughters to mass sigma
   std::map<const reco::Candidate*,double> dMSig;
 
+  // map to handle composite daughters as single particles
+  std::map<const BPHRecoCandidate*,bool> cKinP;
+
   // reconstruction results cache
   mutable bool oldKPs;
   mutable bool oldFit;
   mutable bool oldMom;
   mutable std::map   <const reco::Candidate*,
                       RefCountedKinematicParticle> kinMap;
+  mutable std::map   <const BPHRecoCandidate*,
+                      RefCountedKinematicParticle> kCDMap;
   mutable std::vector<RefCountedKinematicParticle> allParticles;
   mutable RefCountedKinematicTree kinTree;
   mutable math::XYZTLorentzVector totalMomentum;
 
   // build kin particles, perform the fit and compute the total momentum
   virtual void buildParticles() const;
+  virtual void addParticles(
+               std::vector<RefCountedKinematicParticle>& kl,
+               std::map   <const reco::Candidate*,
+                           RefCountedKinematicParticle>& km,
+               std::map   <const BPHRecoCandidate*,
+                           RefCountedKinematicParticle>& cm ) const;
+  virtual void getParticles( const std::string& moth, const std::string& daug,
+               std::vector<RefCountedKinematicParticle>& kl,
+               std::set   <RefCountedKinematicParticle>& ks ) const;
+  virtual void getParticles( const std::string& moth, const
+               std::vector<std::string>& daug,
+               std::vector<RefCountedKinematicParticle>& kl,
+               std::set   <RefCountedKinematicParticle>& ks ) const;
+  virtual unsigned int numParticles( const BPHKinematicFit* cand = 0 ) const;
+  static  void insertParticle( RefCountedKinematicParticle& kp,
+               std::vector<RefCountedKinematicParticle>& kl,
+               std::set   <RefCountedKinematicParticle>& ks );
+  virtual void splitKP( const std::string& name,
+               std::vector<RefCountedKinematicParticle>* kComp,
+               std::vector<RefCountedKinematicParticle>* kTail = 0 ) const;
   virtual void fitMomentum() const;
 
 };

@@ -78,6 +78,7 @@ vector<BPHRecoConstCandPtr> BPHBdToKxMuMuBuilder::build() {
   bBd.filter(  kx0Name, *mkx0Sel );
 
   bBd.filter( *massSel );
+  if ( chi2Sel != 0 )
   bBd.filter( *chi2Sel );
   if ( massConstr ) bBd.filter( *mFitSel );
 
@@ -150,7 +151,8 @@ void BPHBdToKxMuMuBuilder::setMassMax( double m ) {
 
 void BPHBdToKxMuMuBuilder::setProbMin( double p ) {
   updated = false;
-  chi2Sel->setProbMin( p );
+  delete chi2Sel;
+  chi2Sel = ( p < 0.0 ? 0 : new BPHChi2Select( p ) );
   return;
 }
 
@@ -207,7 +209,7 @@ double BPHBdToKxMuMuBuilder::getMassMax() const {
 
 
 double BPHBdToKxMuMuBuilder::getProbMin() const {
-  return chi2Sel->getProbMin();
+  return ( chi2Sel == 0 ? -1.0 : chi2Sel->getProbMin() );
 }
 
 

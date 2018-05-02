@@ -39,7 +39,9 @@ process.bphHistoSpecificDecay = cms.EDAnalyzer('BPHHistoSpecificDecay',
     bdCandsLabel = cms.string('bphWriteSpecificDecay:bdFitted:bphAnalysis'),
     bsCandsLabel = cms.string('bphWriteSpecificDecay:bsFitted:bphAnalysis'),
     k0CandsLabel = cms.string('bphWriteSpecificDecay:k0Fitted:bphAnalysis'),
-    l0CandsLabel = cms.string('bphWriteSpecificDecay:l0Fitted:bphAnalysis')
+    l0CandsLabel = cms.string('bphWriteSpecificDecay:l0Fitted:bphAnalysis'),
+    b0CandsLabel = cms.string('bphWriteSpecificDecay:b0Fitted:bphAnalysis'),
+    lbCandsLabel = cms.string('bphWriteSpecificDecay:lbFitted:bphAnalysis')
 )
 
 process.p = cms.Path(

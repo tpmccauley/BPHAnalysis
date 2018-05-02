@@ -489,6 +489,8 @@ BPHHistoSpecificDecay::BPHHistoSpecificDecay( const edm::ParameterSet& ps ) {
   useBs   = ( SET_LABEL(     bsCandsLabel, ps ) != "" );
   useK0   = ( SET_LABEL(     k0CandsLabel, ps ) != "" );
   useL0   = ( SET_LABEL(     l0CandsLabel, ps ) != "" );
+  useB0   = ( SET_LABEL(     b0CandsLabel, ps ) != "" );
+  useLb   = ( SET_LABEL(     lbCandsLabel, ps ) != "" );
   if ( useTrig ) consume< edm::TriggerResults           >( trigResultsToken,
                                                            trigResultsLabel );
   if ( useOnia ) consume< vector<pat::CompositeCandidate> >( oniaCandsToken,
@@ -507,8 +509,14 @@ BPHHistoSpecificDecay::BPHHistoSpecificDecay( const edm::ParameterSet& ps ) {
                                                                k0CandsLabel );
   if ( useL0   ) consume< vector<pat::CompositeCandidate> >(   l0CandsToken,
                                                                l0CandsLabel );
+  if ( useB0   ) consume< vector<pat::CompositeCandidate> >(   b0CandsToken,
+                                                               b0CandsLabel );
+  if ( useLb   ) consume< vector<pat::CompositeCandidate> >(   lbCandsToken,
+                                                               lbCandsLabel );
 
-  static const BPHSoftMuonSelect sms;
+  static const BPHSoftMuonSelect* sms = new BPHSoftMuonSelect;
+
+  //////////// quarkonia selection ////////////
 
   double  phiIMassMin =  0.85;
   double  phiIMassMax =  1.20;
@@ -516,17 +524,17 @@ BPHHistoSpecificDecay::BPHHistoSpecificDecay( const edm::ParameterSet& ps ) {
   double  phiIEtaMax  = -1.0;
   double  phiIYMax    = -1.0;
   double  phiBMassMin =  0.85;
-  double  phiBMassMax =  3.30;
-  double  phiBPtMin   = 18.0;
+  double  phiBMassMax =  1.20;
+  double  phiBPtMin   = 14.0;
   double  phiBEtaMax  = -1.0;
   double  phiBYMax    =  1.25;
-  double jPsiIMassMin =  2.95;
-  double jPsiIMassMax =  3.30;
+  double jPsiIMassMin =  2.80;
+  double jPsiIMassMax =  3.40;
   double jPsiIPtMin   = 25.0;
   double jPsiIEtaMax  = -1.0;
   double jPsiIYMax    = -1.0;
-  double jPsiBMassMin =  2.95;
-  double jPsiBMassMax =  3.30;
+  double jPsiBMassMin =  2.80;
+  double jPsiBMassMax =  3.40;
   double jPsiBPtMin   = 20.0;
   double jPsiBEtaMax  = -1.0;
   double jPsiBYMax    =  1.25;
@@ -552,7 +560,7 @@ BPHHistoSpecificDecay::BPHHistoSpecificDecay( const edm::ParameterSet& ps ) {
   double  upsBYMax    = -1.0;
 
   double oniaProbMin =  -0.005;
-  double oniaCosMin  = -1.0;
+  double oniaCosMin  = -2.0;
   double oniaSigMin  = -1.0;
 
   double oniaMuPtMinLoose  =  2.0;
@@ -588,7 +596,7 @@ BPHHistoSpecificDecay::BPHHistoSpecificDecay( const edm::ParameterSet& ps ) {
                            oniaProbMin, oniaCosMin, oniaSigMin );
   oniaDaughterSelect = new BPHDaughterSelect(
                            oniaMuPtMinLoose , oniaMuPtMinTight ,
-                           oniaMuEtaMaxLoose, oniaMuEtaMaxTight, &sms );
+                           oniaMuEtaMaxLoose, oniaMuEtaMaxTight, sms );
 
   double npJPsiMassMin   = BPHParticleMasses::jPsiMass - 0.150;
   double npJPsiMassMax   = BPHParticleMasses::jPsiMass + 0.150;
@@ -605,15 +613,17 @@ BPHHistoSpecificDecay::BPHHistoSpecificDecay( const edm::ParameterSet& ps ) {
                              npJPsiPtMin  , npJPsiEtaMax , npJPsiYMax );
   npJPsiDaughterSelect = new BPHDaughterSelect(
                              npMuPtMinLoose , npMuPtMinTight ,
-                             npMuEtaMaxLoose, npMuEtaMaxTight, &sms );
+                             npMuEtaMaxLoose, npMuEtaMaxTight, sms );
+
+  //////////// Bu selection ////////////
 
   double buIMassMin       =      0.0;
   double buIMassMax       = 999999.0;
   double buIPtMin         = 27.0;
   double buIEtaMax        = -1.0;
   double buIYMax          = -1.0;
-  double buIJPsiMassMin   = -1.0;//BPHParticleMasses::jPsiMass - 0.150;
-  double buIJPsiMassMax   = -1.0;//BPHParticleMasses::jPsiMass + 0.150;
+  double buIJPsiMassMin   = BPHParticleMasses::jPsiMass - 0.150;
+  double buIJPsiMassMax   = BPHParticleMasses::jPsiMass + 0.150;
   double buIJPsiPtMin     = 25.0;
   double buIJPsiEtaMax    = -1.0;
   double buIJPsiYMax      = -1.0;
@@ -638,15 +648,15 @@ BPHHistoSpecificDecay::BPHHistoSpecificDecay( const edm::ParameterSet& ps ) {
   buIJPsiDaughterSelect = 0;
 //  buIJPsiDaughterSelect = new BPHDaughterSelect(
 //                              buIMuPtMinLoose , buIMuPtMinTight ,
-//                              buIMuEtaMaxLoose, buMuEtaMaxTight, &sms );
+//                              buIMuEtaMaxLoose, buMuEtaMaxTight, sms );
 
   double buDMassMin       =      0.0;
   double buDMassMax       = 999999.0;
   double buDPtMin         = 10.0;
   double buDEtaMax        = -1.0;
   double buDYMax          = -1.0;
-  double buDJPsiMassMin   = -1.0;//BPHParticleMasses::jPsiMass - 0.150;
-  double buDJPsiMassMax   = -1.0;//BPHParticleMasses::jPsiMass + 0.150;
+  double buDJPsiMassMin   = BPHParticleMasses::jPsiMass - 0.150;
+  double buDJPsiMassMax   = BPHParticleMasses::jPsiMass + 0.150;
   double buDJPsiPtMin     =  8.0;
   double buDJPsiEtaMax    = -1.0;
   double buDJPsiYMax      = -1.0;
@@ -671,15 +681,17 @@ BPHHistoSpecificDecay::BPHHistoSpecificDecay( const edm::ParameterSet& ps ) {
   buDJPsiDaughterSelect = 0;
 //  buDJPsiDaughterSelect = new BPHDaughterSelect(
 //                              buDMuPtMinLoose , buDMuPtMinTight ,
-//                              buDMuEtaMaxLoose, buDMuEtaMaxTight, &sms );
+//                              buDMuEtaMaxLoose, buDMuEtaMaxTight, sms );
+
+  //////////// Bd -> JPsi Kx0 selection ////////////
 
   double bdIMassMin       =      0.0;
   double bdIMassMax       = 999999.0;
   double bdIPtMin         = 27.0;
   double bdIEtaMax        = -1.0;
   double bdIYMax          = -1.0;
-  double bdIJPsiMassMin   = -1.0;//BPHParticleMasses::jPsiMass - 0.150;
-  double bdIJPsiMassMax   = -1.0;//BPHParticleMasses::jPsiMass + 0.150;
+  double bdIJPsiMassMin   = BPHParticleMasses::jPsiMass - 0.150;
+  double bdIJPsiMassMax   = BPHParticleMasses::jPsiMass + 0.150;
   double bdIJPsiPtMin     = 25.0;
   double bdIJPsiEtaMax    = -1.0;
   double bdIJPsiYMax      = -1.0;
@@ -688,9 +700,9 @@ BPHHistoSpecificDecay::BPHHistoSpecificDecay( const edm::ParameterSet& ps ) {
   double bdIKx0PtMin      = -1.0;
   double bdIKx0EtaMax     = -1.0;
   double bdIKx0YMax       = -1.0;
-  double bdIProbMin       =  0.10;
-  double bdICosMin        =  0.99;
-  double bdISigMin        =  3.0;
+  double bdIProbMin       =  0.15;
+  double bdICosMin        = -2.0;
+  double bdISigMin        = -1.0;
 //  double bdIMuPtMinLoose  =  -1.0;
 //  double bdIMuPtMinTight  =  -1.0;
 //  double bdIMuEtaMaxLoose =  -1.0;
@@ -710,15 +722,15 @@ BPHHistoSpecificDecay::BPHHistoSpecificDecay( const edm::ParameterSet& ps ) {
   bdIJPsiDaughterSelect = 0;
 //  bdIJPsiDaughterSelect = new BPHDaughterSelect(
 //                              bdIMuPtMinLoose , bdIMuPtMinTight ,
-//                              bdIMuEtaMaxLoose, bdIMuEtaMaxTight, &sms );
+//                              bdIMuEtaMaxLoose, bdIMuEtaMaxTight, sms );
 
   double bdDMassMin       =      0.0;
   double bdDMassMax       = 999999.0;
   double bdDPtMin         = 10.0;
   double bdDEtaMax        = -1.0;
   double bdDYMax          = -1.0;
-  double bdDJPsiMassMin   = -1.0;//BPHParticleMasses::jPsiMass - 0.150;
-  double bdDJPsiMassMax   = -1.0;//BPHParticleMasses::jPsiMass + 0.150;
+  double bdDJPsiMassMin   = BPHParticleMasses::jPsiMass - 0.150;
+  double bdDJPsiMassMax   = BPHParticleMasses::jPsiMass + 0.150;
   double bdDJPsiPtMin     =  8.0;
   double bdDJPsiEtaMax    = -1.0;
   double bdDJPsiYMax      = -1.0;
@@ -749,7 +761,9 @@ BPHHistoSpecificDecay::BPHHistoSpecificDecay( const edm::ParameterSet& ps ) {
   bdDJPsiDaughterSelect = 0;
 //  bdDJPsiDaughterSelect = new BPHDaughterSelect(
 //                              bdDMuPtMinLoose , bdDMuPtMinTight ,
-//                              bdDMuEtaMaxLoose, bdDMuEtaMaxTight, &sms );
+//                              bdDMuEtaMaxLoose, bdDMuEtaMaxTight, sms );
+
+  //////////// Bs selection ////////////
 
   double bsIMassMin       =      0.0;
   double bsIMassMax       = 999999.0;
@@ -766,9 +780,9 @@ BPHHistoSpecificDecay::BPHHistoSpecificDecay( const edm::ParameterSet& ps ) {
   double bsIPhiPtMin      = -1.0;
   double bsIPhiEtaMax     = -1.0;
   double bsIPhiYMax       = -1.0;
-  double bsIProbMin       =  0.10;
-  double bsICosMin        =  0.99;
-  double bsISigMin        =  3.0;
+  double bsIProbMin       =  0.15;
+  double bsICosMin        = -2.0;
+  double bsISigMin        = -1.0;
 //  double bsIMuPtMinLoose  = -1.0;
 //  double bsIMuPtMinTight  = -1.0;
 //  double bsIMuEtaMaxLoose = -1.0;
@@ -788,15 +802,15 @@ BPHHistoSpecificDecay::BPHHistoSpecificDecay( const edm::ParameterSet& ps ) {
   bsIJPsiDaughterSelect = 0;
 //  bsIJPsiDaughterSelect = new BPHDaughterSelect(
 //                              bsIMuPtMinLoose , bsIMuPtMinTight ,
-//                              bsIMuEtaMaxLoose, bsIMuEtaMaxTight, &sms );
+//                              bsIMuEtaMaxLoose, bsIMuEtaMaxTight, sms );
 
   double bsDMassMin       =      0.0;
   double bsDMassMax       = 999999.0;
   double bsDPtMin         = 10.0;
   double bsDEtaMax        = -1.0;
   double bsDYMax          = -1.0;
-  double bsDJPsiMassMin   = -1.0;//BPHParticleMasses::jPsiMass - 0.150;
-  double bsDJPsiMassMax   = -1.0;//BPHParticleMasses::jPsiMass + 0.150;
+  double bsDJPsiMassMin   = BPHParticleMasses::jPsiMass - 0.150;
+  double bsDJPsiMassMax   = BPHParticleMasses::jPsiMass + 0.150;
   double bsDJPsiPtMin     =  8.0;
   double bsDJPsiEtaMax    = -1.0;
   double bsDJPsiYMax      = -1.0;
@@ -827,7 +841,169 @@ BPHHistoSpecificDecay::BPHHistoSpecificDecay( const edm::ParameterSet& ps ) {
   bsDJPsiDaughterSelect = 0;
 //  bsDJPsiDaughterSelect = new BPHDaughterSelect(
 //                              bsDMuPtMinLoose , bsDMuPtMinTight ,
-//                              bsDMuEtaMaxLoose, bsDMuEtaMaxTight, &sms );
+//                              bsDMuEtaMaxLoose, bsDMuEtaMaxTight, sms );
+
+  //////////// Bd -> JPsi K0s selection ////////////
+
+  double b0IMassMin       =      0.0;
+  double b0IMassMax       = 999999.0;
+  double b0IPtMin         = 27.0;
+  double b0IEtaMax        = -1.0;
+  double b0IYMax          = -1.0;
+  double b0IJPsiMassMin   = BPHParticleMasses::jPsiMass - 0.150;
+  double b0IJPsiMassMax   = BPHParticleMasses::jPsiMass + 0.150;
+  double b0IJPsiPtMin     = 25.0;
+  double b0IJPsiEtaMax    = -1.0;
+  double b0IJPsiYMax      = -1.0;
+  double b0IK0sMassMin    = BPHParticleMasses::k0sMass - 0.010;
+  double b0IK0sMassMax    = BPHParticleMasses::k0sMass + 0.010;
+  double b0IK0sPtMin      = -1.0;
+  double b0IK0sEtaMax     = -1.0;
+  double b0IK0sYMax       = -1.0;
+  double b0IProbMin       =  0.15;
+  double b0ICosMin        = -2.0;
+  double b0ISigMin        = -1.0;
+//  double b0IMuPtMinLoose  =  -1.0;
+//  double b0IMuPtMinTight  =  -1.0;
+//  double b0IMuEtaMaxLoose =  -1.0;
+//  double b0IMuEtaMaxTight =  -1.0;
+
+  b0IBasicSelect        = new BPHFittedBasicSelect(
+                              b0IMassMin, b0IMassMax,
+                              b0IPtMin  , b0IEtaMax , b0IYMax );
+  b0IJPsiBasicSelect    = new BPHCompositeBasicSelect(
+                              b0IJPsiMassMin, b0IJPsiMassMax,
+                              b0IJPsiPtMin  , b0IJPsiEtaMax , b0IJPsiYMax );
+  b0IK0sBasicSelect     = new BPHCompositeBasicSelect(
+                              b0IK0sMassMin, b0IK0sMassMax,
+                              b0IK0sPtMin  , b0IK0sEtaMax , b0IK0sYMax );
+  b0IVertexSelect       = new BPHVertexSelect( 'f',
+                              b0IProbMin, b0ICosMin, b0ISigMin );
+  b0IJPsiDaughterSelect = 0;
+//  b0IJPsiDaughterSelect = new BPHDaughterSelect(
+//                              b0IMuPtMinLoose , b0IMuPtMinTight ,
+//                              b0IMuEtaMaxLoose, b0IMuEtaMaxTight, sms );
+
+  double b0DMassMin       =      0.0;
+  double b0DMassMax       = 999999.0;
+  double b0DPtMin         = 10.0;
+  double b0DEtaMax        = -1.0;
+  double b0DYMax          = -1.0;
+  double b0DJPsiMassMin   = BPHParticleMasses::jPsiMass - 0.150;
+  double b0DJPsiMassMax   = BPHParticleMasses::jPsiMass + 0.150;
+  double b0DJPsiPtMin     =  8.0;
+  double b0DJPsiEtaMax    = -1.0;
+  double b0DJPsiYMax      = -1.0;
+  double b0DK0sMassMin    = BPHParticleMasses::k0sMass - 0.010;
+  double b0DK0sMassMax    = BPHParticleMasses::k0sMass + 0.010;
+  double b0DK0sPtMin      = -1.0;
+  double b0DK0sEtaMax     = -1.0;
+  double b0DK0sYMax       = -1.0;
+  double b0DProbMin       =  0.10;
+  double b0DCosMin        =  0.99;
+  double b0DSigMin        =  3.0;
+//  double b0DMuPtMinLoose  = -1.0;
+//  double b0DMuPtMinTight  = -1.0;
+//  double b0DMuEtaMaxLoose = -1.0;
+//  double b0DMuEtaMaxTight = -1.0;
+
+  b0DBasicSelect        = new BPHFittedBasicSelect(
+                              b0DMassMin, b0DMassMax,
+                              b0DPtMin  , b0DEtaMax , b0DYMax );
+  b0DJPsiBasicSelect    = new BPHCompositeBasicSelect(
+                              b0DJPsiMassMin, b0DJPsiMassMax,
+                              b0DJPsiPtMin  , b0DJPsiEtaMax , b0DJPsiYMax );
+  b0DK0sBasicSelect     = new BPHCompositeBasicSelect(
+                              b0DK0sMassMin, b0DK0sMassMax,
+                              b0DK0sPtMin  , b0DK0sEtaMax , b0DK0sYMax );
+  b0DVertexSelect       = new BPHVertexSelect( 'f',
+                              b0DProbMin, b0DCosMin, b0DSigMin );
+  b0DJPsiDaughterSelect = 0;
+//  b0DJPsiDaughterSelect = new BPHDaughterSelect(
+//                              b0DMuPtMinLoose , b0DMuPtMinTight ,
+//                              b0DMuEtaMaxLoose, b0DMuEtaMaxTight, sms );
+
+  //////////// Lambdab -> JPsi Lambda0 selection ////////////
+
+  double lbIMassMin        =      0.0;
+  double lbIMassMax        = 999999.0;
+  double lbIPtMin          = 27.0;
+  double lbIEtaMax         = -1.0;
+  double lbIYMax           = -1.0;
+  double lbIJPsiMassMin    = BPHParticleMasses::jPsiMass - 0.150;
+  double lbIJPsiMassMax    = BPHParticleMasses::jPsiMass + 0.150;
+  double lbIJPsiPtMin      = 25.0;
+  double lbIJPsiEtaMax     = -1.0;
+  double lbIJPsiYMax       = -1.0;
+  double lbILambda0MassMin = BPHParticleMasses::lambda0Mass - 0.006;
+  double lbILambda0MassMax = BPHParticleMasses::lambda0Mass + 0.006;
+  double lbILambda0PtMin   = -1.0;
+  double lbILambda0EtaMax  = -1.0;
+  double lbILambda0YMax    = -1.0;
+  double lbIProbMin        =  0.10;
+  double lbICosMin         = -2.0;
+  double lbISigMin         = -1.0;
+//  double lbIMuPtMinLoose   =  -1.0;
+//  double lbIMuPtMinTight   =  -1.0;
+//  double lbIMuEtaMaxLoose  =  -1.0;
+//  double lbIMuEtaMaxTight  =  -1.0;
+
+  lbIBasicSelect        = new BPHFittedBasicSelect(
+                              lbIMassMin, lbIMassMax,
+                              lbIPtMin  , lbIEtaMax , lbIYMax );
+  lbIJPsiBasicSelect    = new BPHCompositeBasicSelect(
+                              lbIJPsiMassMin, lbIJPsiMassMax,
+                              lbIJPsiPtMin  , lbIJPsiEtaMax , lbIJPsiYMax );
+  lbILambda0BasicSelect = new BPHCompositeBasicSelect(
+                              lbILambda0MassMin, lbILambda0MassMax,
+                              lbILambda0PtMin  , lbILambda0EtaMax ,
+                              lbILambda0YMax );
+  lbIVertexSelect       = new BPHVertexSelect( 'f',
+                              lbIProbMin, lbICosMin, lbISigMin );
+  lbIJPsiDaughterSelect = 0;
+//  lbIJPsiDaughterSelect = new BPHDaughterSelect(
+//                              lbIMuPtMinLoose , lbIMuPtMinTight ,
+//                              lbIMuEtaMaxLoose, lbIMuEtaMaxTight, sms );
+
+  double lbDMassMin        =      0.0;
+  double lbDMassMax        = 999999.0;
+  double lbDPtMin          = 10.0;
+  double lbDEtaMax         = -1.0;
+  double lbDYMax           = -1.0;
+  double lbDJPsiMassMin    = BPHParticleMasses::jPsiMass - 0.150;
+  double lbDJPsiMassMax    = BPHParticleMasses::jPsiMass + 0.150;
+  double lbDJPsiPtMin      =  8.0;
+  double lbDJPsiEtaMax     = -1.0;
+  double lbDJPsiYMax       = -1.0;
+  double lbDLambda0MassMin = BPHParticleMasses::lambda0Mass - 0.006;
+  double lbDLambda0MassMax = BPHParticleMasses::lambda0Mass + 0.006;
+  double lbDLambda0PtMin   = -1.0;
+  double lbDLambda0EtaMax  = -1.0;
+  double lbDLambda0YMax    = -1.0;
+  double lbDProbMin        =  0.10;
+  double lbDCosMin         =  0.99;
+  double lbDSigMin         =  3.0;
+//  double lbDMuPtMinLoose   = -1.0;
+//  double lbDMuPtMinTight   = -1.0;
+//  double lbDMuEtaMaxLoose  = -1.0;
+//  double lbDMuEtaMaxTight  = -1.0;
+
+  lbDBasicSelect        = new BPHFittedBasicSelect(
+                              lbDMassMin, lbDMassMax,
+                              lbDPtMin  , lbDEtaMax , lbDYMax );
+  lbDJPsiBasicSelect    = new BPHCompositeBasicSelect(
+                              lbDJPsiMassMin, lbDJPsiMassMax,
+                              lbDJPsiPtMin  , lbDJPsiEtaMax , lbDJPsiYMax );
+  lbDLambda0BasicSelect = new BPHCompositeBasicSelect(
+                              lbDLambda0MassMin, lbDLambda0MassMax,
+                              lbDLambda0PtMin  , lbDLambda0EtaMax ,
+                              lbDLambda0YMax );
+  lbDVertexSelect       = new BPHVertexSelect( 'f',
+                              lbDProbMin, lbDCosMin, lbDSigMin );
+  lbDJPsiDaughterSelect = 0;
+//  lbDJPsiDaughterSelect = new BPHDaughterSelect(
+//                              lbDMuPtMinLoose , lbDMuPtMinTight ,
+//                              lbDMuEtaMaxLoose, lbDMuEtaMaxTight, sms );
 
 }
 
@@ -879,6 +1055,28 @@ BPHHistoSpecificDecay::~BPHHistoSpecificDecay() {
   delete bsDVertexSelect;
   delete bsDJPsiDaughterSelect;
 
+  delete b0IBasicSelect;
+  delete b0IJPsiBasicSelect;
+  delete b0IK0sBasicSelect;
+  delete b0IVertexSelect;
+  delete b0IJPsiDaughterSelect;
+  delete b0DBasicSelect;
+  delete b0DJPsiBasicSelect;
+  delete b0DK0sBasicSelect;
+  delete b0DVertexSelect;
+  delete b0DJPsiDaughterSelect;
+
+  delete lbIBasicSelect;
+  delete lbIJPsiBasicSelect;
+  delete lbILambda0BasicSelect;
+  delete lbIVertexSelect;
+  delete lbIJPsiDaughterSelect;
+  delete lbDBasicSelect;
+  delete lbDJPsiBasicSelect;
+  delete lbDLambda0BasicSelect;
+  delete lbDVertexSelect;
+  delete lbDJPsiDaughterSelect;
+
 }
 
 
@@ -894,6 +1092,8 @@ void BPHHistoSpecificDecay::fillDescriptions(
    desc.add<string>(     "bsCandsLabel", "" );
    desc.add<string>(     "k0CandsLabel", "" );
    desc.add<string>(     "l0CandsLabel", "" );
+   desc.add<string>(     "b0CandsLabel", "" );
+   desc.add<string>(     "lbCandsLabel", "" );
    descriptions.add( "process.bphHistoSpecificDecay", desc );
    return;
 }
@@ -901,79 +1101,103 @@ void BPHHistoSpecificDecay::fillDescriptions(
 
 void BPHHistoSpecificDecay::beginJob() {
 
-  createHisto( "massDIPhi"   ,  35, 0.85, 1.20 ); // Phi  mass inclusive
-  createHisto( "massTIPhi"   ,  35, 0.85, 1.20 ); // Phi  mass inclusive
-  createHisto( "massDBPhi"   ,  35, 0.85, 1.20 ); // Phi  mass barrel
-  createHisto( "massTBPhi"   ,  35, 0.85, 1.20 ); // Phi  mass barrel
-  createHisto( "massDIJPsi"  ,  35, 2.95, 3.30 ); // JPsi mass inclusive
-  createHisto( "massTIJPsi"  ,  35, 2.95, 3.30 ); // JPsi mass inclusive
-  createHisto( "massDBJPsi"  ,  35, 2.95, 3.30 ); // JPsi mass barrel
-  createHisto( "massTBJPsi"  ,  35, 2.95, 3.30 ); // JPsi mass barrel
-  createHisto( "massDIPsi2"  ,  60, 3.40, 4.00 ); // Psi2 mass inclusive
-  createHisto( "massTIPsi2"  ,  60, 3.40, 4.00 ); // Psi2 mass inclusive
-  createHisto( "massDBPsi2"  ,  60, 3.40, 4.00 ); // Psi2 mass barrel
-  createHisto( "massTBPsi2"  ,  60, 3.40, 4.00 ); // Psi2 mass barrel
-  createHisto( "massDIUps123", 125, 8.50, 11.0 ); // Ups  mass inclusive
-  createHisto( "massTIUps123", 125, 8.50, 11.0 ); // Ups  mass inclusive
-  createHisto( "massDBUps123", 125, 8.50, 11.0 ); // Ups  mass barrel
-  createHisto( "massTBUps123", 125, 8.50, 11.0 ); // Ups  mass barrel
-  createHisto( "massDIBu"    ,  50, 5.00, 6.00 ); // Bu   mass inclusive
-  createHisto( "massTIBu"    ,  50, 5.00, 6.00 ); // Bu   mass inclusive
-  createHisto( "massDDBu"    ,  50, 5.00, 6.00 ); // Bu   mass displaced
-  createHisto( "massTDBu"    ,  50, 5.00, 6.00 ); // Bu   mass displaced
-  createHisto( "massDIBd"    ,  50, 5.00, 6.00 ); // Bd   mass inclusive
-  createHisto( "massTIBd"    ,  50, 5.00, 6.00 ); // Bd   mass inclusive
-  createHisto( "massDDBd"    ,  50, 5.00, 6.00 ); // Bd   mass displaced
-  createHisto( "massTDBd"    ,  50, 5.00, 6.00 ); // Bd   mass displaced
-  createHisto( "massDIBs"    ,  50, 5.00, 6.00 ); // Bs   mass inclusive
-  createHisto( "massTIBs"    ,  50, 5.00, 6.00 ); // Bs   mass inclusive
-  createHisto( "massDDBs"    ,  50, 5.00, 6.00 ); // Bs   mass displaced
-  createHisto( "massTDBs"    ,  50, 5.00, 6.00 ); // Bs   mass displaced
-  createHisto( "mfitDIBu"    ,  50, 5.00, 6.00 ); // Bu   mass, with constraint
-  createHisto( "mfitTIBu"    ,  50, 5.00, 6.00 ); // Bu   mass, with constraint
-  createHisto( "mfitDDBu"    ,  50, 5.00, 6.00 ); // Bu   mass, with constraint
-  createHisto( "mfitTDBu"    ,  50, 5.00, 6.00 ); // Bu   mass, with constraint
-  createHisto( "mfitDIBd"    ,  50, 5.00, 6.00 ); // Bd   mass, with constraint
-  createHisto( "mfitTIBd"    ,  50, 5.00, 6.00 ); // Bd   mass, with constraint
-  createHisto( "mfitDDBd"    ,  50, 5.00, 6.00 ); // Bd   mass, with constraint
-  createHisto( "mfitTDBd"    ,  50, 5.00, 6.00 ); // Bd   mass, with constraint
-  createHisto( "mfitDIBs"    ,  50, 5.00, 6.00 ); // Bs   mass, with constraint
-  createHisto( "mfitTIBs"    ,  50, 5.00, 6.00 ); // Bs   mass, with constraint
-  createHisto( "mfitDDBs"    ,  50, 5.00, 6.00 ); // Bs   mass, with constraint
-  createHisto( "mfitTDBs"    ,  50, 5.00, 6.00 ); // Bs   mass, with constraint
-  createHisto( "massDBuJPsi" ,  35, 2.95, 3.30 ); // JPsi mass in Bu decay
-  createHisto( "massTBuJPsi" ,  35, 2.95, 3.30 ); // JPsi mass in Bu decay
-  createHisto( "massDBdJPsi" ,  35, 2.95, 3.30 ); // JPsi mass in Bd decay
-  createHisto( "massTBdJPsi" ,  35, 2.95, 3.30 ); // JPsi mass in Bd decay
-  createHisto( "massDBsJPsi" ,  35, 2.95, 3.30 ); // JPsi mass in Bs decay
-  createHisto( "massTBsJPsi" ,  35, 2.95, 3.30 ); // JPsi mass in Bs decay
-  createHisto( "massDBsPhi"  ,  50, 1.01, 1.03 ); // Phi  mass in Bs decay
-  createHisto( "massTBsPhi"  ,  50, 1.01, 1.03 ); // Phi  mass in Bs decay
-  createHisto( "massDBdKx0"  ,  50, 0.80, 1.05 ); // Kx0  mass in Bd decay
-  createHisto( "massTBdKx0"  ,  50, 0.80, 1.05 ); // Kx0  mass in Bd decay
-  createHisto( "massDK0s"    ,  50, 0.40, 0.60 ); // K0s  mass
-  createHisto( "mfitDK0s"    ,  50, 0.40, 0.60 ); // K0s  mass
-  createHisto( "massDLambda0",  50, 1.00, 1.30 ); // Lambda0 mass
-  createHisto( "mfitDLambda0",  50, 1.00, 1.30 ); // Lambda0 mass
+  createHisto( "massDIPhi"    ,  35, 0.85, 1.20 ); // Phi  mass inclusive
+  createHisto( "massTIPhi"    ,  35, 0.85, 1.20 ); // Phi  mass inclusive
+  createHisto( "massDBPhi"    ,  35, 0.85, 1.20 ); // Phi  mass barrel
+  createHisto( "massTBPhi"    ,  35, 0.85, 1.20 ); // Phi  mass barrel
+  createHisto( "massDIJPsi"   ,  35, 2.95, 3.30 ); // JPsi mass inclusive
+  createHisto( "massTIJPsi"   ,  35, 2.95, 3.30 ); // JPsi mass inclusive
+  createHisto( "massDBJPsi"   ,  35, 2.95, 3.30 ); // JPsi mass barrel
+  createHisto( "massTBJPsi"   ,  35, 2.95, 3.30 ); // JPsi mass barrel
+  createHisto( "massDIPsi2"   ,  60, 3.40, 4.00 ); // Psi2 mass inclusive
+  createHisto( "massTIPsi2"   ,  60, 3.40, 4.00 ); // Psi2 mass inclusive
+  createHisto( "massDBPsi2"   ,  60, 3.40, 4.00 ); // Psi2 mass barrel
+  createHisto( "massTBPsi2"   ,  60, 3.40, 4.00 ); // Psi2 mass barrel
+  createHisto( "massDIUps123" , 125, 8.50, 11.0 ); // Ups  mass inclusive
+  createHisto( "massTIUps123" , 125, 8.50, 11.0 ); // Ups  mass inclusive
+  createHisto( "massDBUps123" , 125, 8.50, 11.0 ); // Ups  mass barrel
+  createHisto( "massTBUps123" , 125, 8.50, 11.0 ); // Ups  mass barrel
+  createHisto( "massDIBu"     ,  50, 5.00, 6.00 ); // Bu   mass inclusive
+  createHisto( "massTIBu"     ,  50, 5.00, 6.00 ); // Bu   mass inclusive
+  createHisto( "massDDBu"     ,  50, 5.00, 6.00 ); // Bu   mass displaced
+  createHisto( "massTDBu"     ,  50, 5.00, 6.00 ); // Bu   mass displaced
+  createHisto( "massDIBd"     ,  50, 5.00, 6.00 ); // Bd   mass inclusive
+  createHisto( "massTIBd"     ,  50, 5.00, 6.00 ); // Bd   mass inclusive
+  createHisto( "massDDBd"     ,  50, 5.00, 6.00 ); // Bd   mass displaced
+  createHisto( "massTDBd"     ,  50, 5.00, 6.00 ); // Bd   mass displaced
+  createHisto( "massDIBs"     ,  50, 5.00, 6.00 ); // Bs   mass inclusive
+  createHisto( "massTIBs"     ,  50, 5.00, 6.00 ); // Bs   mass inclusive
+  createHisto( "massDDBs"     ,  50, 5.00, 6.00 ); // Bs   mass displaced
+  createHisto( "massTDBs"     ,  50, 5.00, 6.00 ); // Bs   mass displaced
+  createHisto( "mfitDIBu"     ,  50, 5.00, 6.00 ); // Bu   mass, with constr.
+  createHisto( "mfitTIBu"     ,  50, 5.00, 6.00 ); // Bu   mass, with constr.
+  createHisto( "mfitDDBu"     ,  50, 5.00, 6.00 ); // Bu   mass, with constr.
+  createHisto( "mfitTDBu"     ,  50, 5.00, 6.00 ); // Bu   mass, with constr.
+  createHisto( "mfitDIBd"     ,  50, 5.00, 6.00 ); // Bd   mass, with constr.
+  createHisto( "mfitTIBd"     ,  50, 5.00, 6.00 ); // Bd   mass, with constr.
+  createHisto( "mfitDDBd"     ,  50, 5.00, 6.00 ); // Bd   mass, with constr.
+  createHisto( "mfitTDBd"     ,  50, 5.00, 6.00 ); // Bd   mass, with constr.
+  createHisto( "mfitDIBs"     ,  50, 5.00, 6.00 ); // Bs   mass, with constr.
+  createHisto( "mfitTIBs"     ,  50, 5.00, 6.00 ); // Bs   mass, with constr.
+  createHisto( "mfitDDBs"     ,  50, 5.00, 6.00 ); // Bs   mass, with constr.
+  createHisto( "mfitTDBs"     ,  50, 5.00, 6.00 ); // Bs   mass, with constr.
+  createHisto( "massDBuJPsi"  ,  35, 2.95, 3.30 ); // JPsi mass in Bu decay
+  createHisto( "massTBuJPsi"  ,  35, 2.95, 3.30 ); // JPsi mass in Bu decay
+  createHisto( "massDBdJPsi"  ,  35, 2.95, 3.30 ); // JPsi mass in Bd decay
+  createHisto( "massTBdJPsi"  ,  35, 2.95, 3.30 ); // JPsi mass in Bd decay
+  createHisto( "massDBsJPsi"  ,  35, 2.95, 3.30 ); // JPsi mass in Bs decay
+  createHisto( "massTBsJPsi"  ,  35, 2.95, 3.30 ); // JPsi mass in Bs decay
+  createHisto( "massDBsPhi"   ,  50, 1.01, 1.03 ); // Phi  mass in Bs decay
+  createHisto( "massTBsPhi"   ,  50, 1.01, 1.03 ); // Phi  mass in Bs decay
+  createHisto( "massDBdKx0"   ,  50, 0.80, 1.05 ); // Kx0  mass in Bd decay
+  createHisto( "massTBdKx0"   ,  50, 0.80, 1.05 ); // Kx0  mass in Bd decay
+  createHisto( "massDK0s"     ,  50, 0.40, 0.60 ); // K0s  mass
+  createHisto( "mfitDK0s"     ,  50, 0.40, 0.60 ); // K0s  mass
+  createHisto( "massDLambda0" ,  50, 1.00, 1.30 ); // Lambda0 mass
+  createHisto( "mfitDLambda0" ,  50, 1.00, 1.30 ); // Lambda0 mass
+  createHisto( "massDIB0"     ,  50, 5.00, 6.00 ); // B0   mass inclusive
+  createHisto( "massTIB0"     ,  50, 5.00, 6.00 ); // B0   mass inclusive
+  createHisto( "massDDB0"     ,  50, 5.00, 6.00 ); // B0   mass displaced
+  createHisto( "massTDB0"     ,  50, 5.00, 6.00 ); // B0   mass displaced
+  createHisto( "mfitDIB0"     ,  50, 5.00, 6.00 ); // B0   mass, with constr.
+  createHisto( "mfitTIB0"     ,  50, 5.00, 6.00 ); // B0   mass, with constr.
+  createHisto( "mfitDDB0"     ,  50, 5.00, 6.00 ); // B0   mass, with constr.
+  createHisto( "mfitTDB0"     ,  50, 5.00, 6.00 ); // B0   mass, with constr.
+  createHisto( "massDILambdab",  25, 5.00, 6.00 ); // Lambdab mass inclusive
+  createHisto( "massTILambdab",  25, 5.00, 6.00 ); // Lambdab mass inclusive
+  createHisto( "massDDLambdab",  25, 5.00, 6.00 ); // Lambdab mass displaced
+  createHisto( "massTDLambdab",  25, 5.00, 6.00 ); // Lambdab mass displaced
+  createHisto( "mfitDILambdab",  25, 5.00, 6.00 ); // Lambdab mass, with constr.
+  createHisto( "mfitTILambdab",  25, 5.00, 6.00 ); // Lambdab mass, with constr.
+  createHisto( "mfitDDLambdab",  25, 5.00, 6.00 ); // Lambdab mass, with constr.
+  createHisto( "mfitTDLambdab",  25, 5.00, 6.00 ); // Lambdab mass, with constr.
 
-  createHisto( "massFull"   , 200, 2.00, 12.0 ); // Full onia mass
+  createHisto( "massFull"     , 200, 2.00, 12.0 ); // Full onia mass
 
-  createHisto( "ctauDIJPsi"  ,  60, -0.05, 0.25 ); // JPsi ctau inclusive
-  createHisto( "ctauTIJPsi"  ,  60, -0.05, 0.25 ); // JPsi ctau inclusive
-  createHisto( "ctauDBJPsi"  ,  60, -0.05, 0.25 ); // JPsi ctau barrel
-  createHisto( "ctauTBJPsi"  ,  60, -0.05, 0.25 ); // JPsi ctau barrel
-  createHisto( "ctauDIBu"    ,  60, -0.05, 0.25 ); // Bu   ctau inclusive
-  createHisto( "ctauTIBu"    ,  60, -0.05, 0.25 ); // Bu   ctau inclusive
-  createHisto( "ctauDDBu"    ,  60, -0.05, 0.25 ); // Bu   ctau displaced
-  createHisto( "ctauTDBu"    ,  60, -0.05, 0.25 ); // Bu   ctau displaced
-  createHisto( "ctauDIBd"    ,  60, -0.05, 0.25 ); // Bd   ctau inclusive
-  createHisto( "ctauTIBd"    ,  60, -0.05, 0.25 ); // Bd   ctau inclusive
-  createHisto( "ctauDDBd"    ,  60, -0.05, 0.25 ); // Bd   ctau displaced
-  createHisto( "ctauTDBd"    ,  60, -0.05, 0.25 ); // Bd   ctau displaced
-  createHisto( "ctauDIBs"    ,  60, -0.05, 0.25 ); // Bs   ctau inclusive
-  createHisto( "ctauTIBs"    ,  60, -0.05, 0.25 ); // Bs   ctau inclusive
-  createHisto( "ctauDDBs"    ,  60, -0.05, 0.25 ); // Bs   ctau displaced
-  createHisto( "ctauTDBs"    ,  60, -0.05, 0.25 ); // Bs   ctau displaced
+  createHisto( "ctauDIJPsi"   ,  60, -0.05, 0.25 ); // JPsi ctau inclusive
+  createHisto( "ctauTIJPsi"   ,  60, -0.05, 0.25 ); // JPsi ctau inclusive
+  createHisto( "ctauDBJPsi"   ,  60, -0.05, 0.25 ); // JPsi ctau barrel
+  createHisto( "ctauTBJPsi"   ,  60, -0.05, 0.25 ); // JPsi ctau barrel
+  createHisto( "ctauDIBu"     ,  60, -0.05, 0.25 ); // Bu   ctau inclusive
+  createHisto( "ctauTIBu"     ,  60, -0.05, 0.25 ); // Bu   ctau inclusive
+  createHisto( "ctauDDBu"     ,  60, -0.05, 0.25 ); // Bu   ctau displaced
+  createHisto( "ctauTDBu"     ,  60, -0.05, 0.25 ); // Bu   ctau displaced
+  createHisto( "ctauDIBd"     ,  60, -0.05, 0.25 ); // Bd   ctau inclusive
+  createHisto( "ctauTIBd"     ,  60, -0.05, 0.25 ); // Bd   ctau inclusive
+  createHisto( "ctauDDBd"     ,  60, -0.05, 0.25 ); // Bd   ctau displaced
+  createHisto( "ctauTDBd"     ,  60, -0.05, 0.25 ); // Bd   ctau displaced
+  createHisto( "ctauDIBs"     ,  60, -0.05, 0.25 ); // Bs   ctau inclusive
+  createHisto( "ctauTIBs"     ,  60, -0.05, 0.25 ); // Bs   ctau inclusive
+  createHisto( "ctauDDBs"     ,  60, -0.05, 0.25 ); // Bs   ctau displaced
+  createHisto( "ctauTDBs"     ,  60, -0.05, 0.25 ); // Bs   ctau displaced
+  createHisto( "ctauDIB0"     ,  60, -0.05, 0.25 ); // B0   ctau inclusive
+  createHisto( "ctauTIB0"     ,  60, -0.05, 0.25 ); // B0   ctau inclusive
+  createHisto( "ctauDDB0"     ,  60, -0.05, 0.25 ); // B0   ctau displaced
+  createHisto( "ctauTDB0"     ,  60, -0.05, 0.25 ); // B0   ctau displaced
+  createHisto( "ctauDILambdab",  60, -0.05, 0.25 ); // Lambdab ctau inclusive
+  createHisto( "ctauTILambdab",  60, -0.05, 0.25 ); // Lambdab ctau inclusive
+  createHisto( "ctauDDLambdab",  60, -0.05, 0.25 ); // Lambdab ctau displaced
+  createHisto( "ctauTDLambdab",  60, -0.05, 0.25 ); // Lambdab ctau displaced
 
   return;
 
@@ -981,6 +1205,35 @@ void BPHHistoSpecificDecay::beginJob() {
 
 void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
                                      const edm::EventSetup& es ) {
+
+  static map<string,ofstream*> ofMap;
+  if ( !ofMap.size() ) {
+    ofMap["BarPhi"] = 0;
+    ofMap["IncJPsi"] = 0;
+    ofMap["BarJPsi"] = 0;
+    ofMap["IncPsi2"] = 0;
+    ofMap["BarPsi2"] = 0;
+    ofMap["BarUpsilon123"] = 0;
+    ofMap["InclusiveBu"] = 0;
+    ofMap["DisplacedBu"] = 0;
+    ofMap["InclusiveBd"] = 0;
+    ofMap["DisplacedBd"] = 0;
+    ofMap["InclusiveBs"] = 0;
+    ofMap["DisplacedBs"] = 0;
+    ofMap["K0s"] = 0;
+    ofMap["Lambda0"] = 0;
+    ofMap["InclusiveB0"] = 0;
+    ofMap["DisplacedB0"] = 0;
+    ofMap["InclusiveLambdab"] = 0;
+    ofMap["DisplacedLambdab"] = 0;
+    map<string,ofstream*>::iterator iter = ofMap.begin();
+    map<string,ofstream*>::iterator iend = ofMap.end();
+    string name = "list";
+    while ( iter != iend ) {
+      iter->second = new ofstream( name + iter->first );
+      ++iter;
+    }
+  }
 
   // get magnetic field
   edm::ESHandle<MagneticField> magneticField;
@@ -1045,31 +1298,61 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
       fillHisto( "DBPhi"   , cand, 'c' );
       if ( flag_Dimuon14_Phi_Barrel_Seagulls )
       fillHisto( "TBPhi"   , cand, 'c' );
+      if ( flag_Dimuon14_Phi_Barrel_Seagulls )
+      *ofMap["BarPhi"] << ev.id().run() << ' '
+                       << ev.id().luminosityBlock() << ' '
+                       << ev.id().event() << ' '
+                       << cand.mass() << endl;
     }
     if ( jPsiIBasicSelect->accept( cand ) ) {
       fillHisto( "DIJPsi"  , cand, 'c' );
       if ( flag_Dimuon25_Jpsi )
       fillHisto( "TIJPsi"  , cand, 'c' );
+      if ( flag_Dimuon25_Jpsi )
+      *ofMap["IncJPsi"] << ev.id().run() << ' '
+                        << ev.id().luminosityBlock() << ' '
+                        << ev.id().event() << ' '
+                        << cand.mass() << endl;
     }
     if ( jPsiBBasicSelect->accept( cand ) ) {
       fillHisto( "DBJPsi"  , cand, 'c' );
       if ( flag_Dimuon20_Jpsi_Barrel_Seagulls )
       fillHisto( "TBJPsi"  , cand, 'c' );
+      if ( flag_Dimuon20_Jpsi_Barrel_Seagulls )
+      *ofMap["BarJPsi"] << ev.id().run() << ' '
+                        << ev.id().luminosityBlock() << ' '
+                        << ev.id().event() << ' '
+                        << cand.mass() << endl;
     }
     if ( psi2IBasicSelect->accept( cand ) ) {
       fillHisto( "DIPsi2"  , cand, 'c' );
       if ( flag_Dimuon18_PsiPrime )
       fillHisto( "TIPsi2"  , cand, 'c' );
+      if ( flag_Dimuon18_PsiPrime )
+      *ofMap["IncPsi2"] << ev.id().run() << ' '
+                        << ev.id().luminosityBlock() << ' '
+                        << ev.id().event() << ' '
+                        << cand.mass() << endl;
     }
     if ( psi2BBasicSelect->accept( cand ) ) {
       fillHisto( "DBPsi2"  , cand, 'c' );
       if ( flag_Dimuon10_PsiPrime_Barrel_Seagulls )
       fillHisto( "TBPsi2"  , cand, 'c' );
+      if ( flag_Dimuon10_PsiPrime_Barrel_Seagulls )
+      *ofMap["BarPsi2"] << ev.id().run() << ' '
+                        << ev.id().luminosityBlock() << ' '
+                        << ev.id().event() << ' '
+                        << cand.mass() << endl;
     }
     if (  upsBBasicSelect->accept( cand ) ) {
       fillHisto( "DBUps123", cand, 'c' );
       if ( flag_Dimuon12_Upsilon_eta1p5 )
       fillHisto( "TBUps123", cand, 'c' );
+      if ( flag_Dimuon12_Upsilon_eta1p5 )
+      *ofMap["BarUpsilon123"] << ev.id().run() << ' '
+                              << ev.id().luminosityBlock() << ' '
+                              << ev.id().event() << ' '
+                              << cand.mass() << endl;
     }
   }
 
@@ -1096,7 +1379,7 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
     if ( !npJPsiDaughterSelect->accept( *jPsi ) ) continue;
     const reco::Candidate* kptr = BPHDaughters::get( cand, 0.49, 0.50 ).front();
     if ( kptr == 0 ) continue;
-    if ( buIBasicSelect       ->accept( *jPsi ) &&
+    if ( buIBasicSelect       ->accept(  cand ) &&
          buIJPsiBasicSelect   ->accept( *jPsi ) &&
 //         buIJPsiDaughterSelect->accept( *jPsi ) &&
          buIVertexSelect      ->accept( cand,
@@ -1108,9 +1391,15 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
       if ( flag_Dimuon25_Jpsi ) {
 	fillHisto( "TIBu"    ,  cand, 'f' );
 	fillHisto( "TIBuJPsi", *jPsi, 'c' );
+        *ofMap["InclusiveBu"] << ev.id().run() << ' '
+                              << ev.id().luminosityBlock() << ' '
+                              << ev.id().event() << ' '
+                              << ( cand.hasUserFloat( "fitMass" ) ?
+                                   cand.   userFloat( "fitMass" ) : -1 )
+                              << endl;
       }
     }
-    if ( buDBasicSelect       ->accept( *jPsi ) &&
+    if ( buDBasicSelect       ->accept(  cand ) &&
          buDJPsiBasicSelect   ->accept( *jPsi ) &&
 //         buDJPsiDaughterSelect->accept( *jPsi ) &&
          buDVertexSelect      ->accept( cand,
@@ -1122,11 +1411,17 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
       if ( flag_DoubleMu4_JpsiTrk_Displaced ) {
 	fillHisto( "TDBu"    ,  cand, 'f' );
 	fillHisto( "TDBuJPsi", *jPsi, 'c' );
+        *ofMap["DisplacedBu"] << ev.id().run() << ' '
+                              << ev.id().luminosityBlock() << ' '
+                              << ev.id().event() << ' '
+                              << ( cand.hasUserFloat( "fitMass" ) ?
+                                   cand.   userFloat( "fitMass" ) : -1 )
+                              << endl;
       }
     }
   }
 
-  //////////// Bd ////////////
+  //////////// Bd -> JPsi Kx0 ////////////
 
   edm::Handle< vector<pat::CompositeCandidate> > bdCands;
   int ibd;
@@ -1152,7 +1447,7 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
     LogTrace( "DataDump" )
            << "Kx0: " << kx0;
     if ( kx0 == 0 ) continue;
-    if ( bdIBasicSelect       ->accept( *jPsi ) &&
+    if ( bdIBasicSelect       ->accept(  cand ) &&
          bdIJPsiBasicSelect   ->accept( *jPsi ) &&
          bdIKx0BasicSelect    ->accept( * kx0 ) &&
 //         bdIJPsiDaughterSelect->accept( *jPsi ) &&
@@ -1164,9 +1459,15 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
       if ( flag_Dimuon25_Jpsi ) {
 	fillHisto( "TIBd"    ,  cand, 'f' );
 	fillHisto( "TIBdJPsi", *jPsi, 'c' );
+        *ofMap["InclusiveBd"] << ev.id().run() << ' '
+                              << ev.id().luminosityBlock() << ' '
+                              << ev.id().event() << ' '
+                              << ( cand.hasUserFloat( "fitMass" ) ?
+                                   cand.   userFloat( "fitMass" ) : -1 )
+                              << endl;
       }
     }
-    if ( bdDBasicSelect       ->accept( *jPsi ) &&
+    if ( bdDBasicSelect       ->accept(  cand ) &&
          bdDJPsiBasicSelect   ->accept( *jPsi ) &&
          bdDKx0BasicSelect    ->accept( * kx0 ) &&
 //         bdDJPsiDaughterSelect->accept( *jPsi ) &&
@@ -1178,6 +1479,12 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
       if ( flag_DoubleMu4_JpsiTrk_Displaced ) {
 	fillHisto( "TDBd"    ,  cand, 'f' );
 	fillHisto( "TDBdJPsi", *jPsi, 'c' );
+        *ofMap["DisplacedBd"] << ev.id().run() << ' '
+                              << ev.id().luminosityBlock() << ' '
+                              << ev.id().event() << ' '
+                              << ( cand.hasUserFloat( "fitMass" ) ?
+                                   cand.   userFloat( "fitMass" ) : -1 )
+                              << endl;
       }
     }
   }
@@ -1201,12 +1508,14 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
     LogTrace( "DataDump" )
            << "JPsi: " << jPsi;
     if ( jPsi == 0 ) continue;
+    if ( !npJPsiBasicSelect   ->accept( *jPsi ) ) continue;
+    if ( !npJPsiDaughterSelect->accept( *jPsi ) ) continue;
     const pat::CompositeCandidate* phi = BPHUserData::getByRef
          <pat::CompositeCandidate>( cand, "refToPhi" );
     LogTrace( "DataDump" )
            << "Phi: " << phi;
     if ( phi == 0 ) continue;
-    if ( bsIBasicSelect       ->accept( *jPsi ) &&
+    if ( bsIBasicSelect       ->accept(  cand ) &&
          bsIJPsiBasicSelect   ->accept( *jPsi ) &&
          bsIPhiBasicSelect    ->accept( * phi ) &&
 //         bsIJPsiDaughterSelect->accept( *jPsi ) &&
@@ -1218,9 +1527,15 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
       if ( flag_Dimuon25_Jpsi ) {
 	fillHisto( "TIBs"    ,  cand, 'f' );
 	fillHisto( "TIBsJPsi", *jPsi, 'c' );
+        *ofMap["InclusiveBs"] << ev.id().run() << ' '
+                              << ev.id().luminosityBlock() << ' '
+                              << ev.id().event() << ' '
+                              << ( cand.hasUserFloat( "fitMass" ) ?
+                                   cand.   userFloat( "fitMass" ) : -1 )
+                              << endl;
       }
     }
-    if ( bsDBasicSelect       ->accept( *jPsi ) &&
+    if ( bsDBasicSelect       ->accept(  cand ) &&
          bsDJPsiBasicSelect   ->accept( *jPsi ) &&
          bsDPhiBasicSelect    ->accept( * phi ) &&
 //         bsDJPsiDaughterSelect->accept( *jPsi ) &&
@@ -1232,6 +1547,12 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
       if ( flag_DoubleMu4_JpsiTrk_Displaced ) {
 	fillHisto( "TDBs"    ,  cand, 'f' );
 	fillHisto( "TDBsJPsi", *jPsi, 'c' );
+        *ofMap["DisplacedBs"] << ev.id().run() << ' '
+                              << ev.id().luminosityBlock() << ' '
+                              << ev.id().event() << ' '
+                              << ( cand.hasUserFloat( "fitMass" ) ?
+                                   cand.   userFloat( "fitMass" ) : -1 )
+                              << endl;
       }
     }
   }
@@ -1251,6 +1572,12 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
            << "*********** K0 " << ik0 << "/" << nk0 << " ***********";
     const pat::CompositeCandidate& cand = k0Cands->at( ik0 );
     fillHisto( "DK0s", cand, 'f' );
+    *ofMap["K0s"] << ev.id().run() << ' '
+                  << ev.id().luminosityBlock() << ' '
+                  << ev.id().event() << ' '
+                  << ( cand.hasUserFloat( "fitMass" ) ?
+                       cand.   userFloat( "fitMass" ) : -1 )
+                  << endl;
   }
 
   //////////// Lambda0 ////////////
@@ -1268,6 +1595,152 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
            << "*********** Lambda0 " << il0 << "/" << nl0 << " ***********";
     const pat::CompositeCandidate& cand = l0Cands->at( il0 );
     fillHisto( "DLambda0", cand, 'f' );
+    *ofMap["Lambda0"] << ev.id().run() << ' '
+                      << ev.id().luminosityBlock() << ' '
+                      << ev.id().event() << ' '
+                      << ( cand.hasUserFloat( "fitMass" ) ?
+                           cand.   userFloat( "fitMass" ) : -1 )
+                      << endl;
+  }
+
+  //////////// Bd -> JPsi K0s ////////////
+
+  edm::Handle< vector<pat::CompositeCandidate> > b0Cands;
+  int ib0;
+  int nb0 = 0;
+  if ( useB0 ) {
+    b0CandsToken.get( ev, b0Cands );
+    nb0 = b0Cands->size();
+  }
+
+//  cout << nb0 << ' ' << ev.id().run() << ' ' << ev.id().event();
+//  if ( nb0 ) cout << " *************************";
+//  cout << endl;
+
+  for ( ib0 = 0; ib0 < nb0; ++ ib0 ) {
+    LogTrace( "DataDump" )
+           << "*********** B0 " << ib0 << "/" << nb0 << " ***********";
+    const pat::CompositeCandidate& cand = b0Cands->at( ib0 );
+    const pat::CompositeCandidate* jPsi = BPHUserData::getByRef
+         <pat::CompositeCandidate>( cand, "refToJPsi" );
+    LogTrace( "DataDump" )
+           << "JPsi: " << jPsi;
+    if ( jPsi == 0 ) continue;
+    if ( !npJPsiBasicSelect   ->accept( *jPsi ) ) continue;
+    if ( !npJPsiDaughterSelect->accept( *jPsi ) ) continue;
+    const pat::CompositeCandidate* k0s = BPHUserData::getByRef
+         <pat::CompositeCandidate>( cand, "refToK0s" );
+    LogTrace( "DataDump" )
+           << "K0s: " << k0s;
+    if ( k0s == 0 ) continue;
+    if ( b0IBasicSelect       ->accept(  cand ) &&
+         b0IJPsiBasicSelect   ->accept( *jPsi ) &&
+         b0IK0sBasicSelect    ->accept( * k0s ) &&
+//         b0IJPsiDaughterSelect->accept( *jPsi ) &&
+         b0IVertexSelect      ->accept( cand,
+                                BPHUserData::getByRef<reco::Vertex>( *jPsi,
+                                "primaryVertex" ) ) ) {
+      fillHisto( "DIB0"    ,  cand, 'f' );
+      fillHisto( "DIB0JPsi", *jPsi, 'c' );
+      if ( flag_Dimuon25_Jpsi ) {
+	fillHisto( "TIB0"    ,  cand, 'f' );
+	fillHisto( "TIB0JPsi", *jPsi, 'c' );
+        *ofMap["InclusiveB0"] << ev.id().run() << ' '
+                              << ev.id().luminosityBlock() << ' '
+                              << ev.id().event() << ' '
+                              << ( cand.hasUserFloat( "fitMass" ) ?
+                                   cand.   userFloat( "fitMass" ) : -1 )
+                              << endl;
+      }
+    }
+    if ( b0DBasicSelect       ->accept(  cand ) &&
+         b0DJPsiBasicSelect   ->accept( *jPsi ) &&
+         b0DK0sBasicSelect    ->accept( * k0s ) &&
+//         b0DJPsiDaughterSelect->accept( *jPsi ) &&
+         b0DVertexSelect      ->accept( cand,
+                                BPHUserData::getByRef<reco::Vertex>( *jPsi,
+                                "primaryVertex" ) ) ) {
+      fillHisto( "DDB0"    ,  cand, 'f' );
+      fillHisto( "DDB0JPsi", *jPsi, 'c' );
+      if ( flag_DoubleMu4_JpsiTrk_Displaced ) {
+	fillHisto( "TDB0"    ,  cand, 'f' );
+	fillHisto( "TDB0JPsi", *jPsi, 'c' );
+        *ofMap["DisplacedB0"] << ev.id().run() << ' '
+                              << ev.id().luminosityBlock() << ' '
+                              << ev.id().event() << ' '
+                              << ( cand.hasUserFloat( "fitMass" ) ?
+                                   cand.   userFloat( "fitMass" ) : -1 )
+                              << endl;
+      }
+    }
+  }
+
+  //////////// Lambdab -> JPsi Lambda0///////////
+
+  edm::Handle< vector<pat::CompositeCandidate> > lbCands;
+  int ilb;
+  int nlb = 0;
+  if ( useLb ) {
+    lbCandsToken.get( ev, lbCands );
+    nlb = lbCands->size();
+  }
+
+  for ( ilb = 0; ilb < nlb; ++ ilb ) {
+    LogTrace( "DataDump" )
+           << "*********** Lambdab " << ilb << "/" << nlb << " ***********";
+    const pat::CompositeCandidate& cand = lbCands->at( ilb );
+    const pat::CompositeCandidate* jPsi = BPHUserData::getByRef
+         <pat::CompositeCandidate>( cand, "refToJPsi" );
+    LogTrace( "DataDump" )
+           << "JPsi: " << jPsi;
+    if ( jPsi == 0 ) continue;
+    if ( !npJPsiBasicSelect   ->accept( *jPsi ) ) continue;
+    if ( !npJPsiDaughterSelect->accept( *jPsi ) ) continue;
+    const pat::CompositeCandidate* l0 = BPHUserData::getByRef
+         <pat::CompositeCandidate>( cand, "refToLambda0" );
+    LogTrace( "DataDump" )
+           << "Lambda0: " << l0;
+    if ( l0 == 0 ) continue;
+    if ( lbIBasicSelect       ->accept(  cand ) &&
+         lbIJPsiBasicSelect   ->accept( *jPsi ) &&
+         lbILambda0BasicSelect->accept( *  l0 ) &&
+//         lbIJPsiDaughterSelect->accept( *jPsi ) &&
+         lbIVertexSelect      ->accept( cand,
+                                BPHUserData::getByRef<reco::Vertex>( *jPsi,
+                                "primaryVertex" ) ) ) {
+      fillHisto( "DILambdab"    ,  cand, 'f' );
+      fillHisto( "DILambdabJPsi", *jPsi, 'c' );
+      if ( flag_Dimuon25_Jpsi ) {
+	fillHisto( "TILambdab"    ,  cand, 'f' );
+	fillHisto( "TILambdabJPsi", *jPsi, 'c' );
+        *ofMap["InclusiveLambdab"] << ev.id().run() << ' '
+                                   << ev.id().luminosityBlock() << ' '
+                                   << ev.id().event() << ' '
+                                   << ( cand.hasUserFloat( "fitMass" ) ?
+                                        cand.   userFloat( "fitMass" ) : -1 )
+                                   << endl;
+      }
+    }
+    if ( lbDBasicSelect       ->accept(  cand ) &&
+         lbDJPsiBasicSelect   ->accept( *jPsi ) &&
+         lbDLambda0BasicSelect->accept( *  l0 ) &&
+//         lbDJPsiDaughterSelect->accept( *jPsi ) &&
+         lbDVertexSelect      ->accept( cand,
+                                BPHUserData::getByRef<reco::Vertex>( *jPsi,
+                                "primaryVertex" ) ) ) {
+      fillHisto( "DDLambdab"    ,  cand, 'f' );
+      fillHisto( "DDLambdabJPsi", *jPsi, 'c' );
+      if ( flag_DoubleMu4_JpsiTrk_Displaced ) {
+	fillHisto( "TDLambdab"    ,  cand, 'f' );
+	fillHisto( "TDLambdabJPsi", *jPsi, 'c' );
+        *ofMap["DisplacedLambdab"] << ev.id().run() << ' '
+                                   << ev.id().luminosityBlock() << ' '
+                                   << ev.id().event() << ' '
+                                   << ( cand.hasUserFloat( "fitMass" ) ?
+                                        cand.   userFloat( "fitMass" ) : -1 )
+                                   << endl;
+      }
+    }
   }
 
   return;

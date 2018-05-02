@@ -81,6 +81,7 @@ vector<BPHRecoConstCandPtr> BPHBsToJPsiPhiBuilder::build() {
   bBs.filter(  phiName, *mphiSel );
 
   bBs.filter( *massSel );
+  if ( chi2Sel != 0 )
   bBs.filter( *chi2Sel );
   if ( massConstr ) bBs.filter( *mFitSel );
 
@@ -153,7 +154,8 @@ void BPHBsToJPsiPhiBuilder::setMassMax( double m ) {
 
 void BPHBsToJPsiPhiBuilder::setProbMin( double p ) {
   updated = false;
-  chi2Sel->setProbMin( p );
+  delete chi2Sel;
+  chi2Sel = ( p < 0.0 ? 0 : new BPHChi2Select( p ) );
   return;
 }
 
@@ -210,7 +212,7 @@ double BPHBsToJPsiPhiBuilder::getMassMax() const {
 
 
 double BPHBsToJPsiPhiBuilder::getProbMin() const {
-  return chi2Sel->getProbMin();
+  return ( chi2Sel == 0 ? -1.0 : chi2Sel->getProbMin() );
 }
 
 

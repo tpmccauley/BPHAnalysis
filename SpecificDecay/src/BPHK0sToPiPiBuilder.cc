@@ -79,7 +79,7 @@ BPHK0sToPiPiBuilder::BPHK0sToPiPiBuilder(
     ptSel = new BPHParticlePtSelect (  0.0 );
    etaSel = new BPHParticleEtaSelect( 10.0 );
   massSel = new BPHMassSelect( 0.0, 2.0 ) ;
-  chi2Sel = new BPHChi2Select( -1.0 );
+  chi2Sel = 0;
   updated = false;
 }
 
@@ -100,7 +100,7 @@ BPHK0sToPiPiBuilder::BPHK0sToPiPiBuilder(
     ptSel = new BPHParticlePtSelect (  0.0 );
    etaSel = new BPHParticleEtaSelect( 10.0 );
   massSel = new BPHMassSelect( 0.0, 2.0 ) ;
-  chi2Sel = new BPHChi2Select( -1.0 );
+  chi2Sel = 0;
   updated = false;
 }
 
@@ -146,7 +146,7 @@ void BPHK0sToPiPiBuilder::buildFromBPHGenericCollection() {
   bK0s.filter( pionNegName, *etaSel );
 
   bK0s.filter( *massSel );
-  if ( getProbMin() >= 0.0 )
+  if ( chi2Sel != 0 )
   bK0s.filter( *chi2Sel );
 
   k0sList = BPHPlusMinusCandidate::build( bK0s, pionPosName, pionNegName );
@@ -243,7 +243,8 @@ void BPHK0sToPiPiBuilder::setMassMax( double m ) {
 
 void BPHK0sToPiPiBuilder::setProbMin( double p ) {
   updated = false;
-  chi2Sel->setProbMin( p );
+  delete chi2Sel;
+  chi2Sel = ( p < 0.0 ? 0 : new BPHChi2Select( p ) );
   return;
 }
 
@@ -277,7 +278,7 @@ double BPHK0sToPiPiBuilder::getMassMax() const {
 
 
 double BPHK0sToPiPiBuilder::getProbMin() const {
-  return chi2Sel->getProbMin();
+  return ( chi2Sel == 0 ? -1.0 : chi2Sel->getProbMin() );
 }
 
 
