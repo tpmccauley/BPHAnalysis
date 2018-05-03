@@ -422,11 +422,8 @@ void BPHKinematicFit::addParticles(
   while ( m-- ) {
     const BPHRecoCandidate* cptr = comp[m].get();
     if ( cKinP.at( cptr ) ) {
-      cout << "start cKinP " << this << ' ' << cptr << endl;
       VirtualKinematicParticleFactory vFactory;
-      if ( cptr->isEmpty() ) cout << "cKinP empty" << endl;
       if ( cptr->isEmpty() ) return;
-      if ( !cptr->isValidFit() ) cout << "cKinP invalid" << endl;
       if ( !cptr->isValidFit() ) return;
       const RefCountedKinematicParticle part = cptr->topParticle();
       const RefCountedKinematicVertex   pvtx = cptr->topDecayVertex();
@@ -434,7 +431,6 @@ void BPHKinematicFit::addParticles(
       float dof = pvtx->degreesOfFreedom();
       kl.push_back( cm[cptr] = vFactory.particle( part->currentState(),
                                                   chi, dof, part ) );
-      cout << "end cKinP " << this << endl;
     }
     else {
       cptr->addParticles( kl, km, cm );
