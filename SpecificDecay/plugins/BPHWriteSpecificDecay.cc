@@ -286,6 +286,7 @@ void BPHWriteSpecificDecay::fill( edm::Event& ev,
   lB0.clear();
   lLb.clear();
   jPsiOMap.clear();
+  daughMap.clear();
   pvRefMap.clear();
   ccRefMap.clear();
 
@@ -898,6 +899,9 @@ void BPHWriteSpecificDecay::fill( edm::Event& ev,
     }
 
     lB0 = b0->build();
+    const map<const BPHRecoCandidate*,
+              const BPHRecoCandidate*>& b0Map = b0->daughMap();
+    daughMap.insert( b0Map.begin(), b0Map.end() );
     delete b0;
 
   }
@@ -934,6 +938,9 @@ void BPHWriteSpecificDecay::fill( edm::Event& ev,
     }
 
     lLb = lb->build();
+    const map<const BPHRecoCandidate*,
+              const BPHRecoCandidate*>& ldMap = lb->daughMap();
+    daughMap.insert( ldMap.begin(), ldMap.end() );
     delete lb;
 
   }

@@ -84,6 +84,8 @@ vector<BPHPlusMinusConstCandPtr> BPHOniaToMuMuBuilder::build() {
 
   if ( updated ) return fullList;
 
+  fullList.clear();
+
   BPHMultiSelect<BPHRecoSelect    >  ptSel( BPHSelectOperation::or_mode );
   BPHMultiSelect<BPHRecoSelect    > etaSel( BPHSelectOperation::or_mode );
   BPHMultiSelect<BPHMomentumSelect>   mSel( BPHSelectOperation::or_mode );

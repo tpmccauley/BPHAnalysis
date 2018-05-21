@@ -95,7 +95,7 @@ BPHKinematicFit::~BPHKinematicFit() {
 // Operations --
 //--------------
 void BPHKinematicFit::setConstraint( double mass, double sigma ) {
-  oldFit = oldMom = true;
+  oldFit = oldMom = oldKPs = true;
   massConst = mass;
   massSigma = sigma;
   return;
@@ -234,7 +234,6 @@ const RefCountedKinematicTree& BPHKinematicFit::kinematicTree(
     RefCountedKinematicTree compTree = vtxFitter.fit( kComp );
     if ( compTree->isEmpty() ) return kinTree;
     if ( kc != 0 ) {
-      KinematicParticleVertexFitter vtxFitter;
       KinematicParticleFitter kinFitter;
       compTree = kinFitter.fit( kc, compTree );
       if ( compTree->isEmpty() ) return kinTree;
@@ -349,6 +348,21 @@ const math::XYZTLorentzVector& BPHKinematicFit::p4() const {
 }
 
 
+/// retrieve particle mass sigma
+double BPHKinematicFit::getMassSigma( const reco::Candidate* cand ) const {
+  map<const reco::Candidate*,double>::const_iterator iter = dMSig.find( cand );
+  return ( iter != dMSig.end() ? iter->second : -1 );
+}
+
+
+/// retrieve independent fit flag
+bool BPHKinematicFit::getIndependentFit( const std::string& name ) const {
+  const BPHRecoCandidate* comp = getComp( name ).get();
+  map<const BPHRecoCandidate*,bool>::const_iterator iter = cKinP.find( comp );
+  return ( iter != cKinP.end() ? iter->second : false );
+}
+
+
 void BPHKinematicFit::addK( const string& name,
                             const reco::Candidate* daug, 
                             double mass, double sigma ) {
@@ -422,15 +436,11 @@ void BPHKinematicFit::addParticles(
   while ( m-- ) {
     const BPHRecoCandidate* cptr = comp[m].get();
     if ( cKinP.at( cptr ) ) {
-      VirtualKinematicParticleFactory vFactory;
-      if ( cptr->isEmpty() ) return;
-      if ( !cptr->isValidFit() ) return;
-      const RefCountedKinematicParticle part = cptr->topParticle();
-      const RefCountedKinematicVertex   pvtx = cptr->topDecayVertex();
-      float chi = pvtx->chiSquared();
-      float dof = pvtx->degreesOfFreedom();
-      kl.push_back( cm[cptr] = vFactory.particle( part->currentState(),
-                                                  chi, dof, part ) );
+      const BPHRecoCandidate* tptr = cptr->clone();
+      tmpList.push_back( BPHRecoConstCandPtr( tptr ) );
+      if ( tptr->isEmpty() ) return;
+      if ( !tptr->isValidFit() ) return;
+      kl.push_back( cm[cptr] = tptr->topParticle() );
     }
     else {
       cptr->addParticles( kl, km, cm );
@@ -563,7 +573,7 @@ void BPHKinematicFit::splitKP( const string& name,
 
 void BPHKinematicFit::fitMomentum() const {
   if ( isValidFit() ) {
-    const KinematicState& ks = currentParticle()->currentState();
+    const KinematicState& ks = topParticle()->currentState();
     GlobalVector tm = ks.globalMomentum();
     double x = tm.x();
     double y = tm.y();

@@ -135,6 +135,8 @@ vector<BPHPlusMinusConstCandPtr> BPHLambda0ToPPiBuilder::build(){
 
 void BPHLambda0ToPPiBuilder::buildFromBPHGenericCollection() {
 
+  lambda0List.clear();
+
   BPHRecoBuilder bLambda0( *evSetup );
   bLambda0.add( protonName, prCollection, BPHParticleMasses::protonMass,
                                           BPHParticleMasses::protonMSigma );
@@ -166,12 +168,7 @@ void BPHLambda0ToPPiBuilder::buildFromV0( const T* v0Collection ) {
   // cycle over v0Collection
   for ( iv0 = 0; iv0 < nv0; ++iv0 ) {
 
-    BPHPlusMinusCandidatePtr plX( new BPHPlusMinusCandidate( evSetup ) );
-    BPHPlusMinusCandidatePtr plY( new BPHPlusMinusCandidate( evSetup ) );
-
     const typename T::value_type& lv0 = v0Collection->at( iv0 );
-    BPHPlusMinusCandidate* lambdaX = plX.get();
-    BPHPlusMinusCandidate* lambdaY = plY.get();
 
     // every reco::VertexCompositeCandidate must have exactly two daughters
     if ( lv0.numberOfDaughters() != 2 ) continue;
@@ -182,6 +179,10 @@ void BPHLambda0ToPPiBuilder::buildFromV0( const T* v0Collection ) {
     if( !ptSel ->accept( *lv0.daughter( 1 ) ) ) continue;
     if( !etaSel->accept( *lv0.daughter( 1 ) ) ) continue;
 
+    BPHPlusMinusCandidatePtr plX( new BPHPlusMinusCandidate( evSetup ) );
+    BPHPlusMinusCandidatePtr plY( new BPHPlusMinusCandidate( evSetup ) );
+    BPHPlusMinusCandidate* lambdaX = plX.get();
+    BPHPlusMinusCandidate* lambdaY = plY.get();
     lambdaX->add( protonName, lv0.daughter( 0 ), sList,
                   BPHParticleMasses::protonMass );
     lambdaX->add(   pionName, lv0.daughter( 1 ), sList,

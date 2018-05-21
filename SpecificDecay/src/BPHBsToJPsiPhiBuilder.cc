@@ -73,6 +73,8 @@ vector<BPHRecoConstCandPtr> BPHBsToJPsiPhiBuilder::build() {
 
   if ( updated ) return bsList;
 
+  bsList.clear();
+
   BPHRecoBuilder bBs( *evSetup );
   bBs.setMinPDiffererence( minPDiff );
   bBs.add( jPsiName, *jCollection );
@@ -95,8 +97,8 @@ vector<BPHRecoConstCandPtr> BPHBsToJPsiPhiBuilder::build() {
 //  int iBs;
 //  int nBs = ( massConstr ? bsList.size() : 0 );
 //  for ( iBs = 0; iBs < nBs; ++iBs ) {
-//    BPHRecoCandidate* cptr( const_cast<BPHRecoCandidate*>(
-//                            bsList[iBs].get() ) );
+//    BPHRecoCandidate* cptr = const_cast<BPHRecoCandidate*>(
+//                             bsList[iBs].get() );
 //    BPHRecoConstCandPtr jpsi = cptr->getComp( jPsiName );
 //    double jMass = jpsi->constrMass();
 //    if ( jMass < 0 ) continue;

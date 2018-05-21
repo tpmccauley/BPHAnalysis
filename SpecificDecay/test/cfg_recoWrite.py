@@ -50,14 +50,31 @@ from BPHAnalysis.SpecificDecay.recoSelectForWrite_cfi import recoSelect
 
 process.bphWriteSpecificDecay = cms.EDProducer('BPHWriteSpecificDecay',
     pVertexLabel = cms.string('offlinePrimaryVertices::RECO'),
+
+# for BPH skim input
     gpCandsLabel = cms.string('patSelectedTracks'),
     ccCandsLabel = cms.string('onia2MuMuPAT::RECO'),
+# for MiniAOD input
+#    patMuonLabel = cms.string('slimmedMuons'),
+#    pcCandsLabel = cms.string('packedPFCandidates::RECO'),
+#    kSCandsLabel = cms.string('slimmedKshortVertices::RECO'),
+#    lSCandsLabel = cms.string('slimmedLambdaVertices::RECO'),
+# for AOD input
+#    patMuonLabel = cms.string('slimmedMuons'),
+#    pfCandsLabel = cms.string('particleFlow::RECO'),
+#    k0CandsLabel = cms.string('generalV0Candidates:Kshort:RECO'),
+#    l0CandsLabel = cms.string('generalV0Candidates:Lambda:RECO'),
+
     oniaName = cms.string('oniaFitted'),
     sdName   = cms.string('kx0Cand'),
     ssName   = cms.string('phiCand'),
     buName   = cms.string('buFitted'),
     bdName   = cms.string('bdFitted'),
     bsName   = cms.string('bsFitted'),
+    k0Name   = cms.string('k0Fitted'),
+    l0Name   = cms.string('l0Fitted'),
+    b0Name   = cms.string('b0Fitted'),
+    lbName   = cms.string('lbFitted'),
     writeVertex   = cms.bool( True ),
     writeMomentum = cms.bool( True ),
     recoSelect = cms.VPSet(recoSelect)

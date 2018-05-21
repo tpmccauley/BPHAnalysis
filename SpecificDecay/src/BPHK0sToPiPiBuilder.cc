@@ -135,6 +135,8 @@ vector<BPHPlusMinusConstCandPtr> BPHK0sToPiPiBuilder::build(){
 
 void BPHK0sToPiPiBuilder::buildFromBPHGenericCollection() {
 
+  k0sList.clear();
+
   BPHRecoBuilder bK0s( *evSetup );
   bK0s.add( pionPosName, pCollection, BPHParticleMasses::pionMass,
                                       BPHParticleMasses::pionMSigma );
@@ -167,9 +169,7 @@ void BPHK0sToPiPiBuilder::buildFromV0( const T* v0Collection ) {
   // cycle over std::vector<reco::VertexCompositeCandidate>* vCollection
   for ( iv0 = 0; iv0 < nv0; ++iv0 ) {
 
-    BPHPlusMinusCandidatePtr pk0( new BPHPlusMinusCandidate( evSetup ) );
     const typename T::value_type& kv0 = v0Collection->at( iv0 );
-    BPHPlusMinusCandidate* k0s = pk0.get();
 
     // every reco::VertexCompositeCandidate must have exactly two daughters
     if ( kv0.numberOfDaughters() != 2 ) continue;
@@ -179,6 +179,9 @@ void BPHK0sToPiPiBuilder::buildFromV0( const T* v0Collection ) {
     if( !etaSel->accept( *kv0.daughter( 0 ) ) ) continue;
     if( ! ptSel->accept( *kv0.daughter( 1 ) ) ) continue;
     if( !etaSel->accept( *kv0.daughter( 1 ) ) ) continue;
+
+    BPHPlusMinusCandidatePtr pk0( new BPHPlusMinusCandidate( evSetup ) );
+    BPHPlusMinusCandidate* k0s = pk0.get();
 
     // check which daughter has positive/negative charge
     if ( kv0.daughter( 0 )->charge() > 0 ) {
@@ -193,9 +196,6 @@ void BPHK0sToPiPiBuilder::buildFromV0( const T* v0Collection ) {
       k0s->add( pionNegName, kv0.daughter( 0 ), sList,
                 BPHParticleMasses::pionMass );
     }
-
-    const_cast<pat::CompositeCandidate&>( k0s->composite() ).
-                                          addUserFloat( "V0Mass", kv0.mass() );
 
     if ( !massSel->accept( *k0s ) ) continue;
     if ( ( chi2Sel != 0 ) &&

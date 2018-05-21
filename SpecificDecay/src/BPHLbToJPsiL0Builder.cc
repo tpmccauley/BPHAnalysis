@@ -21,6 +21,9 @@
 #include "BPHAnalysis/SpecificDecay/interface/BPHMassFitSelect.h"
 #include "BPHAnalysis/SpecificDecay/interface/BPHParticleMasses.h"
 
+#include "RecoVertex/KinematicFit/interface/KinematicParticleFitter.h"
+#include "RecoVertex/KinematicFit/interface/MassKinematicConstraint.h"
+
 //---------------
 // C++ Headers --
 //---------------
@@ -43,7 +46,7 @@ BPHLbToJPsiL0Builder::BPHLbToJPsiL0Builder( const edm::EventSetup& es,
   jCollection( &jpsiCollection ),
   lCollection( &  l0Collection ) {
   jpsiSel = new BPHMassSelect   ( 2.80, 3.40 );
-   ml0Sel = new BPHMassSelect   ( 0.00, 3.00 );
+   ml0Sel = new BPHMassFitSelect( 0.00, 3.00 );
   massSel = new BPHMassSelect   ( 3.50, 8.00 );
   probMin = 0.02;
   mFitSel = new BPHMassFitSelect( jPsiName,
@@ -68,9 +71,13 @@ BPHLbToJPsiL0Builder::~BPHLbToJPsiL0Builder() {
 //--------------
 // Operations --
 //--------------
+/// build Bs candidates
 vector<BPHRecoConstCandPtr> BPHLbToJPsiL0Builder::build() {
 
   if ( updated ) return lbList;
+
+  lbList.clear();
+  dMap.clear();
 
   BPHRecoBuilder bLb( *evSetup );
   bLb.setMinPDiffererence( minPDiff );
@@ -90,24 +97,37 @@ vector<BPHRecoConstCandPtr> BPHLbToJPsiL0Builder::build() {
   int nLb = tmpList.size();
   lbList.reserve( nLb );
   for ( iLb = 0; iLb < nLb; ++iLb ) {
-    BPHRecoConstCandPtr cand = tmpList[iLb];
-    BPHRecoCandidate* cptr( const_cast<BPHRecoCandidate*>( cand.get() ) );
+    BPHRecoConstCandPtr ctmp = tmpList[iLb];
+    BPHRecoCandidate* cptr = const_cast<BPHRecoCandidate*>( ctmp->clone() );
+    BPHRecoConstCandPtr cand( cptr );
     cptr->setIndependentFit( l0Name );    // fit for Lambda0 reconstruction
-                                          // indipendent from other particles
-//    cout << "apply mfit selection " << cptr << endl;
+                                          // independent from other particles
+    BPHRecoCandidate* lptr = const_cast<BPHRecoCandidate*>(
+                      cptr->getComp( l0Name ).get() );
+    lptr->setConstraint( BPHParticleMasses::lambda0Mass,
+                         BPHParticleMasses::lambda0MSigma );
+    cptr->resetKinematicFit();
     if ( !mFitSel->accept( *cptr ) ) continue;
-//    cout << "mfit selection done" << endl;
     const RefCountedKinematicVertex tdv = cptr->topDecayVertex();
     if ( tdv.get() == 0 ) continue;
     if ( !tdv->vertexIsValid() ) continue;
     reco::Vertex vtx( *tdv );
-    if ( TMath::Prob( vtx.chi2(), lround( vtx.ndof() ) ) >= probMin )
+    if ( TMath::Prob( vtx.chi2(), lround( vtx.ndof() ) ) < probMin ) continue;
+    dMap[cand->getComp( jPsiName ).get()] = ctmp->getComp( jPsiName ).get();
+    dMap[cand->getComp(   l0Name ).get()] = ctmp->getComp(   l0Name ).get();
     lbList.push_back( cand );
   }
   updated = true;
 
   return lbList;
 
+}
+
+/// get original daughters map
+const std::map<const BPHRecoCandidate*,
+               const BPHRecoCandidate*>&
+               BPHLbToJPsiL0Builder::daughMap() const {
+  return dMap;
 }
 
 /// set cuts

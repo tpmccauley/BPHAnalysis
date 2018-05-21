@@ -84,7 +84,13 @@ class BPHRecoCandidate: public virtual BPHKinematicFit {
                                                  double mass = -1,
                                                  double msig = -1 );
 
+  /// clone object, cloning daughters as well up to required depth
+  /// level = -1 to clone all levels
+  virtual const BPHRecoCandidate* clone( int level = -1 ) const;
+
  protected:
+
+  virtual void fill( BPHRecoCandidate* ptr, int level ) const;
 
   // template function called by "build" to allow
   // the creation of derived objects
@@ -103,7 +109,7 @@ void BPHRecoCandidate::fill( std::vector<
                              typename BPHGenericPtr<const T>::type >& cList,
                              const BPHRecoBuilder& builder,
                              double mass, double msig ) {
-  // create paricle combinations
+  // create particle combinations
   const std::vector<BPHRecoBuilder::ComponentSet> dll = builder.build();
   // loop over combinations and create reconstructed particles
   int i;

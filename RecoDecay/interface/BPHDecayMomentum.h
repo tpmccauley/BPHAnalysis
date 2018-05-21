@@ -128,6 +128,8 @@ class BPHDecayMomentum {
   // utility function used to cash reconstruction results
   virtual void setNotUpdated() const;
 
+  virtual void fill( BPHRecoCandidate* ptr, int level ) const = 0;
+
  private:
 
   // object filled in the constructor

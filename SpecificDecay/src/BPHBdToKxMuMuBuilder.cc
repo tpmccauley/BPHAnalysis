@@ -70,6 +70,8 @@ vector<BPHRecoConstCandPtr> BPHBdToKxMuMuBuilder::build() {
 
   if ( updated ) return bdList;
 
+  bdList.clear();
+
   BPHRecoBuilder bBd( *evSetup );
   bBd.setMinPDiffererence( minPDiff );
   bBd.add( oniaName, *jCollection );
@@ -92,8 +94,8 @@ vector<BPHRecoConstCandPtr> BPHBdToKxMuMuBuilder::build() {
 //  int iBd;
 //  int nBd = ( massConstr ? bdList.size() : 0 );
 //  for ( iBd = 0; iBd < nBd; ++iBd ) {
-//    BPHRecoCandidate* cptr( const_cast<BPHRecoCandidate*>(
-//                            bdList[iBd].get() ) );
+//    BPHRecoCandidate* cptr = const_cast<BPHRecoCandidate*>(
+//                             bdList[iBd].get() );
 //    BPHRecoConstCandPtr onia = cptr->getComp( oniaName );
 //    double oMass = onia->constrMass();
 //    if ( oMass < 0 ) continue;

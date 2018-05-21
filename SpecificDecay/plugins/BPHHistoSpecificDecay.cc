@@ -556,8 +556,10 @@ BPHHistoSpecificDecay::BPHHistoSpecificDecay( const edm::ParameterSet& ps ) {
   double  upsBMassMin =  8.50;
   double  upsBMassMax = 11.0;
   double  upsBPtMin   = 12.0;
-  double  upsBEtaMax  =  1.5;
-  double  upsBYMax    = -1.0;
+//  double  upsBEtaMax  =  1.5; // 2017
+//  double  upsBYMax    = -1.0; // 2017
+  double  upsBEtaMax  = -1.0; // 2018
+  double  upsBYMax    =  1.4; // 2018
 
   double oniaProbMin =  -0.005;
   double oniaCosMin  = -2.0;
@@ -874,7 +876,7 @@ BPHHistoSpecificDecay::BPHHistoSpecificDecay( const edm::ParameterSet& ps ) {
   b0IJPsiBasicSelect    = new BPHCompositeBasicSelect(
                               b0IJPsiMassMin, b0IJPsiMassMax,
                               b0IJPsiPtMin  , b0IJPsiEtaMax , b0IJPsiYMax );
-  b0IK0sBasicSelect     = new BPHCompositeBasicSelect(
+  b0IK0sBasicSelect     = new BPHFittedBasicSelect(
                               b0IK0sMassMin, b0IK0sMassMax,
                               b0IK0sPtMin  , b0IK0sEtaMax , b0IK0sYMax );
   b0IVertexSelect       = new BPHVertexSelect( 'f',
@@ -913,7 +915,7 @@ BPHHistoSpecificDecay::BPHHistoSpecificDecay( const edm::ParameterSet& ps ) {
   b0DJPsiBasicSelect    = new BPHCompositeBasicSelect(
                               b0DJPsiMassMin, b0DJPsiMassMax,
                               b0DJPsiPtMin  , b0DJPsiEtaMax , b0DJPsiYMax );
-  b0DK0sBasicSelect     = new BPHCompositeBasicSelect(
+  b0DK0sBasicSelect     = new BPHFittedBasicSelect(
                               b0DK0sMassMin, b0DK0sMassMax,
                               b0DK0sPtMin  , b0DK0sEtaMax , b0DK0sYMax );
   b0DVertexSelect       = new BPHVertexSelect( 'f',
@@ -954,7 +956,7 @@ BPHHistoSpecificDecay::BPHHistoSpecificDecay( const edm::ParameterSet& ps ) {
   lbIJPsiBasicSelect    = new BPHCompositeBasicSelect(
                               lbIJPsiMassMin, lbIJPsiMassMax,
                               lbIJPsiPtMin  , lbIJPsiEtaMax , lbIJPsiYMax );
-  lbILambda0BasicSelect = new BPHCompositeBasicSelect(
+  lbILambda0BasicSelect = new BPHFittedBasicSelect(
                               lbILambda0MassMin, lbILambda0MassMax,
                               lbILambda0PtMin  , lbILambda0EtaMax ,
                               lbILambda0YMax );
@@ -994,7 +996,7 @@ BPHHistoSpecificDecay::BPHHistoSpecificDecay( const edm::ParameterSet& ps ) {
   lbDJPsiBasicSelect    = new BPHCompositeBasicSelect(
                               lbDJPsiMassMin, lbDJPsiMassMax,
                               lbDJPsiPtMin  , lbDJPsiEtaMax , lbDJPsiYMax );
-  lbDLambda0BasicSelect = new BPHCompositeBasicSelect(
+  lbDLambda0BasicSelect = new BPHFittedBasicSelect(
                               lbDLambda0MassMin, lbDLambda0MassMax,
                               lbDLambda0PtMin  , lbDLambda0EtaMax ,
                               lbDLambda0YMax );
@@ -1101,10 +1103,10 @@ void BPHHistoSpecificDecay::fillDescriptions(
 
 void BPHHistoSpecificDecay::beginJob() {
 
-  createHisto( "massDIPhi"    ,  35, 0.85, 1.20 ); // Phi  mass inclusive
-  createHisto( "massTIPhi"    ,  35, 0.85, 1.20 ); // Phi  mass inclusive
-  createHisto( "massDBPhi"    ,  35, 0.85, 1.20 ); // Phi  mass barrel
-  createHisto( "massTBPhi"    ,  35, 0.85, 1.20 ); // Phi  mass barrel
+  createHisto( "massDIPhi"    ,  50, 0.90, 1.15 ); // Phi  mass inclusive
+  createHisto( "massTIPhi"    ,  50, 0.90, 1.15 ); // Phi  mass inclusive
+  createHisto( "massDBPhi"    ,  50, 0.90, 1.15 ); // Phi  mass barrel
+  createHisto( "massTBPhi"    ,  50, 0.90, 1.15 ); // Phi  mass barrel
   createHisto( "massDIJPsi"   ,  35, 2.95, 3.30 ); // JPsi mass inclusive
   createHisto( "massTIJPsi"   ,  35, 2.95, 3.30 ); // JPsi mass inclusive
   createHisto( "massDBJPsi"   ,  35, 2.95, 3.30 ); // JPsi mass barrel
@@ -1113,48 +1115,58 @@ void BPHHistoSpecificDecay::beginJob() {
   createHisto( "massTIPsi2"   ,  60, 3.40, 4.00 ); // Psi2 mass inclusive
   createHisto( "massDBPsi2"   ,  60, 3.40, 4.00 ); // Psi2 mass barrel
   createHisto( "massTBPsi2"   ,  60, 3.40, 4.00 ); // Psi2 mass barrel
-  createHisto( "massDIUps123" , 125, 8.50, 11.0 ); // Ups  mass inclusive
-  createHisto( "massTIUps123" , 125, 8.50, 11.0 ); // Ups  mass inclusive
-  createHisto( "massDBUps123" , 125, 8.50, 11.0 ); // Ups  mass barrel
-  createHisto( "massTBUps123" , 125, 8.50, 11.0 ); // Ups  mass barrel
-  createHisto( "massDIBu"     ,  50, 5.00, 6.00 ); // Bu   mass inclusive
-  createHisto( "massTIBu"     ,  50, 5.00, 6.00 ); // Bu   mass inclusive
-  createHisto( "massDDBu"     ,  50, 5.00, 6.00 ); // Bu   mass displaced
-  createHisto( "massTDBu"     ,  50, 5.00, 6.00 ); // Bu   mass displaced
-  createHisto( "massDIBd"     ,  50, 5.00, 6.00 ); // Bd   mass inclusive
-  createHisto( "massTIBd"     ,  50, 5.00, 6.00 ); // Bd   mass inclusive
-  createHisto( "massDDBd"     ,  50, 5.00, 6.00 ); // Bd   mass displaced
-  createHisto( "massTDBd"     ,  50, 5.00, 6.00 ); // Bd   mass displaced
-  createHisto( "massDIBs"     ,  50, 5.00, 6.00 ); // Bs   mass inclusive
-  createHisto( "massTIBs"     ,  50, 5.00, 6.00 ); // Bs   mass inclusive
-  createHisto( "massDDBs"     ,  50, 5.00, 6.00 ); // Bs   mass displaced
-  createHisto( "massTDBs"     ,  50, 5.00, 6.00 ); // Bs   mass displaced
-  createHisto( "mfitDIBu"     ,  50, 5.00, 6.00 ); // Bu   mass, with constr.
-  createHisto( "mfitTIBu"     ,  50, 5.00, 6.00 ); // Bu   mass, with constr.
-  createHisto( "mfitDDBu"     ,  50, 5.00, 6.00 ); // Bu   mass, with constr.
-  createHisto( "mfitTDBu"     ,  50, 5.00, 6.00 ); // Bu   mass, with constr.
-  createHisto( "mfitDIBd"     ,  50, 5.00, 6.00 ); // Bd   mass, with constr.
-  createHisto( "mfitTIBd"     ,  50, 5.00, 6.00 ); // Bd   mass, with constr.
-  createHisto( "mfitDDBd"     ,  50, 5.00, 6.00 ); // Bd   mass, with constr.
-  createHisto( "mfitTDBd"     ,  50, 5.00, 6.00 ); // Bd   mass, with constr.
-  createHisto( "mfitDIBs"     ,  50, 5.00, 6.00 ); // Bs   mass, with constr.
-  createHisto( "mfitTIBs"     ,  50, 5.00, 6.00 ); // Bs   mass, with constr.
-  createHisto( "mfitDDBs"     ,  50, 5.00, 6.00 ); // Bs   mass, with constr.
-  createHisto( "mfitTDBs"     ,  50, 5.00, 6.00 ); // Bs   mass, with constr.
-  createHisto( "massDBuJPsi"  ,  35, 2.95, 3.30 ); // JPsi mass in Bu decay
-  createHisto( "massTBuJPsi"  ,  35, 2.95, 3.30 ); // JPsi mass in Bu decay
-  createHisto( "massDBdJPsi"  ,  35, 2.95, 3.30 ); // JPsi mass in Bd decay
-  createHisto( "massTBdJPsi"  ,  35, 2.95, 3.30 ); // JPsi mass in Bd decay
-  createHisto( "massDBsJPsi"  ,  35, 2.95, 3.30 ); // JPsi mass in Bs decay
-  createHisto( "massTBsJPsi"  ,  35, 2.95, 3.30 ); // JPsi mass in Bs decay
-  createHisto( "massDBsPhi"   ,  50, 1.01, 1.03 ); // Phi  mass in Bs decay
-  createHisto( "massTBsPhi"   ,  50, 1.01, 1.03 ); // Phi  mass in Bs decay
-  createHisto( "massDBdKx0"   ,  50, 0.80, 1.05 ); // Kx0  mass in Bd decay
-  createHisto( "massTBdKx0"   ,  50, 0.80, 1.05 ); // Kx0  mass in Bd decay
+  createHisto( "massDIUps123" , 115, 8.70, 11.0 ); // Ups  mass inclusive
+  createHisto( "massTIUps123" , 115, 8.70, 11.0 ); // Ups  mass inclusive
+  createHisto( "massDBUps123" , 115, 8.70, 11.0 ); // Ups  mass barrel
+  createHisto( "massTBUps123" , 115, 8.70, 11.0 ); // Ups  mass barrel
+  createHisto( "massDIBu"     , 100, 5.00, 6.00 ); // Bu   mass inclusive
+  createHisto( "massTIBu"     , 100, 5.00, 6.00 ); // Bu   mass inclusive
+  createHisto( "massDDBu"     , 100, 5.00, 6.00 ); // Bu   mass displaced
+  createHisto( "massTDBu"     , 100, 5.00, 6.00 ); // Bu   mass displaced
+  createHisto( "massDIBd"     , 100, 5.00, 6.00 ); // Bd   mass inclusive
+  createHisto( "massTIBd"     , 100, 5.00, 6.00 ); // Bd   mass inclusive
+  createHisto( "massDDBd"     , 100, 5.00, 6.00 ); // Bd   mass displaced
+  createHisto( "massTDBd"     , 100, 5.00, 6.00 ); // Bd   mass displaced
+  createHisto( "massDIBs"     , 100, 5.00, 6.00 ); // Bs   mass inclusive
+  createHisto( "massTIBs"     , 100, 5.00, 6.00 ); // Bs   mass inclusive
+  createHisto( "massDDBs"     , 100, 5.00, 6.00 ); // Bs   mass displaced
+  createHisto( "massTDBs"     , 100, 5.00, 6.00 ); // Bs   mass displaced
+  createHisto( "mfitDIBu"     , 100, 5.00, 6.00 ); // Bu   mass, with constr.
+  createHisto( "mfitTIBu"     , 100, 5.00, 6.00 ); // Bu   mass, with constr.
+  createHisto( "mfitDDBu"     , 100, 5.00, 6.00 ); // Bu   mass, with constr.
+  createHisto( "mfitTDBu"     , 100, 5.00, 6.00 ); // Bu   mass, with constr.
+  createHisto( "mfitDIBd"     , 100, 5.00, 6.00 ); // Bd   mass, with constr.
+  createHisto( "mfitTIBd"     , 100, 5.00, 6.00 ); // Bd   mass, with constr.
+  createHisto( "mfitDDBd"     , 100, 5.00, 6.00 ); // Bd   mass, with constr.
+  createHisto( "mfitTDBd"     , 100, 5.00, 6.00 ); // Bd   mass, with constr.
+  createHisto( "mfitDIBs"     , 100, 5.00, 6.00 ); // Bs   mass, with constr.
+  createHisto( "mfitTIBs"     , 100, 5.00, 6.00 ); // Bs   mass, with constr.
+  createHisto( "mfitDDBs"     , 100, 5.00, 6.00 ); // Bs   mass, with constr.
+  createHisto( "mfitTDBs"     , 100, 5.00, 6.00 ); // Bs   mass, with constr.
+  createHisto( "massDIBuJPsi" ,  35, 2.95, 3.30 ); // JPsi mass in Bu decay
+  createHisto( "massTIBuJPsi" ,  35, 2.95, 3.30 ); // JPsi mass in Bu decay
+  createHisto( "massDDBuJPsi" ,  35, 2.95, 3.30 ); // JPsi mass in Bu decay
+  createHisto( "massTDBuJPsi" ,  35, 2.95, 3.30 ); // JPsi mass in Bu decay
+  createHisto( "massDIBdJPsi" ,  35, 2.95, 3.30 ); // JPsi mass in Bd decay
+  createHisto( "massTIBdJPsi" ,  35, 2.95, 3.30 ); // JPsi mass in Bd decay
+  createHisto( "massDDBdJPsi" ,  35, 2.95, 3.30 ); // JPsi mass in Bd decay
+  createHisto( "massTDBdJPsi" ,  35, 2.95, 3.30 ); // JPsi mass in Bd decay
+  createHisto( "massDIBdKx0"  ,  50, 0.80, 1.05 ); // Kx0  mass in Bd decay
+  createHisto( "massTIBdKx0"  ,  50, 0.80, 1.05 ); // Kx0  mass in Bd decay
+  createHisto( "massDDBdKx0"  ,  50, 0.80, 1.05 ); // Kx0  mass in Bd decay
+  createHisto( "massTDBdKx0"  ,  50, 0.80, 1.05 ); // Kx0  mass in Bd decay
+  createHisto( "massDIBsJPsi" ,  35, 2.95, 3.30 ); // JPsi mass in Bs decay
+  createHisto( "massTIBsJPsi" ,  35, 2.95, 3.30 ); // JPsi mass in Bs decay
+  createHisto( "massDDBsJPsi" ,  35, 2.95, 3.30 ); // JPsi mass in Bs decay
+  createHisto( "massTDBsJPsi" ,  35, 2.95, 3.30 ); // JPsi mass in Bs decay
+  createHisto( "massDIBsPhi"  ,  50, 1.01, 1.03 ); // Phi  mass in Bs decay
+  createHisto( "massTIBsPhi"  ,  50, 1.01, 1.03 ); // Phi  mass in Bs decay
+  createHisto( "massDDBsPhi"  ,  50, 1.01, 1.03 ); // Phi  mass in Bs decay
+  createHisto( "massTDBsPhi"  ,  50, 1.01, 1.03 ); // Phi  mass in Bs decay
   createHisto( "massDK0s"     ,  50, 0.40, 0.60 ); // K0s  mass
   createHisto( "mfitDK0s"     ,  50, 0.40, 0.60 ); // K0s  mass
-  createHisto( "massDLambda0" ,  50, 1.00, 1.30 ); // Lambda0 mass
-  createHisto( "mfitDLambda0" ,  50, 1.00, 1.30 ); // Lambda0 mass
+  createHisto( "massDLambda0" ,  60, 1.00, 1.30 ); // Lambda0 mass
+  createHisto( "mfitDLambda0" ,  60, 1.00, 1.30 ); // Lambda0 mass
   createHisto( "massDIB0"     ,  50, 5.00, 6.00 ); // B0   mass inclusive
   createHisto( "massTIB0"     ,  50, 5.00, 6.00 ); // B0   mass inclusive
   createHisto( "massDDB0"     ,  50, 5.00, 6.00 ); // B0   mass displaced
@@ -1163,6 +1175,18 @@ void BPHHistoSpecificDecay::beginJob() {
   createHisto( "mfitTIB0"     ,  50, 5.00, 6.00 ); // B0   mass, with constr.
   createHisto( "mfitDDB0"     ,  50, 5.00, 6.00 ); // B0   mass, with constr.
   createHisto( "mfitTDB0"     ,  50, 5.00, 6.00 ); // B0   mass, with constr.
+  createHisto( "massDIB0JPsi" ,  35, 2.95, 3.30 ); // JPsi mass in B0 decay
+  createHisto( "massTIB0JPsi" ,  35, 2.95, 3.30 ); // JPsi mass in B0 decay
+  createHisto( "massDDB0JPsi" ,  35, 2.95, 3.30 ); // JPsi mass in B0 decay
+  createHisto( "massTDB0JPsi" ,  35, 2.95, 3.30 ); // JPsi mass in B0 decay
+  createHisto( "massDIB0K0s"  ,  50, 0.40, 0.60 ); // K0s  mass in B0 decay
+  createHisto( "massTIB0K0s"  ,  50, 0.40, 0.60 ); // K0s  mass in B0 decay
+  createHisto( "massDDB0K0s"  ,  50, 0.40, 0.60 ); // K0s  mass in B0 decay
+  createHisto( "massTDB0K0s"  ,  50, 0.40, 0.60 ); // K0s  mass in B0 decay
+  createHisto( "mfitDIB0K0s"  ,  50, 0.40, 0.60 ); // K0s  mass in B0 decay
+  createHisto( "mfitTIB0K0s"  ,  50, 0.40, 0.60 ); // K0s  mass in B0 decay
+  createHisto( "mfitDDB0K0s"  ,  50, 0.40, 0.60 ); // K0s  mass in B0 decay
+  createHisto( "mfitTDB0K0s"  ,  50, 0.40, 0.60 ); // K0s  mass in B0 decay
   createHisto( "massDILambdab",  25, 5.00, 6.00 ); // Lambdab mass inclusive
   createHisto( "massTILambdab",  25, 5.00, 6.00 ); // Lambdab mass inclusive
   createHisto( "massDDLambdab",  25, 5.00, 6.00 ); // Lambdab mass displaced
@@ -1171,6 +1195,18 @@ void BPHHistoSpecificDecay::beginJob() {
   createHisto( "mfitTILambdab",  25, 5.00, 6.00 ); // Lambdab mass, with constr.
   createHisto( "mfitDDLambdab",  25, 5.00, 6.00 ); // Lambdab mass, with constr.
   createHisto( "mfitTDLambdab",  25, 5.00, 6.00 ); // Lambdab mass, with constr.
+  createHisto( "massDILbJPsi" ,  35, 2.95, 3.30 ); // JPsi mass in Lambdab decay
+  createHisto( "massTILbJPsi" ,  35, 2.95, 3.30 ); // JPsi mass in Lambdab decay
+  createHisto( "massDDLbJPsi" ,  35, 2.95, 3.30 ); // JPsi mass in Lambdab decay
+  createHisto( "massTDLbJPsi" ,  35, 2.95, 3.30 ); // JPsi mass in Lambdab decay
+  createHisto( "massDILbL0"   ,  60, 1.00, 1.30 ); // L0   mass in Lambdab decay
+  createHisto( "massTILbL0"   ,  60, 1.00, 1.30 ); // L0   mass in Lambdab decay
+  createHisto( "massDDLbL0"   ,  60, 1.00, 1.30 ); // L0   mass in Lambdab decay
+  createHisto( "massTDLbL0"   ,  60, 1.00, 1.30 ); // L0   mass in Lambdab decay
+  createHisto( "mfitDILbL0"   ,  60, 1.00, 1.30 ); // L0   mass in Lambdab decay
+  createHisto( "mfitTILbL0"   ,  60, 1.00, 1.30 ); // L0   mass in Lambdab decay
+  createHisto( "mfitDDLbL0"   ,  60, 1.00, 1.30 ); // L0   mass in Lambdab decay
+  createHisto( "mfitTDLbL0"   ,  60, 1.00, 1.30 ); // L0   mass in Lambdab decay
 
   createHisto( "massFull"     , 200, 2.00, 12.0 ); // Full onia mass
 
@@ -1259,6 +1295,7 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
   bool flag_Dimuon18_PsiPrime                 = false;
   bool flag_Dimuon10_PsiPrime_Barrel_Seagulls = false;
   bool flag_Dimuon12_Upsilon_eta1p5           = false;
+  bool flag_Dimuon12_Upsilon_y1p4             = false;
   bool flag_DoubleMu4_JpsiTrk_Displaced       = false;
   if ( trigNames != 0 ) {
     const edm::TriggerNames::Strings& names = trigNames->triggerNames();
@@ -1271,6 +1308,7 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
       CHK_TRIG( trigResults, names, iObj, Dimuon18_PsiPrime                 )
       CHK_TRIG( trigResults, names, iObj, Dimuon10_PsiPrime_Barrel_Seagulls )
       CHK_TRIG( trigResults, names, iObj, Dimuon12_Upsilon_eta1p5           )
+      CHK_TRIG( trigResults, names, iObj, Dimuon12_Upsilon_y1p4             )
       CHK_TRIG( trigResults, names, iObj, DoubleMu4_JpsiTrk_Displaced       )
     }
   }
@@ -1346,9 +1384,11 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
     }
     if (  upsBBasicSelect->accept( cand ) ) {
       fillHisto( "DBUps123", cand, 'c' );
-      if ( flag_Dimuon12_Upsilon_eta1p5 )
+      if ( flag_Dimuon12_Upsilon_eta1p5 ||
+           flag_Dimuon12_Upsilon_y1p4   )
       fillHisto( "TBUps123", cand, 'c' );
-      if ( flag_Dimuon12_Upsilon_eta1p5 )
+      if ( flag_Dimuon12_Upsilon_eta1p5 ||
+           flag_Dimuon12_Upsilon_y1p4   )
       *ofMap["BarUpsilon123"] << ev.id().run() << ' '
                               << ev.id().luminosityBlock() << ' '
                               << ev.id().event() << ' '
@@ -1456,9 +1496,11 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
                                 "primaryVertex" ) ) ) {
       fillHisto( "DIBd"    ,  cand, 'f' );
       fillHisto( "DIBdJPsi", *jPsi, 'c' );
+      fillHisto( "DIBdKx0" , * kx0, 'c' );
       if ( flag_Dimuon25_Jpsi ) {
 	fillHisto( "TIBd"    ,  cand, 'f' );
 	fillHisto( "TIBdJPsi", *jPsi, 'c' );
+        fillHisto( "TIBdKx0" , * kx0, 'c' );
         *ofMap["InclusiveBd"] << ev.id().run() << ' '
                               << ev.id().luminosityBlock() << ' '
                               << ev.id().event() << ' '
@@ -1476,9 +1518,11 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
                                 "primaryVertex" ) ) ) {
       fillHisto( "DDBd"    ,  cand, 'f' );
       fillHisto( "DDBdJPsi", *jPsi, 'c' );
+      fillHisto( "DDBdKx0" , * kx0, 'c' );
       if ( flag_DoubleMu4_JpsiTrk_Displaced ) {
 	fillHisto( "TDBd"    ,  cand, 'f' );
 	fillHisto( "TDBdJPsi", *jPsi, 'c' );
+        fillHisto( "TDBdKx0" , * kx0, 'c' );
         *ofMap["DisplacedBd"] << ev.id().run() << ' '
                               << ev.id().luminosityBlock() << ' '
                               << ev.id().event() << ' '
@@ -1524,9 +1568,11 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
                                 "primaryVertex" ) ) ) {
       fillHisto( "DIBs"    ,  cand, 'f' );
       fillHisto( "DIBsJPsi", *jPsi, 'c' );
+      fillHisto( "DIBsPhi" , * phi, 'c' );
       if ( flag_Dimuon25_Jpsi ) {
 	fillHisto( "TIBs"    ,  cand, 'f' );
 	fillHisto( "TIBsJPsi", *jPsi, 'c' );
+        fillHisto( "TIBsPhi" , * phi, 'c' );
         *ofMap["InclusiveBs"] << ev.id().run() << ' '
                               << ev.id().luminosityBlock() << ' '
                               << ev.id().event() << ' '
@@ -1544,9 +1590,11 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
                                 "primaryVertex" ) ) ) {
       fillHisto( "DDBs"    ,  cand, 'f' );
       fillHisto( "DDBsJPsi", *jPsi, 'c' );
+      fillHisto( "DDBsPhi" , * phi, 'c' );
       if ( flag_DoubleMu4_JpsiTrk_Displaced ) {
 	fillHisto( "TDBs"    ,  cand, 'f' );
 	fillHisto( "TDBsJPsi", *jPsi, 'c' );
+        fillHisto( "TDBsPhi" , * phi, 'c' );
         *ofMap["DisplacedBs"] << ev.id().run() << ' '
                               << ev.id().luminosityBlock() << ' '
                               << ev.id().event() << ' '
@@ -1613,10 +1661,6 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
     nb0 = b0Cands->size();
   }
 
-//  cout << nb0 << ' ' << ev.id().run() << ' ' << ev.id().event();
-//  if ( nb0 ) cout << " *************************";
-//  cout << endl;
-
   for ( ib0 = 0; ib0 < nb0; ++ ib0 ) {
     LogTrace( "DataDump" )
            << "*********** B0 " << ib0 << "/" << nb0 << " ***********";
@@ -1642,9 +1686,11 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
                                 "primaryVertex" ) ) ) {
       fillHisto( "DIB0"    ,  cand, 'f' );
       fillHisto( "DIB0JPsi", *jPsi, 'c' );
+      fillHisto( "DIB0K0s" , * k0s, 'c' );
       if ( flag_Dimuon25_Jpsi ) {
 	fillHisto( "TIB0"    ,  cand, 'f' );
 	fillHisto( "TIB0JPsi", *jPsi, 'c' );
+        fillHisto( "TIB0K0s" , * k0s, 'c' );
         *ofMap["InclusiveB0"] << ev.id().run() << ' '
                               << ev.id().luminosityBlock() << ' '
                               << ev.id().event() << ' '
@@ -1662,9 +1708,11 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
                                 "primaryVertex" ) ) ) {
       fillHisto( "DDB0"    ,  cand, 'f' );
       fillHisto( "DDB0JPsi", *jPsi, 'c' );
+      fillHisto( "DDB0K0s" , * k0s, 'c' );
       if ( flag_DoubleMu4_JpsiTrk_Displaced ) {
 	fillHisto( "TDB0"    ,  cand, 'f' );
 	fillHisto( "TDB0JPsi", *jPsi, 'c' );
+        fillHisto( "TDB0K0s" , * k0s, 'c' );
         *ofMap["DisplacedB0"] << ev.id().run() << ' '
                               << ev.id().luminosityBlock() << ' '
                               << ev.id().event() << ' '
@@ -1708,11 +1756,13 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
          lbIVertexSelect      ->accept( cand,
                                 BPHUserData::getByRef<reco::Vertex>( *jPsi,
                                 "primaryVertex" ) ) ) {
-      fillHisto( "DILambdab"    ,  cand, 'f' );
-      fillHisto( "DILambdabJPsi", *jPsi, 'c' );
+      fillHisto( "DILambdab",  cand, 'f' );
+      fillHisto( "DILbJPsi" , *jPsi, 'c' );
+      fillHisto( "DILbL0"   , *  l0, 'c' );
       if ( flag_Dimuon25_Jpsi ) {
-	fillHisto( "TILambdab"    ,  cand, 'f' );
-	fillHisto( "TILambdabJPsi", *jPsi, 'c' );
+	fillHisto( "TILambdab",  cand, 'f' );
+	fillHisto( "TILbJPsi" , *jPsi, 'c' );
+        fillHisto( "TILbL0"   , *  l0, 'c' );
         *ofMap["InclusiveLambdab"] << ev.id().run() << ' '
                                    << ev.id().luminosityBlock() << ' '
                                    << ev.id().event() << ' '
@@ -1728,11 +1778,13 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
          lbDVertexSelect      ->accept( cand,
                                 BPHUserData::getByRef<reco::Vertex>( *jPsi,
                                 "primaryVertex" ) ) ) {
-      fillHisto( "DDLambdab"    ,  cand, 'f' );
-      fillHisto( "DDLambdabJPsi", *jPsi, 'c' );
+      fillHisto( "DDLambdab",  cand, 'f' );
+      fillHisto( "DDLbJPsi" , *jPsi, 'c' );
+      fillHisto( "DDLbL0"   , *  l0, 'c' );
       if ( flag_DoubleMu4_JpsiTrk_Displaced ) {
-	fillHisto( "TDLambdab"    ,  cand, 'f' );
-	fillHisto( "TDLambdabJPsi", *jPsi, 'c' );
+	fillHisto( "TDLambdab",  cand, 'f' );
+        fillHisto( "TDLbJPsi" , *jPsi, 'c' );
+        fillHisto( "TDLbL0"   , *  l0, 'c' );
         *ofMap["DisplacedLambdab"] << ev.id().run() << ' '
                                    << ev.id().luminosityBlock() << ' '
                                    << ev.id().event() << ' '
@@ -1756,6 +1808,7 @@ void BPHHistoSpecificDecay::endJob() {
 void BPHHistoSpecificDecay::fillHisto( const string& name,
                                        const pat::CompositeCandidate& cand,
                                        char svType ) {
+
   float mass = ( cand.hasUserFloat( "fitMass" ) ?
                  cand.   userFloat( "fitMass" ) : -1 );
   fillHisto( "mass" + name, cand.mass() );
@@ -1813,6 +1866,7 @@ void BPHHistoSpecificDecay::fillHisto( const string& name,
   fillHisto( "ctau" + name, ctauPV2 );
 
   return;
+
 }
 
 

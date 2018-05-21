@@ -147,6 +147,7 @@ class BPHWriteSpecificDecay:
   std::vector<BPHRecoConstCandPtr> lLb;
 
   std::map<const BPHRecoCandidate*,const BPHRecoCandidate*> jPsiOMap;
+  std::map<const BPHRecoCandidate*,const BPHRecoCandidate*> daughMap;
   typedef edm::Ref< std::vector<reco::Vertex> > vertex_ref;
   std::map<const BPHRecoCandidate*,vertex_ref> pvRefMap;
   typedef edm::Ref< pat::CompositeCandidateCollection > compcc_ref;
@@ -161,6 +162,10 @@ class BPHWriteSpecificDecay:
       new pat::CompositeCandidateCollection;
     int i;
     int n = list.size();
+    std::map<const BPHRecoCandidate*,
+             const BPHRecoCandidate*>::const_iterator dauIter;
+    std::map<const BPHRecoCandidate*,
+             const BPHRecoCandidate*>::const_iterator dauIend = daughMap.end();
     std::map<const BPHRecoCandidate*,
              const BPHRecoCandidate*>::const_iterator jpoIter;
     std::map<const BPHRecoCandidate*,
@@ -184,9 +189,10 @@ class BPHWriteSpecificDecay:
         const std::string& compName = cNames[j++];
         const BPHRecoCandidate* cptr = ptr->getComp( compName ).get();
         if ( ( ccrIter = ccRefMap.find( cptr ) ) == ccrIend ) {
+          if ( ( dauIter = daughMap.find( cptr ) ) != dauIend )
+               cptr = dauIter->second;
           if ( ( jpoIter = jPsiOMap.find( cptr ) ) != jpoIend )
                cptr = jpoIter->second;
-          else cptr = 0;
         }
         if ( ( ccrIter = ccRefMap.find( cptr ) ) != ccrIend ) {
           compcc_ref cref = ccrIter->second;

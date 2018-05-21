@@ -139,6 +139,12 @@ reco::TransientTrack* BPHDecayVertex::getTransientTrack(
 }
 
 
+/// retrieve EventSetup
+const edm::EventSetup* BPHDecayVertex::getEventSetup() const {
+  return evSetup;
+}
+
+
 const string& BPHDecayVertex::getTrackSearchList(
                               const reco::Candidate* cand ) const {
   static string dum = "";

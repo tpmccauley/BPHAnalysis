@@ -56,6 +56,10 @@ class BPHLbToJPsiL0Builder {
   /// build Bs candidates
   std::vector<BPHRecoConstCandPtr> build();
 
+  /// get original daughters map
+  const std::map<const BPHRecoCandidate*,
+                 const BPHRecoCandidate*>& daughMap() const;
+
   /// set cuts
   void setJPsiMassMin   ( double m  );
   void setJPsiMassMax   ( double m  );
@@ -94,7 +98,7 @@ class BPHLbToJPsiL0Builder {
   const std::vector<BPHPlusMinusConstCandPtr>* lCollection;
 
   BPHMassSelect   * jpsiSel;
-  BPHMassSelect   *  ml0Sel;
+  BPHMassFitSelect*  ml0Sel;
 
   BPHMassSelect   * massSel;
   double probMin;
@@ -104,6 +108,7 @@ class BPHLbToJPsiL0Builder {
   float minPDiff;
   bool updated;
 
+  std::map<const BPHRecoCandidate*,const BPHRecoCandidate*> dMap;
   std::vector<BPHRecoConstCandPtr> lbList;
 
 };

@@ -43,7 +43,7 @@ BPHBdToJPsiKsBuilder::BPHBdToJPsiKsBuilder( const edm::EventSetup& es,
   jCollection( &jpsiCollection ),
   kCollection( & k0sCollection ) {
   jpsiSel = new BPHMassSelect   ( 2.80, 3.40 );
-  mk0sSel = new BPHMassSelect   ( 0.00, 2.00 );
+  mk0sSel = new BPHMassFitSelect( 0.00, 2.00 );
   massSel = new BPHMassSelect   ( 3.50, 8.00 );
   probMin = 0.02;
   mFitSel = new BPHMassFitSelect( jPsiName,
@@ -72,6 +72,9 @@ vector<BPHRecoConstCandPtr> BPHBdToJPsiKsBuilder::build() {
 
   if ( updated ) return bdList;
 
+  bdList.clear();
+  dMap.clear();
+
   BPHRecoBuilder bBd( *evSetup );
   bBd.setMinPDiffererence( minPDiff );
   bBd.add( jPsiName, *jCollection );
@@ -90,24 +93,37 @@ vector<BPHRecoConstCandPtr> BPHBdToJPsiKsBuilder::build() {
   int nBd = tmpList.size();
   bdList.reserve( nBd );
   for ( iBd = 0; iBd < nBd; ++iBd ) {
-    BPHRecoConstCandPtr cand = tmpList[iBd];
-    BPHRecoCandidate* cptr( const_cast<BPHRecoCandidate*>( cand.get() ) );
+    BPHRecoConstCandPtr ctmp = tmpList[iBd];
+    BPHRecoCandidate* cptr = const_cast<BPHRecoCandidate*>( ctmp->clone() );
+    BPHRecoConstCandPtr cand( cptr );
     cptr->setIndependentFit( k0sName );    // fit for K0s reconstruction
                                            // indipendent from other particles
-//    cout << "apply mfit selection " << cptr << endl;
+    BPHRecoCandidate* kptr = const_cast<BPHRecoCandidate*>(
+                      cptr->getComp( k0sName ).get() );
+    kptr->setConstraint( BPHParticleMasses::k0sMass,
+                         BPHParticleMasses::k0sMSigma );
+    cptr->resetKinematicFit();
     if ( !mFitSel->accept( *cptr ) ) continue;
-//    cout << "mfit selection done" << endl;
     const RefCountedKinematicVertex tdv = cptr->topDecayVertex();
     if ( tdv.get() == 0 ) continue;
     if ( !tdv->vertexIsValid() ) continue;
     reco::Vertex vtx( *tdv );
-    if ( TMath::Prob( vtx.chi2(), lround( vtx.ndof() ) ) >= probMin )
+    if ( TMath::Prob( vtx.chi2(), lround( vtx.ndof() ) ) < probMin ) continue;
+    dMap[cand->getComp( jPsiName ).get()] = ctmp->getComp( jPsiName ).get();
+    dMap[cand->getComp(  k0sName ).get()] = ctmp->getComp(  k0sName ).get();
     bdList.push_back( cand );
   }
   updated = true;
 
   return bdList;
 
+}
+
+/// get original daughters map
+const std::map<const BPHRecoCandidate*,
+               const BPHRecoCandidate*>&
+               BPHBdToJPsiKsBuilder::daughMap() const {
+  return dMap;
 }
 
 /// set cuts

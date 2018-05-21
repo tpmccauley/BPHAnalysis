@@ -70,6 +70,10 @@ class BPHPlusMinusCandidate: public BPHRecoCandidate,
                                                double mass = -1,
                                                double msig = -1 );
 
+  /// clone object, cloning daughters as well up to required depth
+  /// level = -1 to clone all levels
+  virtual const BPHRecoCandidate* clone( int level = -1 ) const;
+
   /// get a composite by the simple sum of simple particles
   virtual const pat::CompositeCandidate& composite() const;
 

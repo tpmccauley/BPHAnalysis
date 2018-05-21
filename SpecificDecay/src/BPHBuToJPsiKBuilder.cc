@@ -80,6 +80,8 @@ vector<BPHRecoConstCandPtr> BPHBuToJPsiKBuilder::build() {
 
   if ( updated ) return buList;
 
+  buList.clear();
+
   BPHRecoBuilder bBu( *evSetup );
   bBu.setMinPDiffererence( minPDiff );
   bBu.add( jPsiName, *jCollection );
@@ -105,8 +107,8 @@ vector<BPHRecoConstCandPtr> BPHBuToJPsiKBuilder::build() {
 //  int iBu;
 //  int nBu = ( massConstr ? buList.size() : 0 );
 //  for ( iBu = 0; iBu < nBu; ++iBu ) {
-//    BPHRecoCandidate* cptr( const_cast<BPHRecoCandidate*>(
-//                            buList[iBu].get() ) );
+//    BPHRecoCandidate* cptr = const_cast<BPHRecoCandidate*>(
+//                             buList[iBu].get() );
 //    BPHRecoConstCandPtr jpsi = cptr->getComp( jPsiName );
 //    double jMass = jpsi->constrMass();
 //    if ( jMass < 0 ) continue;

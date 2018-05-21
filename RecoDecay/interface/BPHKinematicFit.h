@@ -81,17 +81,23 @@ class BPHKinematicFit: public virtual BPHDecayVertex {
   /// reset the kinematic fit
   virtual void resetKinematicFit() const;
 
-  // get current particle
+  /// get current particle
   virtual const RefCountedKinematicParticle currentParticle   () const;
   virtual const RefCountedKinematicVertex   currentDecayVertex() const;
 
-  // get top particle
+  /// get top particle
   virtual const RefCountedKinematicParticle topParticle   () const;
   virtual const RefCountedKinematicVertex   topDecayVertex() const;
   virtual ParticleMass                      mass          () const;
 
   /// compute total momentum after the fit
   virtual const math::XYZTLorentzVector& p4() const;
+
+  /// retrieve particle mass sigma
+  double getMassSigma( const reco::Candidate* cand ) const;
+
+  /// retrieve independent fit flag
+  bool getIndependentFit( const std::string& name ) const;
 
  protected:
 
@@ -130,6 +136,9 @@ class BPHKinematicFit: public virtual BPHDecayVertex {
 
   // map to handle composite daughters as single particles
   std::map<const BPHRecoCandidate*,bool> cKinP;
+
+  // temporary particle set
+  mutable std::vector<BPHRecoConstCandPtr> tmpList;
 
   // reconstruction results cache
   mutable bool oldKPs;
