@@ -22,6 +22,7 @@
 #include "TVector3.h"
 
 #include <TH1.h>
+#include <TTree.h>
 #include <TFile.h>
 
 #include <set>
@@ -44,6 +45,62 @@ using namespace std;
 // CHK_TRIG( trigResults, names, i, xyz );
 // is equivalent to
 // if ( names[i].find( "HLT_xyz_v" ) == 0 ) { flag_xyz = trigResults->accept( i ); break; }
+
+
+class VertexAnalysis {
+ public:
+  static double cAlpha( const reco::Vertex* pvtx,
+                        const reco::Vertex* svtx,
+                        float px, float py ) {
+    TVector3 disp( svtx->x() - pvtx->x(),
+                   svtx->y() - pvtx->y(),
+                   0 );
+    TVector3 cmom( px, py, 0 );
+    return disp.Dot( cmom ) / ( disp.Perp() * cmom.Perp() );
+  }
+  static double cAlpha( const reco::Vertex* pvtx,
+                        const reco::Vertex* svtx,
+                        const TVector3& cmom ) {
+    TVector3 disp( svtx->x() - pvtx->x(),
+                   svtx->y() - pvtx->y(),
+                   0 );
+    return disp.Dot( cmom ) / ( disp.Perp() * cmom.Perp() );
+  }
+  static void dist2D( const reco::Vertex* pvtx,
+                      const reco::Vertex* svtx,
+                      float px, float py,
+                      float mass,
+                      double& ctauPV, double& ctauErrPV ) {
+    TVector3 cmom( px, py, 0 );
+    float cosAlpha = cAlpha( pvtx, svtx, cmom );
+    AlgebraicVector3 vmom( px, py, 0 );
+    VertexDistanceXY vdistXY;
+    Measurement1D distXY = vdistXY.distance( *svtx, *pvtx );
+    ctauPV = distXY.value() * cosAlpha * mass / cmom.Perp();
+    GlobalError sve = svtx->error();
+    GlobalError pve = pvtx->error();
+    AlgebraicSymMatrix33 vXYe = sve.matrix() + pve.matrix();
+    ctauErrPV = sqrt( ROOT::Math::Similarity( vmom, vXYe ) ) * mass /
+                      cmom.Perp2();
+    return;
+  }
+  static void dist2D( const reco::Vertex* pvtx,
+                      const reco::Vertex* svtx,
+                      float px, float py,
+                      double cosAlpha, float mass,
+                      double& ctauPV, double& ctauErrPV ) {
+    TVector3 cmom( px, py, 0 );
+    AlgebraicVector3 vmom( px, py, 0 );
+    VertexDistanceXY vdistXY;
+    Measurement1D distXY = vdistXY.distance( *svtx, *pvtx );
+    ctauPV = distXY.value() * cosAlpha * mass / cmom.Perp();
+    GlobalError sve = svtx->error();
+    GlobalError pve = pvtx->error();
+    AlgebraicSymMatrix33 vXYe = sve.matrix() + pve.matrix();
+    ctauErrPV = sqrt( ROOT::Math::Similarity( vmom, vXYe ) ) * mass /
+                      cmom.Perp2();
+  }
+};
 
 class BPHUserData {
  public:
@@ -349,6 +406,14 @@ class BPHVertexSelect: public BPHHistoSpecificDecay::CandidateSelect {
                                   svtx->ndof() ) < pMin ) return false;
     }
     if ( ( cMin > 0 ) || ( sMin > 0 ) ) {
+      float cosAlpha = VertexAnalysis::cAlpha( pvtx, svtx, px, py );
+      if ( cosAlpha < cMin ) return false;
+      if ( sMin < 0 ) return true;
+      double ctauPV;
+      double ctauErrPV;
+      VertexAnalysis::dist2D( pvtx, svtx, px, py,
+                              cosAlpha, mass, ctauPV, ctauErrPV );
+/*
       TVector3 disp( svtx->x() - pvtx->x(),
                      svtx->y() - pvtx->y(),
                      0 );
@@ -365,6 +430,7 @@ class BPHVertexSelect: public BPHHistoSpecificDecay::CandidateSelect {
       AlgebraicSymMatrix33 vXYe = sve.matrix() + pve.matrix();
       double ctauErrPV = sqrt( ROOT::Math::Similarity( vmom, vXYe ) ) * mass /
                                cmom.Perp2();
+*/
       if ( ( ctauPV / ctauErrPV ) < sMin ) return false;
     }
     return true;
@@ -377,7 +443,7 @@ class BPHVertexSelect: public BPHHistoSpecificDecay::CandidateSelect {
   float sMin;
 };
 
-
+/*
 class BPHCompositeVertexSelect: public BPHHistoSpecificDecay::CandidateSelect {
  public:
   BPHCompositeVertexSelect( float probMin,
@@ -476,7 +542,7 @@ class BPHFittedVertexSelect: public BPHHistoSpecificDecay::CandidateSelect {
   float cMin;
   float sMin;
 };
-
+*/
 
 BPHHistoSpecificDecay::BPHHistoSpecificDecay( const edm::ParameterSet& ps ) {
 
@@ -561,7 +627,7 @@ BPHHistoSpecificDecay::BPHHistoSpecificDecay( const edm::ParameterSet& ps ) {
   double  upsBEtaMax  = -1.0; // 2018
   double  upsBYMax    =  1.4; // 2018
 
-  double oniaProbMin =  -0.005;
+  double oniaProbMin =  0.005;
   double oniaCosMin  = -2.0;
   double oniaSigMin  = -1.0;
 
@@ -594,7 +660,8 @@ BPHHistoSpecificDecay::BPHHistoSpecificDecay( const edm::ParameterSet& ps ) {
    upsBBasicSelect   = new BPHCompositeBasicSelect(
                            upsBMassMin,  upsBMassMax,
                            upsBPtMin  ,  upsBEtaMax ,  upsBYMax );
-  oniaVertexSelect   = new BPHCompositeVertexSelect(
+//  oniaVertexSelect   = new BPHCompositeVertexSelect(
+  oniaVertexSelect   = new BPHVertexSelect( 'c',
                            oniaProbMin, oniaCosMin, oniaSigMin );
   oniaDaughterSelect = new BPHDaughterSelect(
                            oniaMuPtMinLoose , oniaMuPtMinTight ,
@@ -1235,6 +1302,16 @@ void BPHHistoSpecificDecay::beginJob() {
   createHisto( "ctauDDLambdab",  60, -0.05, 0.25 ); // Lambdab ctau displaced
   createHisto( "ctauTDLambdab",  60, -0.05, 0.25 ); // Lambdab ctau displaced
 
+  recoName = new string;
+  tree = fs->make<TTree>( "BPHReco", "BPHReco" );
+  b_runNumber   = tree->Branch( "runNumber"  , &runNumber  , "runNumber/i"   );
+  b_lumiSection = tree->Branch( "lumiSection", &lumiSection, "lumiSection/i" );
+  b_eventNumber = tree->Branch( "eventNumber", &eventNumber, "eventNumber/i" );
+  b_recoName    = tree->Branch( "recoName"   , &recoName   , 8192, 99 );
+  b_recoMass    = tree->Branch( "recoMass"   , &recoMass   , "recoMass/F" );
+  b_recoTime    = tree->Branch( "recoTime"   , &recoTime   , "recoTime/F" );
+  b_recoErrT    = tree->Branch( "recoErrT"   , &recoErrT   , "recoErrT/F" );
+
   return;
 
 }
@@ -1271,6 +1348,11 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
     }
   }
 
+  // event number
+  runNumber   = ev.id().run();
+  lumiSection = ev.id().luminosityBlock();
+  eventNumber = ev.id().event();
+
   // get magnetic field
   edm::ESHandle<MagneticField> magneticField;
   es.get<IdealMagneticFieldRecord>().get( magneticField );
@@ -1302,6 +1384,7 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
     int iObj;
     int nObj = names.size();
     for ( iObj = 0; iObj < nObj; ++iObj ) {
+//      cout << names[iObj] << endl;
       CHK_TRIG( trigResults, names, iObj, Dimuon25_Jpsi                     )
       CHK_TRIG( trigResults, names, iObj, Dimuon20_Jpsi_Barrel_Seagulls     )
       CHK_TRIG( trigResults, names, iObj, Dimuon14_Phi_Barrel_Seagulls      )
@@ -1312,6 +1395,21 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
       CHK_TRIG( trigResults, names, iObj, DoubleMu4_JpsiTrk_Displaced       )
     }
   }
+
+//  cout <<       "Dimuon25_Jpsi "
+//       << ( flag_Dimuon25_Jpsi ? 'A' : 'R' ) << endl;
+//  cout <<       "Dimuon20_Jpsi_Barrel_Seagulls "
+//       << ( flag_Dimuon20_Jpsi_Barrel_Seagulls ? 'A' : 'R' ) << endl;
+//  cout <<       "Dimuon14_Phi_Barrel_Seagulls "
+//       << ( flag_Dimuon14_Phi_Barrel_Seagulls ? 'A' : 'R' ) << endl;
+//  cout <<       "Dimuon18_PsiPrime "
+//       << ( flag_Dimuon18_PsiPrime ? 'A' : 'R' ) << endl;
+//  cout <<       "Dimuon10_PsiPrime_Barrel_Seagulls "
+//       << ( flag_Dimuon10_PsiPrime_Barrel_Seagulls ? 'A' : 'R' ) << endl;
+//  cout <<       "Dimuon12_Upsilon_eta1p5 "
+//       << ( flag_Dimuon12_Upsilon_eta1p5 ? 'A' : 'R' ) << endl;
+//  cout <<       "DoubleMu4_JpsiTrk_Displaced "
+//       << ( flag_DoubleMu4_JpsiTrk_Displaced ? 'A' : 'R' ) << endl;
 
   //////////// quarkonia ////////////
 
@@ -1327,9 +1425,9 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
     LogTrace( "DataDump" )
            << "*********** quarkonium " << iqo << "/" << nqo << " ***********";
     const pat::CompositeCandidate& cand = oniaCands->at( iqo );
-//    if ( !oniaVertexSelect->accept( cand,
-//                                    BPHUserData::getByRef<reco::Vertex>( cand,
-//                                    "primaryVertex" ) ) ) continue;
+    if ( !oniaVertexSelect->accept( cand,
+                                    BPHUserData::getByRef<reco::Vertex>( cand,
+                                    "primaryVertex" ) ) ) continue;
     if ( !oniaDaughterSelect->accept( cand ) ) continue;
     fillHisto( "Full", cand, 'c' );
     if (  phiBBasicSelect->accept( cand ) ) {
@@ -1661,6 +1759,10 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
     nb0 = b0Cands->size();
   }
 
+//  cout << nb0 << ' ' << ev.id().run() << ' ' << ev.id().event();
+//  if ( nb0 ) cout << " *************************";
+//  cout << endl;
+
   for ( ib0 = 0; ib0 < nb0; ++ ib0 ) {
     LogTrace( "DataDump" )
            << "*********** B0 " << ib0 << "/" << nb0 << " ***********";
@@ -1737,6 +1839,69 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
     LogTrace( "DataDump" )
            << "*********** Lambdab " << ilb << "/" << nlb << " ***********";
     const pat::CompositeCandidate& cand = lbCands->at( ilb );
+    // @@ debug dump
+    const Vector3DBase<float,GlobalTag>* fmom = BPHUserData::get
+        < Vector3DBase<float,GlobalTag> >( cand, "fitMomentum" );
+    const reco::Vertex* svtx = BPHUserData::get<reco::Vertex>( cand,
+                                                               "fitVertex" );
+    const pat::CompositeCandidate* jptr = BPHUserData::getByRef
+         <pat::CompositeCandidate>( cand, "refToJPsi" );
+    const pat::CompositeCandidate* lptr = BPHUserData::getByRef
+         <pat::CompositeCandidate>( cand, "refToLambda0" );
+    const reco::Vertex* pvtx = ( jptr != 0 ?
+                                 BPHUserData::getByRef<reco::Vertex>( *jptr,
+                                                           "primaryVertex" ) :
+                                 0 );
+    float mass = ( cand.hasUserFloat( "fitMass" ) ? 
+                   cand.   userFloat( "fitMass" ) : -1 );
+    float mdjp = ( jptr != 0 ? jptr->mass      () : -1 );
+    float mdl0 = ( lptr != 0 ? lptr->mass      () : -1 );
+    float lbpt = ( fmom != 0 ? fmom->transverse() : -1 );
+    float jppt = ( jptr != 0 ? jptr->pt        () : -1 );
+    float prob = ( svtx != 0 ? ChiSquaredProbability( svtx->chi2(),
+                                                      svtx->ndof() ) : -1 );
+    float dcos = -1;
+    float dsig = -1;
+    if ( ( svtx != 0 ) && ( pvtx != 0 ) && ( fmom != 0 ) && ( mass > 0 ) ) {
+      float px = fmom->x();
+      float py = fmom->y();
+      TVector3 disp( svtx->x() - pvtx->x(),
+                     svtx->y() - pvtx->y(),
+                     0 );
+      TVector3 cmom( px, py, 0 );
+      dcos = disp.Dot( cmom ) / ( disp.Perp() * cmom.Perp() );
+      AlgebraicVector3 vmom( px, py, 0 );
+      VertexDistanceXY vdistXY;
+      Measurement1D distXY = vdistXY.distance( *svtx, *pvtx );
+      double ctauPV = distXY.value() * dcos * mass / cmom.Perp();
+      GlobalError sve = svtx->error();
+      GlobalError pve = pvtx->error();
+      AlgebraicSymMatrix33 vXYe = sve.matrix() + pve.matrix();
+      double ctauErrPV = sqrt( ROOT::Math::Similarity( vmom, vXYe ) ) * mass /
+                               cmom.Perp2();
+      dsig = ctauPV / ctauErrPV;
+    }
+    if ( ( mdjp > BPHParticleMasses::   jPsiMass - 0.150 ) &&
+         ( mdjp < BPHParticleMasses::   jPsiMass + 0.150 ) &&
+         ( mdl0 > BPHParticleMasses::lambda0Mass - 0.006 ) &&
+         ( mdl0 < BPHParticleMasses::lambda0Mass + 0.006 ) &&
+           npJPsiBasicSelect   ->accept( *jptr )           &&
+           npJPsiDaughterSelect->accept( *jptr )           ) {
+    cout << "LAMBDAB: "
+         << ev.id().run() << ' '
+         << ev.id().luminosityBlock() << ' '
+         << ev.id().event() << ' '
+         << mass << ' '
+         << mdjp << ' '
+         << mdl0 << ' '
+         << lbpt << ' '
+         << jppt << ' '
+         << prob << ' '
+         << dcos << ' '
+         << dsig << ' '
+         << endl;
+    }
+    // @@ debug dump end
     const pat::CompositeCandidate* jPsi = BPHUserData::getByRef
          <pat::CompositeCandidate>( cand, "refToJPsi" );
     LogTrace( "DataDump" )
@@ -1801,6 +1966,7 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
 
 
 void BPHHistoSpecificDecay::endJob() {
+//  tree->Write();
   return;
 }
 
@@ -1809,10 +1975,14 @@ void BPHHistoSpecificDecay::fillHisto( const string& name,
                                        const pat::CompositeCandidate& cand,
                                        char svType ) {
 
+  *recoName = name;
   float mass = ( cand.hasUserFloat( "fitMass" ) ?
                  cand.   userFloat( "fitMass" ) : -1 );
   fillHisto( "mass" + name, cand.mass() );
   fillHisto( "mfit" + name, mass );
+  recoMass = mass;
+  recoTime = -999999.0;
+  recoErrT = -999999.0;
 
   const reco::Vertex*
   pvtx = BPHUserData::getByRef<reco::Vertex>( cand, "primaryVertex" );
@@ -1822,15 +1992,30 @@ void BPHHistoSpecificDecay::fillHisto( const string& name,
     if ( jPsi == 0 ) return;
     pvtx = BPHUserData::getByRef<reco::Vertex>( *jPsi, "primaryVertex" );
   }
-  if ( pvtx == 0 ) return;
+//  if ( pvtx == 0 ) return;
 
+  if ( pvtx != 0 ) {
   const reco::Vertex* svtx = 0;
   if ( svType == 'f' )
   svtx = BPHUserData::get<reco::Vertex>( cand, "fitVertex" );
   if ( svtx == 0 )
   svtx = BPHUserData::get<reco::Vertex>( cand, "vertex" );
-  if ( svtx == 0 ) return;
+//  if ( svtx == 0 ) return;
+  if ( svtx != 0 ) {
 
+  float px;
+  float py;
+  const Vector3DBase<float,GlobalTag>* fmom = BPHUserData::get
+      < Vector3DBase<float,GlobalTag> >( cand, "fitMomentum" );
+  if ( fmom != 0 ) {
+    px = fmom->x();
+    py = fmom->y();
+  }
+  else {
+    px = cand.px();
+    py = cand.py();
+  }
+/*
   TVector3 disp2( svtx->x() - pvtx->x(),
                   svtx->y() - pvtx->y(),
                   0 );
@@ -1850,7 +2035,6 @@ void BPHHistoSpecificDecay::fillHisto( const string& name,
 //  Measurement1D dist3D = vdist3D.distance( *svtx, *pvtx );
 //  float mass = cand.mass();
   double ctauPV2 = distXY.value() * cosAlpha2 * mass / cmom2.Perp();
-/*
 //  double ctauPV3 = dist3D.value() * cosAlpha3 * mass / cmom3.Perp();
   GlobalError sve = svtx->error();
   GlobalError pve = pvtx->error();
@@ -1862,9 +2046,16 @@ void BPHHistoSpecificDecay::fillHisto( const string& name,
 //  d2d = Measurement1D( ctauPV2, ctauPV2 / ctauErrPV2 );
 //  d3d = Measurement1D( ctauPV3, ctauPV3 / ctauErrPV3 );
 */
-
+  double ctauPV2;
+  double ctauErrPV2;
+  VertexAnalysis::dist2D( pvtx, svtx, px, py,
+                          mass, ctauPV2, ctauErrPV2 );
+  recoTime = ctauPV2;
+  recoErrT = ctauErrPV2;
   fillHisto( "ctau" + name, ctauPV2 );
-
+  }
+  }
+  tree->Fill();
   return;
 
 }

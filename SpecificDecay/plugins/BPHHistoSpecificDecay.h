@@ -16,6 +16,8 @@
 #include <string>
 
 class TH1F;
+class TTree;
+class TBranch;
 class TVector3;
 
 namespace reco {
@@ -82,6 +84,21 @@ class BPHHistoSpecificDecay:
 
   edm::Service<TFileService> fs;
   std::map<std::string,TH1F*> histoMap;
+  TTree* tree;
+  unsigned int runNumber;
+  unsigned int lumiSection;
+  unsigned int eventNumber;
+  std::string* recoName;
+  float recoMass;
+  float recoTime;
+  float recoErrT;
+  TBranch* b_runNumber;
+  TBranch* b_lumiSection;
+  TBranch* b_eventNumber;
+  TBranch* b_recoName;
+  TBranch* b_recoMass;
+  TBranch* b_recoTime;
+  TBranch* b_recoErrT;
 
   CandidateSelect*  phiIBasicSelect;
   CandidateSelect* jPsiIBasicSelect;
