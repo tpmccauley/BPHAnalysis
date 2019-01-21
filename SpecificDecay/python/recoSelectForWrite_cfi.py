@@ -159,5 +159,29 @@ recoSelect = cms.VPSet(
         massFitMin = cms.double( 5.00 ),
         massFitMax = cms.double( 6.00 ),
         constrMJPsi = cms.bool( True )
+    ),
+    cms.PSet( name = cms.string( 'Bc' ),
+          ptMin = cms.double( 3.0 ),
+         etaMax = cms.double( 10.0 ),
+        mJPsiMin = cms.double( 2.80 ),
+        mJPsiMax = cms.double( 3.40 ),
+        massMin = cms.double( 4.00 ),
+        massMax = cms.double( 9.00 ),
+        probMin = cms.double( 0.02 ),
+        massFitMin = cms.double( 6.00 ),
+        massFitMax = cms.double( 7.00 ),
+        constrMJPsi = cms.bool( True )
+    ),
+    cms.PSet( name = cms.string( 'X3872' ),
+          ptMin = cms.double( 1.0 ),
+         etaMax = cms.double( 10.0 ),
+        mJPsiMin = cms.double( 2.80 ),
+        mJPsiMax = cms.double( 3.40 ),
+        massMin = cms.double( 3.00 ),
+        massMax = cms.double( 4.50 ),
+        probMin = cms.double( 0.02 ),
+        massFitMin = cms.double( 3.60 ),
+        massFitMax = cms.double( 4.00 ),
+        constrMJPsi = cms.bool( True )
     )
 )

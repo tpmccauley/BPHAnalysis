@@ -86,19 +86,21 @@ class BPHWriteSpecificDecay:
   bool useKS;
   bool useLS;
 
-  std::string oniaName;
-  std::string   sdName;
-  std::string   ssName;
-  std::string   buName;
-  std::string   bdName;
-  std::string   bsName;
-  std::string   k0Name;
-  std::string   l0Name;
-  std::string   b0Name;
-  std::string   lbName;
+  std::string  oniaName;
+  std::string    sdName;
+  std::string    ssName;
+  std::string    buName;
+  std::string    bdName;
+  std::string    bsName;
+  std::string    k0Name;
+  std::string    l0Name;
+  std::string    b0Name;
+  std::string    lbName;
+  std::string    bcName;
+  std::string x3872Name;
 
   enum recoType { Onia, Pmm , Psi1, Psi2, Ups , Ups1, Ups2, Ups3,
-                  Kx0, Pkk, Bu, Bd, Bs, K0s, Lambda0, B0, Lambdab };
+                  Kx0, Pkk, Bu, Bd, Bs, K0s, Lambda0, B0, Lambdab, Bc, X3872 };
   enum  parType { ptMin, etaMax,
                   mPsiMin, mPsiMax, mKx0Min, mKx0Max, mPhiMin, mPhiMax,
                   mK0sMin, mK0sMax, mLambda0Min, mLambda0Max,
@@ -119,6 +121,8 @@ class BPHWriteSpecificDecay:
   bool recoLambda0;
   bool recoB0;
   bool recoLambdab;
+  bool recoBc;
+  bool recoX3872;
 
   bool writeOnia;
   bool writeKx0;
@@ -130,6 +134,8 @@ class BPHWriteSpecificDecay:
   bool writeLambda0;
   bool writeB0;
   bool writeLambdab;
+  bool writeBc;
+  bool writeX3872;
 
   bool writeVertex;
   bool writeMomentum;
@@ -145,6 +151,8 @@ class BPHWriteSpecificDecay:
   std::vector<BPHPlusMinusConstCandPtr> lL0;
   std::vector<BPHRecoConstCandPtr> lB0;
   std::vector<BPHRecoConstCandPtr> lLb;
+  std::vector<BPHRecoConstCandPtr> lBc;
+  std::vector<BPHRecoConstCandPtr> lX3872;
 
   std::map<const BPHRecoCandidate*,const BPHRecoCandidate*> jPsiOMap;
   std::map<const BPHRecoCandidate*,const BPHRecoCandidate*> daughMap;
@@ -201,7 +209,10 @@ class BPHWriteSpecificDecay:
       }
       const BPHPlusMinusCandidate* pmp =
             dynamic_cast<const BPHPlusMinusCandidate*>( ptr.get() );
-      if ( pmp != 0 ) cc.addUserData( "cowboy", pmp->isCowboy() );
+      if ( pmp != 0 ) {
+        cc.addUserData ( "cowboy", pmp->isCowboy  ()            );
+//        cc.addUserFloat(    "dca", pmp->cAppInRPhi().distance() );
+      }
       if ( writeVertex ) cc.addUserData( "vertex" , ptr->vertex() );
       if ( ptr->isEmpty() ) continue;
       if ( writeVertex ) cc.addUserData( "fitVertex",

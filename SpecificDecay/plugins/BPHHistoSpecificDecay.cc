@@ -71,6 +71,7 @@ class VertexAnalysis {
                       float px, float py,
                       float mass,
                       double& ctauPV, double& ctauErrPV ) {
+/*
     TVector3 cmom( px, py, 0 );
     float cosAlpha = cAlpha( pvtx, svtx, cmom );
     AlgebraicVector3 vmom( px, py, 0 );
@@ -82,6 +83,9 @@ class VertexAnalysis {
     AlgebraicSymMatrix33 vXYe = sve.matrix() + pve.matrix();
     ctauErrPV = sqrt( ROOT::Math::Similarity( vmom, vXYe ) ) * mass /
                       cmom.Perp2();
+*/
+    dist2D( pvtx, svtx, px, py, cAlpha( pvtx, svtx, px, py ), mass,
+            ctauPV, ctauErrPV );
     return;
   }
   static void dist2D( const reco::Vertex* pvtx,
@@ -99,6 +103,7 @@ class VertexAnalysis {
     AlgebraicSymMatrix33 vXYe = sve.matrix() + pve.matrix();
     ctauErrPV = sqrt( ROOT::Math::Similarity( vmom, vXYe ) ) * mass /
                       cmom.Perp2();
+    return;
   }
 };
 
@@ -109,6 +114,11 @@ class BPHUserData {
                        const string& name ) {
     if ( cand.hasUserData( name ) ) return cand.userData<T>( name );
     return 0;
+  }
+  static float get( const pat::CompositeCandidate& cand,
+                    const string& name, float d = 0.0 ) {
+    if ( cand.hasUserFloat( name ) ) return cand.userFloat( name );
+    return d;
   }
   template<class T>
   static const T* getByRef( const pat::CompositeCandidate& cand,
@@ -365,15 +375,18 @@ class BPHVertexSelect: public BPHHistoSpecificDecay::CandidateSelect {
  public:
   BPHVertexSelect( char vType,
                    float probMin,
-                   float  cosMin = -1.0,
-                   float  sigMin = -1.0 ): type( vType ),
-                                           pMin( probMin ),
-                                           cMin(  cosMin ),
-                                           sMin(  sigMin ) {
+                   float  cosMin = -2.0,
+                   float  sigMin = -1.0,
+                   char dMode = 'r' ): type( vType ),
+                                       pMin( probMin ),
+                                       cMin(  cosMin ),
+                                       sMin(  sigMin ),
+                                       mode(   dMode ) {
   }
   bool accept( const pat::CompositeCandidate& cand,
                const reco::Vertex* pvtx ) const {
-    const reco::Vertex* svtx;
+    if ( pvtx == 0 ) return false;
+    const reco::Vertex* svtx = 0;
     float px;
     float py;
     float mass;
@@ -400,12 +413,11 @@ class BPHVertexSelect: public BPHHistoSpecificDecay::CandidateSelect {
       return false;
     }
     if ( svtx == 0 ) return false;
-    if ( pvtx == 0 ) return false;
     if ( pMin > 0 ) {
       if ( ChiSquaredProbability( svtx->chi2(),
                                   svtx->ndof() ) < pMin ) return false;
     }
-    if ( ( cMin > 0 ) || ( sMin > 0 ) ) {
+    if ( ( cMin > -1.0 ) || ( sMin > 0 ) ) {
       float cosAlpha = VertexAnalysis::cAlpha( pvtx, svtx, px, py );
       if ( cosAlpha < cMin ) return false;
       if ( sMin < 0 ) return true;
@@ -431,7 +443,19 @@ class BPHVertexSelect: public BPHHistoSpecificDecay::CandidateSelect {
       double ctauErrPV = sqrt( ROOT::Math::Similarity( vmom, vXYe ) ) * mass /
                                cmom.Perp2();
 */
-      if ( ( ctauPV / ctauErrPV ) < sMin ) return false;
+      float dTest;
+      switch ( mode ) {
+      case 'a':
+      case 'd':
+        dTest = ctauPV;
+      break;
+      case 'r':
+      case 's':
+      default:
+        dTest = ctauPV / ctauErrPV;
+      break;
+      }
+      if ( dTest < sMin ) return false;
     }
     return true;
   }
@@ -441,6 +465,7 @@ class BPHVertexSelect: public BPHHistoSpecificDecay::CandidateSelect {
   float pMin;
   float cMin;
   float sMin;
+  char mode;
 };
 
 /*
@@ -546,39 +571,45 @@ class BPHFittedVertexSelect: public BPHHistoSpecificDecay::CandidateSelect {
 
 BPHHistoSpecificDecay::BPHHistoSpecificDecay( const edm::ParameterSet& ps ) {
 
-  useTrig = ( SET_LABEL( trigResultsLabel, ps ) != "" );
-  useOnia = ( SET_LABEL(   oniaCandsLabel, ps ) != "" );
-  useSd   = ( SET_LABEL(     sdCandsLabel, ps ) != "" );
-  useSs   = ( SET_LABEL(     ssCandsLabel, ps ) != "" );
-  useBu   = ( SET_LABEL(     buCandsLabel, ps ) != "" );
-  useBd   = ( SET_LABEL(     bdCandsLabel, ps ) != "" );
-  useBs   = ( SET_LABEL(     bsCandsLabel, ps ) != "" );
-  useK0   = ( SET_LABEL(     k0CandsLabel, ps ) != "" );
-  useL0   = ( SET_LABEL(     l0CandsLabel, ps ) != "" );
-  useB0   = ( SET_LABEL(     b0CandsLabel, ps ) != "" );
-  useLb   = ( SET_LABEL(     lbCandsLabel, ps ) != "" );
-  if ( useTrig ) consume< edm::TriggerResults           >( trigResultsToken,
-                                                           trigResultsLabel );
-  if ( useOnia ) consume< vector<pat::CompositeCandidate> >( oniaCandsToken,
-                                                             oniaCandsLabel );
-  if ( useSd   ) consume< vector<pat::CompositeCandidate> >(   sdCandsToken,
-                                                               sdCandsLabel );
-  if ( useSs   ) consume< vector<pat::CompositeCandidate> >(   ssCandsToken,
-                                                               ssCandsLabel );
-  if ( useBu   ) consume< vector<pat::CompositeCandidate> >(   buCandsToken,
-                                                               buCandsLabel );
-  if ( useBd   ) consume< vector<pat::CompositeCandidate> >(   bdCandsToken,
-                                                               bdCandsLabel );
-  if ( useBs   ) consume< vector<pat::CompositeCandidate> >(   bsCandsToken,
-                                                               bsCandsLabel );
-  if ( useK0   ) consume< vector<pat::CompositeCandidate> >(   k0CandsToken,
-                                                               k0CandsLabel );
-  if ( useL0   ) consume< vector<pat::CompositeCandidate> >(   l0CandsToken,
-                                                               l0CandsLabel );
-  if ( useB0   ) consume< vector<pat::CompositeCandidate> >(   b0CandsToken,
-                                                               b0CandsLabel );
-  if ( useLb   ) consume< vector<pat::CompositeCandidate> >(   lbCandsToken,
-                                                               lbCandsLabel );
+  useTrig  = ( SET_LABEL( trigResultsLabel, ps ) != "" );
+  useOnia  = ( SET_LABEL(   oniaCandsLabel, ps ) != "" );
+  useSd    = ( SET_LABEL(     sdCandsLabel, ps ) != "" );
+  useSs    = ( SET_LABEL(     ssCandsLabel, ps ) != "" );
+  useBu    = ( SET_LABEL(     buCandsLabel, ps ) != "" );
+  useBd    = ( SET_LABEL(     bdCandsLabel, ps ) != "" );
+  useBs    = ( SET_LABEL(     bsCandsLabel, ps ) != "" );
+  useK0    = ( SET_LABEL(     k0CandsLabel, ps ) != "" );
+  useL0    = ( SET_LABEL(     l0CandsLabel, ps ) != "" );
+  useB0    = ( SET_LABEL(     b0CandsLabel, ps ) != "" );
+  useLb    = ( SET_LABEL(     lbCandsLabel, ps ) != "" );
+  useBc    = ( SET_LABEL(     bcCandsLabel, ps ) != "" );
+  useX3872 = ( SET_LABEL(  x3872CandsLabel, ps ) != "" );
+  if ( useTrig  ) consume< edm::TriggerResults           >(  trigResultsToken,
+                                                             trigResultsLabel );
+  if ( useOnia  ) consume< vector<pat::CompositeCandidate> >(  oniaCandsToken,
+                                                               oniaCandsLabel );
+  if ( useSd    ) consume< vector<pat::CompositeCandidate> >(    sdCandsToken,
+                                                                 sdCandsLabel );
+  if ( useSs    ) consume< vector<pat::CompositeCandidate> >(    ssCandsToken,
+                                                                 ssCandsLabel );
+  if ( useBu    ) consume< vector<pat::CompositeCandidate> >(    buCandsToken,
+                                                                 buCandsLabel );
+  if ( useBd    ) consume< vector<pat::CompositeCandidate> >(    bdCandsToken,
+                                                                 bdCandsLabel );
+  if ( useBs    ) consume< vector<pat::CompositeCandidate> >(    bsCandsToken,
+                                                                 bsCandsLabel );
+  if ( useK0    ) consume< vector<pat::CompositeCandidate> >(    k0CandsToken,
+                                                                 k0CandsLabel );
+  if ( useL0    ) consume< vector<pat::CompositeCandidate> >(    l0CandsToken,
+                                                                 l0CandsLabel );
+  if ( useB0    ) consume< vector<pat::CompositeCandidate> >(    b0CandsToken,
+                                                                 b0CandsLabel );
+  if ( useLb    ) consume< vector<pat::CompositeCandidate> >(    lbCandsToken,
+                                                                 lbCandsLabel );
+  if ( useBc    ) consume< vector<pat::CompositeCandidate> >(    bcCandsToken,
+                                                                 bcCandsLabel );
+  if ( useX3872 ) consume< vector<pat::CompositeCandidate> >( x3872CandsToken,
+                                                              x3872CandsLabel );
 
   static const BPHSoftMuonSelect* sms = new BPHSoftMuonSelect;
 
@@ -1074,6 +1105,163 @@ BPHHistoSpecificDecay::BPHHistoSpecificDecay( const edm::ParameterSet& ps ) {
 //                              lbDMuPtMinLoose , lbDMuPtMinTight ,
 //                              lbDMuEtaMaxLoose, lbDMuEtaMaxTight, sms );
 
+  //////////// Bc selection ////////////
+
+  double bcIMassMin       =      0.0;
+  double bcIMassMax       = 999999.0;
+  double bcIPtMin         = 27.0;
+  double bcIEtaMax        = -1.0;
+  double bcIYMax          = -1.0;
+  double bcIJPsiMassMin   = BPHParticleMasses::jPsiMass - 0.150;
+  double bcIJPsiMassMax   = BPHParticleMasses::jPsiMass + 0.150;
+  double bcIJPsiPtMin     = 25.0;
+  double bcIJPsiEtaMax    = -1.0;
+  double bcIJPsiYMax      = -1.0;
+  double bcIJPsiProbMin   =  0.005;
+  double bcIProbMin       =  0.10;
+  double bcICosMin        = -2.0;
+  double bcISigMin        = -1.0;
+  double bcIDistMin       =  0.01;
+//  double bcIMuPtMinLoose  = -1.0;
+//  double bcIMuPtMinTight  = -1.0;
+//  double bcIMuEtaMaxLoose = -1.0;
+//  double bcIMuEtaMaxTight = -1.0;
+
+  bcIPiPtMin = 3.5;
+
+  bcIBasicSelect        = new BPHFittedBasicSelect(
+                              bcIMassMin, bcIMassMax,
+                              bcIPtMin  , bcIEtaMax , bcIYMax );
+  bcIJPsiBasicSelect    = new BPHCompositeBasicSelect(
+                              bcIJPsiMassMin, bcIJPsiMassMax,
+                              bcIJPsiPtMin  , bcIJPsiEtaMax , bcIJPsiYMax );
+  bcIJPsiVertexSelect   = new BPHVertexSelect( 'c',
+                              bcIJPsiProbMin );
+  bcIVertexSelect       = new BPHVertexSelect( 'f',
+                              bcIProbMin, bcICosMin, bcISigMin, bcIDistMin );
+  bcIJPsiDaughterSelect = 0;
+//  bcIJPsiDaughterSelect = new BPHDaughterSelect(
+//                              bcIMuPtMinLoose , bcIMuPtMinTight ,
+//                              bcIMuEtaMaxLoose, bcMuEtaMaxTight, sms );
+
+  double bcDMassMin       =      0.0;
+  double bcDMassMax       = 999999.0;
+  double bcDPtMin         =  8.0;
+  double bcDEtaMax        = -1.0;
+  double bcDYMax          = -1.0;
+  double bcDJPsiMassMin   = BPHParticleMasses::jPsiMass - 0.150;
+  double bcDJPsiMassMax   = BPHParticleMasses::jPsiMass + 0.150;
+  double bcDJPsiPtMin     =  7.0;
+  double bcDJPsiEtaMax    = -1.0;
+  double bcDJPsiYMax      = -1.0;
+  double bcDJPsiProbMin   =  0.005;
+  double bcDProbMin       =  0.10;
+  double bcDCosMin        =  0.99;
+  double bcDSigMin        =  3.0;
+//  double bcDMuPtMinLoose  = -1.0;
+//  double bcDMuPtMinTight  = -1.0;
+//  double bcDMuEtaMaxLoose = -1.0;
+//  double bcDMuEtaMaxTight = -1.0;
+
+  bcJPsiDcaMax = 0.5;
+  bcDPiPtMin = 3.5;
+
+  bcDBasicSelect        = new BPHFittedBasicSelect(
+                              bcDMassMin, bcDMassMax,
+                              bcDPtMin  , bcDEtaMax , bcDYMax );
+  bcDJPsiBasicSelect    = new BPHCompositeBasicSelect(
+                              bcDJPsiMassMin, bcDJPsiMassMax,
+                              bcDJPsiPtMin  , bcDJPsiEtaMax , bcDJPsiYMax );
+  bcDJPsiVertexSelect   = new BPHVertexSelect( 'c',
+                              bcDJPsiProbMin );
+  bcDVertexSelect       = new BPHVertexSelect( 'f',
+                              bcDProbMin, bcDCosMin, bcDSigMin );
+  bcDJPsiDaughterSelect = 0;
+//  bcDJPsiDaughterSelect = new BPHDaughterSelect(
+//                              bcDMuPtMinLoose , bcDMuPtMinTight ,
+//                              bcDMuEtaMaxLoose, bcDMuEtaMaxTight, sms );
+
+  //////////// X3872 selection ////////////
+
+  double x3872IMassMin       =      0.0;
+  double x3872IMassMax       = 999999.0;
+  double x3872IPtMin         = 27.0;
+  double x3872IEtaMax        = -1.0;
+  double x3872IYMax          = -1.0;
+  double x3872IJPsiMassMin   = BPHParticleMasses::jPsiMass - 0.150;
+  double x3872IJPsiMassMax   = BPHParticleMasses::jPsiMass + 0.150;
+  double x3872IJPsiPtMin     = 25.0;
+  double x3872IJPsiEtaMax    = -1.0;
+  double x3872IJPsiYMax      = -1.0;
+  double x3872IJPsiProbMin   =  0.10;
+  double x3872IProbMin       =  0.10;
+  double x3872ICosMin        = -2.0;
+  double x3872ISigMin        = -1.0;
+  double x3872IDistMin       =  0.01;
+//  double x3872IMuPtMinLoose  = -1.0;
+//  double x3872IMuPtMinTight  = -1.0;
+//  double x3872IMuEtaMaxLoose = -1.0;
+//  double x3872IMuEtaMaxTight = -1.0;
+
+  x3872JPsiDcaMax = 0.5;
+  x3872IPiPtMin = 1.2;
+
+  x3872IBasicSelect        = new BPHFittedBasicSelect(
+                                 x3872IMassMin, x3872IMassMax,
+                                 x3872IPtMin  , x3872IEtaMax , x3872IYMax );
+  x3872IJPsiBasicSelect    = new BPHCompositeBasicSelect(
+                                 x3872IJPsiMassMin, x3872IJPsiMassMax,
+                                 x3872IJPsiPtMin  ,
+                                 x3872IJPsiEtaMax , x3872IJPsiYMax );
+  x3872IJPsiVertexSelect   = new BPHVertexSelect( 'c',
+                                 x3872IJPsiProbMin );
+  x3872IVertexSelect       = new BPHVertexSelect( 'f',
+                                 x3872IProbMin,
+                                 x3872ICosMin, x3872ISigMin, x3872IDistMin );
+  x3872IJPsiDaughterSelect = 0;
+//  x3872IJPsiDaughterSelect = new BPHDaughterSelect(
+//                                 x3872IMuPtMinLoose , x3872IMuPtMinTight,
+//                                 x3872IMuEtaMaxLoose, x3872MuEtaMaxTight,
+//                                 sms );
+
+  double x3872DMassMin       =      0.0;
+  double x3872DMassMax       = 999999.0;
+  double x3872DPtMin         =  8.0;
+  double x3872DEtaMax        = -1.0;
+  double x3872DYMax          = -1.0;
+  double x3872DJPsiMassMin   = BPHParticleMasses::jPsiMass - 0.150;
+  double x3872DJPsiMassMax   = BPHParticleMasses::jPsiMass + 0.150;
+  double x3872DJPsiPtMin     =  7.0;
+  double x3872DJPsiEtaMax    = -1.0;
+  double x3872DJPsiYMax      = -1.0;
+  double x3872DJPsiProbMin   =  0.10;
+  double x3872DProbMin       =  0.10;
+  double x3872DCosMin        =  0.99;
+  double x3872DSigMin        =  3.0;
+//  double x3872DMuPtMinLoose  = -1.0;
+//  double x3872DMuPtMinTight  = -1.0;
+//  double x3872DMuEtaMaxLoose = -1.0;
+//  double x3872DMuEtaMaxTight = -1.0;
+
+  x3872DPiPtMin = 1.2;
+
+  x3872DBasicSelect        = new BPHFittedBasicSelect(
+                                 x3872DMassMin, x3872DMassMax,
+                                 x3872DPtMin  , x3872DEtaMax , x3872DYMax );
+  x3872DJPsiBasicSelect    = new BPHCompositeBasicSelect(
+                                 x3872DJPsiMassMin, x3872DJPsiMassMax,
+                                 x3872DJPsiPtMin  ,
+                                 x3872DJPsiEtaMax , x3872DJPsiYMax );
+  x3872DJPsiVertexSelect   = new BPHVertexSelect( 'c',
+                                 x3872DJPsiProbMin );
+  x3872DVertexSelect       = new BPHVertexSelect( 'f',
+                                 x3872DProbMin, x3872DCosMin, x3872DSigMin );
+  x3872DJPsiDaughterSelect = 0;
+//  x3872DJPsiDaughterSelect = new BPHDaughterSelect(
+//                                 x3872DMuPtMinLoose , x3872DMuPtMinTight ,
+//                                 x3872DMuEtaMaxLoose, x3872DMuEtaMaxTight,,
+//                                 sms );
+
 }
 
 
@@ -1146,6 +1334,28 @@ BPHHistoSpecificDecay::~BPHHistoSpecificDecay() {
   delete lbDVertexSelect;
   delete lbDJPsiDaughterSelect;
 
+  delete bcIBasicSelect;
+  delete bcIJPsiBasicSelect;
+  delete bcIJPsiVertexSelect;
+  delete bcIVertexSelect;
+  delete bcIJPsiDaughterSelect;
+  delete bcDBasicSelect;
+  delete bcDJPsiBasicSelect;
+  delete bcDJPsiVertexSelect;
+  delete bcDVertexSelect;
+  delete bcDJPsiDaughterSelect;
+
+  delete x3872IBasicSelect;
+  delete x3872IJPsiBasicSelect;
+  delete x3872IJPsiVertexSelect;
+  delete x3872IVertexSelect;
+  delete x3872IJPsiDaughterSelect;
+  delete x3872DBasicSelect;
+  delete x3872DJPsiBasicSelect;
+  delete x3872DJPsiVertexSelect;
+  delete x3872DVertexSelect;
+  delete x3872DJPsiDaughterSelect;
+
 }
 
 
@@ -1163,6 +1373,8 @@ void BPHHistoSpecificDecay::fillDescriptions(
    desc.add<string>(     "l0CandsLabel", "" );
    desc.add<string>(     "b0CandsLabel", "" );
    desc.add<string>(     "lbCandsLabel", "" );
+   desc.add<string>(     "bcCandsLabel", "" );
+   desc.add<string>(  "x3872CandsLabel", "" );
    descriptions.add( "process.bphHistoSpecificDecay", desc );
    return;
 }
@@ -1198,6 +1410,14 @@ void BPHHistoSpecificDecay::beginJob() {
   createHisto( "massTIBs"     , 100, 5.00, 6.00 ); // Bs   mass inclusive
   createHisto( "massDDBs"     , 100, 5.00, 6.00 ); // Bs   mass displaced
   createHisto( "massTDBs"     , 100, 5.00, 6.00 ); // Bs   mass displaced
+  createHisto( "massDIBc"     , 100, 6.00, 7.00 ); // Bc   mass inclusive
+  createHisto( "massTIBc"     , 100, 6.00, 7.00 ); // Bc   mass inclusive
+  createHisto( "massDDBc"     , 100, 6.00, 7.00 ); // Bc   mass displaced
+  createHisto( "massTDBc"     , 100, 6.00, 7.00 ); // Bc   mass displaced
+  createHisto( "massDIX3872"  ,  40, 3.60, 4.00 ); // X3872 mass inclusive
+  createHisto( "massTIX3872"  ,  40, 3.60, 4.00 ); // X3872 mass inclusive
+  createHisto( "massDDX3872"  ,  40, 3.60, 4.00 ); // X3872 mass displaced
+  createHisto( "massTDX3872"  ,  40, 3.60, 4.00 ); // X3872 mass displaced
   createHisto( "mfitDIBu"     , 100, 5.00, 6.00 ); // Bu   mass, with constr.
   createHisto( "mfitTIBu"     , 100, 5.00, 6.00 ); // Bu   mass, with constr.
   createHisto( "mfitDDBu"     , 100, 5.00, 6.00 ); // Bu   mass, with constr.
@@ -1210,6 +1430,14 @@ void BPHHistoSpecificDecay::beginJob() {
   createHisto( "mfitTIBs"     , 100, 5.00, 6.00 ); // Bs   mass, with constr.
   createHisto( "mfitDDBs"     , 100, 5.00, 6.00 ); // Bs   mass, with constr.
   createHisto( "mfitTDBs"     , 100, 5.00, 6.00 ); // Bs   mass, with constr.
+  createHisto( "mfitDIBc"     , 100, 6.00, 7.00 ); // Bc   mass, with constr.
+  createHisto( "mfitTIBc"     , 100, 6.00, 7.00 ); // Bc   mass, with constr.
+  createHisto( "mfitDDBc"     , 100, 6.00, 7.00 ); // Bc   mass, with constr.
+  createHisto( "mfitTDBc"     , 100, 6.00, 7.00 ); // Bc   mass, with constr.
+  createHisto( "mfitDIX3872"  ,  40, 3.60, 4.00 ); // X3872 mass, with constr.
+  createHisto( "mfitTIX3872"  ,  40, 3.60, 4.00 ); // X3872 mass, with constr.
+  createHisto( "mfitDDX3872"  ,  40, 3.60, 4.00 ); // X3872 mass, with constr.
+  createHisto( "mfitTDX3872"  ,  40, 3.60, 4.00 ); // X3872 mass, with constr.
   createHisto( "massDIBuJPsi" ,  35, 2.95, 3.30 ); // JPsi mass in Bu decay
   createHisto( "massTIBuJPsi" ,  35, 2.95, 3.30 ); // JPsi mass in Bu decay
   createHisto( "massDDBuJPsi" ,  35, 2.95, 3.30 ); // JPsi mass in Bu decay
@@ -1230,6 +1458,14 @@ void BPHHistoSpecificDecay::beginJob() {
   createHisto( "massTIBsPhi"  ,  50, 1.01, 1.03 ); // Phi  mass in Bs decay
   createHisto( "massDDBsPhi"  ,  50, 1.01, 1.03 ); // Phi  mass in Bs decay
   createHisto( "massTDBsPhi"  ,  50, 1.01, 1.03 ); // Phi  mass in Bs decay
+  createHisto( "massDIBcJPsi" ,  35, 2.95, 3.30 ); // JPsi mass in Bc decay
+  createHisto( "massTIBcJPsi" ,  35, 2.95, 3.30 ); // JPsi mass in Bc decay
+  createHisto( "massDDBcJPsi" ,  35, 2.95, 3.30 ); // JPsi mass in Bc decay
+  createHisto( "massTDBcJPsi" ,  35, 2.95, 3.30 ); // JPsi mass in Bc decay
+  createHisto( "massDIX3JPsi" ,  35, 2.95, 3.30 ); // JPsi mass in X3872 decay
+  createHisto( "massTIX3JPsi" ,  35, 2.95, 3.30 ); // JPsi mass in X3872 decay
+  createHisto( "massDDX3JPsi" ,  35, 2.95, 3.30 ); // JPsi mass in X3872 decay
+  createHisto( "massTDX3JPsi" ,  35, 2.95, 3.30 ); // JPsi mass in X3872 decay
   createHisto( "massDK0s"     ,  50, 0.40, 0.60 ); // K0s  mass
   createHisto( "mfitDK0s"     ,  50, 0.40, 0.60 ); // K0s  mass
   createHisto( "massDLambda0" ,  60, 1.00, 1.30 ); // Lambda0 mass
@@ -1319,6 +1555,8 @@ void BPHHistoSpecificDecay::beginJob() {
 void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
                                      const edm::EventSetup& es ) {
 
+//  if ( ev.id().run  () !=    316239 ) return;
+//  if ( ev.id().event() != 170736782 ) return;
   static map<string,ofstream*> ofMap;
   if ( !ofMap.size() ) {
     ofMap["BarPhi"] = 0;
@@ -1339,6 +1577,10 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
     ofMap["DisplacedB0"] = 0;
     ofMap["InclusiveLambdab"] = 0;
     ofMap["DisplacedLambdab"] = 0;
+    ofMap["InclusiveBc"] = 0;
+    ofMap["DisplacedBc"] = 0;
+    ofMap["InclusiveX3872"] = 0;
+    ofMap["DisplacedX3872"] = 0;
     map<string,ofstream*>::iterator iter = ofMap.begin();
     map<string,ofstream*>::iterator iend = ofMap.end();
     string name = "list";
@@ -1839,69 +2081,6 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
     LogTrace( "DataDump" )
            << "*********** Lambdab " << ilb << "/" << nlb << " ***********";
     const pat::CompositeCandidate& cand = lbCands->at( ilb );
-    // @@ debug dump
-    const Vector3DBase<float,GlobalTag>* fmom = BPHUserData::get
-        < Vector3DBase<float,GlobalTag> >( cand, "fitMomentum" );
-    const reco::Vertex* svtx = BPHUserData::get<reco::Vertex>( cand,
-                                                               "fitVertex" );
-    const pat::CompositeCandidate* jptr = BPHUserData::getByRef
-         <pat::CompositeCandidate>( cand, "refToJPsi" );
-    const pat::CompositeCandidate* lptr = BPHUserData::getByRef
-         <pat::CompositeCandidate>( cand, "refToLambda0" );
-    const reco::Vertex* pvtx = ( jptr != 0 ?
-                                 BPHUserData::getByRef<reco::Vertex>( *jptr,
-                                                           "primaryVertex" ) :
-                                 0 );
-    float mass = ( cand.hasUserFloat( "fitMass" ) ? 
-                   cand.   userFloat( "fitMass" ) : -1 );
-    float mdjp = ( jptr != 0 ? jptr->mass      () : -1 );
-    float mdl0 = ( lptr != 0 ? lptr->mass      () : -1 );
-    float lbpt = ( fmom != 0 ? fmom->transverse() : -1 );
-    float jppt = ( jptr != 0 ? jptr->pt        () : -1 );
-    float prob = ( svtx != 0 ? ChiSquaredProbability( svtx->chi2(),
-                                                      svtx->ndof() ) : -1 );
-    float dcos = -1;
-    float dsig = -1;
-    if ( ( svtx != 0 ) && ( pvtx != 0 ) && ( fmom != 0 ) && ( mass > 0 ) ) {
-      float px = fmom->x();
-      float py = fmom->y();
-      TVector3 disp( svtx->x() - pvtx->x(),
-                     svtx->y() - pvtx->y(),
-                     0 );
-      TVector3 cmom( px, py, 0 );
-      dcos = disp.Dot( cmom ) / ( disp.Perp() * cmom.Perp() );
-      AlgebraicVector3 vmom( px, py, 0 );
-      VertexDistanceXY vdistXY;
-      Measurement1D distXY = vdistXY.distance( *svtx, *pvtx );
-      double ctauPV = distXY.value() * dcos * mass / cmom.Perp();
-      GlobalError sve = svtx->error();
-      GlobalError pve = pvtx->error();
-      AlgebraicSymMatrix33 vXYe = sve.matrix() + pve.matrix();
-      double ctauErrPV = sqrt( ROOT::Math::Similarity( vmom, vXYe ) ) * mass /
-                               cmom.Perp2();
-      dsig = ctauPV / ctauErrPV;
-    }
-    if ( ( mdjp > BPHParticleMasses::   jPsiMass - 0.150 ) &&
-         ( mdjp < BPHParticleMasses::   jPsiMass + 0.150 ) &&
-         ( mdl0 > BPHParticleMasses::lambda0Mass - 0.006 ) &&
-         ( mdl0 < BPHParticleMasses::lambda0Mass + 0.006 ) &&
-           npJPsiBasicSelect   ->accept( *jptr )           &&
-           npJPsiDaughterSelect->accept( *jptr )           ) {
-    cout << "LAMBDAB: "
-         << ev.id().run() << ' '
-         << ev.id().luminosityBlock() << ' '
-         << ev.id().event() << ' '
-         << mass << ' '
-         << mdjp << ' '
-         << mdl0 << ' '
-         << lbpt << ' '
-         << jppt << ' '
-         << prob << ' '
-         << dcos << ' '
-         << dsig << ' '
-         << endl;
-    }
-    // @@ debug dump end
     const pat::CompositeCandidate* jPsi = BPHUserData::getByRef
          <pat::CompositeCandidate>( cand, "refToJPsi" );
     LogTrace( "DataDump" )
@@ -1956,6 +2135,155 @@ void BPHHistoSpecificDecay::analyze( const edm::Event& ev,
                                    << ( cand.hasUserFloat( "fitMass" ) ?
                                         cand.   userFloat( "fitMass" ) : -1 )
                                    << endl;
+      }
+    }
+  }
+
+  //////////// Bc ////////////
+
+  edm::Handle< vector<pat::CompositeCandidate> > bcCands;
+  int ibc;
+  int nbc = 0;
+  if ( useBc ) {
+    bcCandsToken.get( ev, bcCands );
+    nbc = bcCands->size();
+  }
+
+  for ( ibc = 0; ibc < nbc; ++ ibc ) {
+    LogTrace( "DataDump" )
+           << "*********** Bc " << ibc << "/" << nbc << " ***********";
+    const pat::CompositeCandidate& cand = bcCands->at( ibc );
+    const pat::CompositeCandidate* jPsi = BPHUserData::getByRef
+         <pat::CompositeCandidate>( cand, "refToJPsi" );
+    LogTrace( "DataDump" )
+           << "JPsi: " << jPsi;
+    if ( jPsi == 0 ) continue;
+//    if ( BPHUserData::get( *jPsi, "dca", -1.0 ) < bcJPsiDcaMax ) continue;
+    if ( !npJPsiBasicSelect   ->accept( *jPsi ) ) continue;
+    if ( !npJPsiDaughterSelect->accept( *jPsi ) ) continue;
+    const reco::Candidate* pptr = BPHDaughters::get( cand, 0.13, 0.14 ).front();
+    if ( pptr == 0 ) continue;
+
+    if ( bcIBasicSelect       ->accept(  cand ) &&
+         bcIJPsiBasicSelect   ->accept( *jPsi ) &&
+//         bcIJPsiDaughterSelect->accept( *jPsi ) &&
+         bcIJPsiVertexSelect  ->accept( *jPsi,
+                                BPHUserData::getByRef<reco::Vertex>( *jPsi,
+                                "primaryVertex" ) ) &&
+         bcIVertexSelect      ->accept( cand,
+                                BPHUserData::getByRef<reco::Vertex>( *jPsi,
+                                "primaryVertex" ) ) &&
+         ( pptr->pt() > bcIPiPtMin ) ) {
+      fillHisto( "DIBc"    ,  cand, 'f' );
+      fillHisto( "DIBcJPsi", *jPsi, 'c' );
+      if ( flag_Dimuon25_Jpsi ) {
+	fillHisto( "TIBc"    ,  cand, 'f' );
+	fillHisto( "TIBcJPsi", *jPsi, 'c' );
+        *ofMap["InclusiveBc"] << ev.id().run() << ' '
+                              << ev.id().luminosityBlock() << ' '
+                              << ev.id().event() << ' '
+                              << ( cand.hasUserFloat( "fitMass" ) ?
+                                   cand.   userFloat( "fitMass" ) : -1 )
+                              << endl;
+      }
+    }
+    if ( bcDBasicSelect       ->accept(  cand ) &&
+         bcDJPsiBasicSelect   ->accept( *jPsi ) &&
+//         bcDJPsiDaughterSelect->accept( *jPsi ) &&
+         bcDVertexSelect      ->accept( cand,
+                                BPHUserData::getByRef<reco::Vertex>( *jPsi,
+                                "primaryVertex" ) ) &&
+         bcDVertexSelect      ->accept( cand,
+                                BPHUserData::getByRef<reco::Vertex>( *jPsi,
+                                "primaryVertex" ) ) &&
+         ( pptr->pt() > bcDPiPtMin ) ) {
+      fillHisto( "DDBc"    ,  cand, 'f' );
+      fillHisto( "DDBcJPsi", *jPsi, 'c' );
+      if ( flag_DoubleMu4_JpsiTrk_Displaced ) {
+	fillHisto( "TDBc"    ,  cand, 'f' );
+	fillHisto( "TDBcJPsi", *jPsi, 'c' );
+        *ofMap["DisplacedBc"] << ev.id().run() << ' '
+                              << ev.id().luminosityBlock() << ' '
+                              << ev.id().event() << ' '
+                              << ( cand.hasUserFloat( "fitMass" ) ?
+                                   cand.   userFloat( "fitMass" ) : -1 )
+                              << endl;
+      }
+    }
+  }
+
+  //////////// X3872 ////////////
+
+  edm::Handle< vector<pat::CompositeCandidate> > x3872Cands;
+  int ix3872;
+  int nx3872 = 0;
+  if ( useX3872 ) {
+    x3872CandsToken.get( ev, x3872Cands );
+    nx3872 = x3872Cands->size();
+  }
+
+  for ( ix3872 = 0; ix3872 < nx3872; ++ ix3872 ) {
+    LogTrace( "DataDump" )
+           << "*********** X3872 " << ix3872 << "/" << nx3872 << " ***********";
+    const pat::CompositeCandidate& cand = x3872Cands->at( ix3872 );
+    const pat::CompositeCandidate* jPsi = BPHUserData::getByRef
+         <pat::CompositeCandidate>( cand, "refToJPsi" );
+    LogTrace( "DataDump" )
+           << "JPsi: " << jPsi;
+    if ( jPsi == 0 ) continue;
+//    if ( BPHUserData::get( *jPsi, "dca", -1.0 ) < x3872JPsiDcaMax ) continue;
+    if ( !npJPsiBasicSelect   ->accept( *jPsi ) ) continue;
+    if ( !npJPsiDaughterSelect->accept( *jPsi ) ) continue;
+    const reco::Candidate* ppt1 = BPHDaughters::get( cand, 0.13, 0.14 )[0];
+    const reco::Candidate* ppt2 = BPHDaughters::get( cand, 0.13, 0.14 )[1];
+    if ( ppt1 == 0 ) continue;
+    if ( ppt2 == 0 ) continue;
+    if ( x3872IBasicSelect       ->accept(  cand ) &&
+         x3872IJPsiBasicSelect   ->accept( *jPsi ) &&
+//         x3872IJPsiDaughterSelect->accept( *jPsi ) &&
+         x3872IJPsiVertexSelect  ->accept( *jPsi,
+                                   BPHUserData::getByRef<reco::Vertex>( *jPsi,
+                                   "primaryVertex" ) ) &&
+         x3872IVertexSelect      ->accept( cand,
+                                   BPHUserData::getByRef<reco::Vertex>( *jPsi,
+                                   "primaryVertex" ) ) &&
+         ( ppt1->pt() > x3872IPiPtMin ) &&
+         ( ppt2->pt() > x3872IPiPtMin ) ) {
+      fillHisto( "DIX3872"    ,  cand, 'f' );
+      fillHisto( "DIX3872JPsi", *jPsi, 'c' );
+      if ( flag_Dimuon25_Jpsi ) {
+	fillHisto( "TIX3872"    ,  cand, 'f' );
+	fillHisto( "TIX3872JPsi", *jPsi, 'c' );
+        *ofMap["InclusiveX3872"] << ev.id().run() << ' '
+                                 << ev.id().luminosityBlock() << ' '
+                                 << ev.id().event() << ' '
+                                 << ( cand.hasUserFloat( "fitMass" ) ?
+                                      cand.   userFloat( "fitMass" ) : -1 )
+                                 << endl;
+      }
+    }
+    if ( x3872DBasicSelect       ->accept(  cand ) &&
+         x3872DJPsiBasicSelect   ->accept( *jPsi ) &&
+//         x3872DJPsiDaughterSelect->accept( *jPsi ) &&
+         x3872DVertexSelect      ->accept( cand,
+                                   BPHUserData::getByRef<reco::Vertex>( *jPsi,
+                                   "primaryVertex" ) ) &&
+         x3872DVertexSelect      ->accept( cand,
+                                   BPHUserData::getByRef<reco::Vertex>( *jPsi,
+                                   "primaryVertex" ) ) &&
+         ( ppt1->pt() > x3872DPiPtMin ) &&
+         ( ppt2->pt() > x3872DPiPtMin ) ) {
+      fillHisto( "DDX3872"    ,  cand, 'f' );
+      fillHisto( "DDX3872JPsi", *jPsi, 'c' );
+      if ( flag_DoubleMu4_JpsiTrk_Displaced ) {
+	fillHisto( "TDX3872"    ,  cand, 'f' );
+	fillHisto( "TDX3872JPsi", *jPsi, 'c' );
+        *ofMap["DisplacedX3872"] << ev.id().run() << ' '
+                                 << ev.id().luminosityBlock() << ' '
+                                 << ev.id().event() << ' '
+                                 << ( cand.hasUserFloat( "fitMass" ) ?
+                                      cand.   userFloat( "fitMass" ) : -1 )
+                                 << endl;
       }
     }
   }
