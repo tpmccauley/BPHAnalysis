@@ -1,25 +1,64 @@
 using namespace RooFit;
 
 EColor csig = kRed;
+EColor csi2 = kViolet;
 EColor cbkg = kGreen;
 EColor cmis = kOrange;
 
+#define SETLOGVAL(X,Y) bool X = ( Y.find(#X) == Y.end() ? false : true );
+
+/*
 bool fitijp = false;
 bool fitbjp = false;
 bool fitphi = false;
 bool fitip2 = false;
 bool fitbp2 = false;
 bool fitups = false;
-bool fitbui = true;
+bool fitbui = false;
 bool fitbud = false;
 bool fitbsd = false;
 bool fitbdd = false;
 bool fitb0i = false;
 bool fitlbi = false;
+bool fitlbd = false;
+bool fitbci = false;
+bool fitbcd = false;
+bool fitx3i = false;
+bool fitx3d = false;
 
-bool fitA1l = false;
-bool fitA1h = true;
-bool fitA2h = false;
+bool fitA = false;
+bool fitB = false;
+bool fitC = false;
+*/
+
+set<string> parseLabels( const string& labelString ) {
+  set<string> labelSet;
+//  labelSet.clear();
+  const char* labelPtr = labelString.c_str();
+  unsigned long labelLength = labelString.length();
+  while ( labelLength ) {
+    while ( *labelPtr == ' ' ) ++labelPtr;
+    string labelNext( labelPtr );
+    cout << "parse ---" << labelNext << "---" << endl;
+    if ( labelNext == "" ) break;
+    unsigned long currentLength = labelLength = labelNext.find( ":" );
+    string labelCurr ;
+    if ( currentLength != string::npos ) {
+      labelCurr = labelNext.substr( 0, currentLength );
+      labelPtr += ++currentLength;
+    }
+    else {
+      labelCurr = labelNext;
+      labelLength = 0;
+    }
+    currentLength = labelCurr.find( " " );
+    if ( !currentLength ) break;
+    if ( currentLength != string::npos )
+         labelCurr = labelCurr.substr( 0, currentLength );
+    labelSet.insert( labelCurr );
+  }
+  return labelSet;
+}
 
 double errFunct( double x, double threshold, double slope ) {
   float mmin = 5.0;
@@ -49,13 +88,17 @@ void print( const RooRealVar& x, ofstream& os, float s = 1.0 ) {
     cout << "*" << s;
     os   << "*" << s;
   }
-  cout << " = "
+  cout << " = " << scientific << setw( 20 ) << setprecision( 12 )
        << x.getVal()   * s << " +/- "
        << x.getError() * s << endl;
-  os   << " = "
+  os   << " = " << scientific << setw( 20 ) << setprecision( 12 )
        << x.getVal  () * s << " \\pm "
        << x.getError() * s << '~'
        << x.getUnit ()     << '$' << endl;
+  os   << "%" << scientific << setw( 20 ) << setprecision( 12 )
+       << x.getVal  () * s << " +- "
+       << x.getError() * s << '~'
+       << x.getUnit ()     << endl;
   return;
 }
 
@@ -266,6 +309,133 @@ void printTitleLog( RooPlot* frame, int year, float lumi,
   return;
 }
 
+void fitCBPol2 ( const string& head,
+                 const string& name,
+                 const string& pset, int year,
+                 const string& dset, float lumi,
+                 const string& ptit,
+                 const string& atit,
+                 const vector<const InfoLabel*>& lv,
+                 int nbin, double xmin, double xmax, float xfac, float yfac,
+                 double mass, double sigm,
+                 double tcut, double tpow, double fsig,
+                 bool wwid = true, bool pbkg = true, bool psig = false ) {
+  string nfit = name + pset + to_string( year ) + dset;
+  string file = head + nfit;
+  const char* list = file.c_str();
+  // define the data variables and fit model parameters
+  RooRealVar m( "m", "Reconstructed Mass", xmin, xmax, "GeV" );
+  RooRealVar rmass( "rmass", "Resonance  Mass" , mass, xmin, xmax, "GeV" );
+  RooRealVar width( "width", "Resonance Width" , sigm, sigm/10, sigm*2, "GeV" );
+  RooRealVar sfcut( "sfcut", "Cut Distance"    , tcut, 0.0, tcut*2, "GeV" );
+  RooRealVar power( "power", "Tail Power"      , tpow, 0.0, tpow*10, "." );
+  RooRealVar coef1( "coef1", "Coefficicent 1"  , 0.0, -100.0, 100.0, "GeV^-1" );
+  RooRealVar coef2( "coef2", "Coefficicent 1"  , 0.0,  -10.0,  10.0, "GeV^-2" );
+//  RooRealVar frac1( "frac1", "signal fraction1",  0.5, 0.0, 1.0 );
+//  RooRealVar frac2( "frac2", "signal fraction2", fsig, 0.0, 1.0 );
+  // create the fit model components: CB and polynomial PDFs
+  RooCBShape crybf( "crybf", "Crystal Ball Lineshape", m, rmass, width,
+                                                          sfcut, power );
+  RooPolynomial polyn( "polyn", "Polynomial Distribution", m, RooArgList( coef1, coef2 ) );
+  // combine them using addition
+//  RooAddPdf cbsum( "cbsum", "Signal", RooArgList( cryb1, cryb2 ), frac1 );
+  // read values of ’m’ from a text file
+  RooDataSet* data = RooDataSet::read( list, m );
+  int nevr = data->numEntries();
+  float nevs = nevr * fsig;
+  float nevb = nevr * ( 1.0 - fsig );
+  RooRealVar nsig( "nsig", "nsignal", nevs, nevs / 10.0, nevs * 10.0 );
+  RooExtendPdf exsig( "exsig", "esig", crybf, nsig );
+  RooRealVar nbkg( "nbkg", "nbackgr", nevb, nevb / 10.0, nevb * 10.0 );
+  RooExtendPdf exbkg( "exbkg", "ebkg", polyn, nbkg );
+  RooAddPdf model( "model", "Signal + Background", RooArgList( exsig, exbkg ) );
+//  RooAddPdf model( "model", "Signal + Background", RooArgList( cbsum, polyn ), frac2 );
+  // fit the data to the model with an unbinned maximum likelihood method
+  model.fitTo( *data, Extended( kTRUE ) );
+//  model.fitTo( *data );
+  // print results
+  cout << nfit << " results" << endl;
+/*
+  cout << "rmass: " << rmass.getVal() << " +/- " << rmass.getError() << endl;
+  cout << "width: " << width.getVal() << " +/- " << width.getError() << endl;
+  cout << "sfcut: " << sfcut.getVal() << " +/- " << sfcut.getError() << endl;
+  cout << "power: " << power.getVal() << " +/- " << power.getError() << endl;
+  cout << "coef1: " << coef1.getVal() << " +/- " << coef1.getError() << endl;
+  cout << "coef2: " << coef2.getVal() << " +/- " << coef2.getError() << endl;
+//  cout << "frac1: " << frac1.getVal() << " +/- " << frac1.getError() << endl;
+//  cout << "frac2: " << frac2.getVal() << " +/- " << frac2.getError() << endl;
+  cout << "nsig:  " << nsig .getVal() << " +/- " << nsig .getError() << endl;
+  cout << "nbkg:  " << nbkg .getVal() << " +/- " << nbkg .getError() << endl;
+  cout << "norm:  " << nsig .getVal() / lumi << " +/- "
+                    << nsig .getError() / lumi << endl;
+*/
+//  float f1 = frac1.getVal();
+//  float sigma = sqrt( ( pow( widt1.getVal(), 2 ) *         f1   ) +
+//                      ( pow( widt2.getVal(), 2 ) * ( 1.0 - f1 ) ) );
+  float sigma = width.getVal();
+  ofstream os( ( nfit + ".tex" ).c_str() );
+  print( rmass, os );
+  print( width, os );
+  print( sfcut, os );
+  print( power, os );
+  print( coef1, os );
+  print( coef2, os );
+//  print( frac1, os );
+  print( nsig , os );
+  print( nbkg , os );
+  print( nsig , os, 1.0 / lumi );
+  cout << " sigma = " << sigma << endl;
+  os << "$\\sigma = " << sigma << '$' << endl;
+//  int nevt = lround( data->sumEntries() );
+//  fsig = frac2.getVal();
+//  float esig = frac2.getError();
+//  string nfit = name + dset;
+//  cout << nfit << " : " << nevt * fsig << " +/- " << nevt * esig
+//       << " ; sigma = " << width << endl;
+//  cout << nfit << " : " << nevt * fsig / lumi << " +/- " << nevt * esig / lumi
+//       << endl;
+  // plot function
+  TCanvas* can = new TCanvas( nfit.c_str(), nfit.c_str(), 800, 600 );
+  can->SetLeftMargin( 0.15 );
+  can->cd();
+  m.setBins( nbin );
+  RooPlot* mframe = m.frame();
+  mframe->SetTitle( ptit.c_str() );
+  mframe->SetXTitle( atit.c_str() );
+  data->plotOn( mframe );
+  if ( psig ) model.plotOn( mframe, Components( "crybf" ),
+                            LineStyle( kDashed ), LineColor( csig ) );
+  if ( pbkg ) model.plotOn( mframe, Components( "polyn" ),
+                            LineStyle( kDashed ), LineColor( cbkg ) );
+  model.plotOn( mframe );
+  mframe->Draw();
+  cout << mframe->GetYaxis()->GetXmin() << " <---> " << mframe->GetYaxis()->GetXmax() << endl;
+  cout << mframe->GetMinimum() << " <---> " << mframe->GetMaximum() << endl;
+/*
+  char lstr[100];
+  sprintf( lstr, "%5.2f", lumi );
+  TLatex t;
+  string s = "#font[";
+  s += to_string( mframe->GetYaxis()->GetLabelFont() ) + "]{L}=";
+  s += lstr;
+  s += " fb^{-1} (#sqrt{s}=13 TeV, ";
+  s += to_string( year ) + ")";
+  cout << mframe->GetYaxis()->GetLabelFont() << endl;
+  cout << s << endl;
+  t.SetTextSize( mframe->GetYaxis()->GetLabelSize() );
+  t.SetTextFont( mframe->GetYaxis()->GetLabelFont() );
+  t.DrawLatex( ( xmin * 0.45 ) + ( xmax * 0.55 ), mframe->GetMaximum() * 1.01, s.c_str() );
+//  h->Draw( "same" );
+*/
+  printTitleLin( mframe, year, lumi, xmin, xmax );
+  if ( wwid ) printSigma( mframe, sigma, xmin, xmax, xfac, yfac );
+  printInfo( mframe, lv, xmin, xmax, xfac, yfac );
+//  nfit += ".pdf";
+  can->Print( ( nfit + ".pdf" ).c_str() );
+  can->Print( ( nfit + ".png" ).c_str() );
+
+}
+
 void fitCB2Pol2( const string& head,
                  const string& name,
                  const string& pset, int year,
@@ -273,11 +443,12 @@ void fitCB2Pol2( const string& head,
                  const string& ptit,
                  const string& atit,
                  const vector<const InfoLabel*>& lv,
-                 int nbin, double xmin, double xmax,
+                 int nbin, double xmin, double xmax, float xfac, float yfac,
                  double mass, double sig1, double sig2,
                  double tcut, double tpow, double fsig,
-                 bool pbkg = true, bool psig = false ) {
-  string file = head + name + pset + to_string( year ) + dset;
+                 bool wwid = true, bool pbkg = true, bool psig = false ) {
+  string nfit = name + pset + to_string( year ) + dset;
+  string file = head + nfit;
   const char* list = file.c_str();
   // define the data variables and fit model parameters
   RooRealVar m( "m", "Reconstructed Mass", xmin, xmax, "GeV" );
@@ -313,7 +484,6 @@ void fitCB2Pol2( const string& head,
   model.fitTo( *data, Extended( kTRUE ) );
 //  model.fitTo( *data );
   // print results
-  string nfit = name + dset;
   cout << nfit << " results" << endl;
 /*
   cout << "rmass: " << rmass.getVal() << " +/- " << rmass.getError() << endl;
@@ -389,10 +559,318 @@ void fitCB2Pol2( const string& head,
 //  h->Draw( "same" );
 */
   printTitleLin( mframe, year, lumi, xmin, xmax );
-  printSigma( mframe, sigma, xmin, xmax );
-  printInfo( mframe, lv, xmin, xmax );
-  nfit += ".pdf";
-  can->Print( nfit.c_str() );
+  if ( wwid ) printSigma( mframe, sigma, xmin, xmax, xfac, yfac );
+  printInfo( mframe, lv, xmin, xmax, xfac, yfac );
+//  nfit += ".pdf";
+  can->Print( ( nfit + ".pdf" ).c_str() );
+  can->Print( ( nfit + ".png" ).c_str() );
+
+}
+
+void fitCBChP2 ( const string& head,
+                 const string& name,
+                 const string& pset, int year,
+                 const string& dset, float lumi,
+                 const string& ptit,
+                 const string& atit,
+                 const vector<const InfoLabel*>& lv,
+                 int nbin, double xmin, double xmax, float xfac, float yfac,
+                 double mass, double sigm, double tcut, double tpow,
+                 double fsig,
+                 bool wwid = true, bool pbkg = true, bool psig = false,
+                 bool line = false ) {
+  string nfit = name + pset + to_string( year ) + dset;
+  string file = head + nfit;
+  const char* list = file.c_str();
+  // define the data variables and fit model parameters
+  RooRealVar m( "m", "Reconstructed Mass", xmin, xmax, "GeV" );
+  RooRealVar rmass( "rmass", "Resonance  Mass" , mass, xmin, xmax, "GeV" );
+  RooRealVar width( "width", "Resonance Width" , sigm, sigm/10, sigm*5, "GeV" );
+  RooRealVar sfcut( "sfcut", "Cut Distance"    , tcut, 0.0, tcut*10, "GeV" );
+  RooRealVar power( "power", "Tail Power"      , tpow, 0.0, tpow*10, "." );
+  RooRealVar coef1( "coef1", "Coefficicent 1"  , 0.0, -100.0, 100.0, "GeV^-1" );
+  RooRealVar coef2( "coef2", "Coefficicent 1"  , 0.0,  -10.0,  10.0, "GeV^-2" );
+//  RooRealVar frac1( "frac1", "signal fraction1",  0.5, 0.0, 1.0 );
+//  RooRealVar frac2( "frac2", "signal fraction2", fsig, 0.0, 1.0 );
+  // create the fit model components: CB and polynomial PDFs
+  RooCBShape crybf( "crybf", "Crystal Ball Lineshape", m, rmass, width,
+                                                          sfcut, power );
+  RooChebychev polyn( "polyn", "Polynomial Distribution", m, RooArgList( coef1, coef2 ) );
+  // combine them using addition
+//  RooAddPdf cbsum( "cbsum", "Signal", RooArgList( cryb1, cryb2 ), frac1 );
+//  RooAddPdf tmpdf( "tmpdf", "Signal + Background tmp", RooArgList( cbsum, polyn ), frac2 );
+  // read values of ’m’ from a text file
+  RooDataSet* data = RooDataSet::read( list, m );
+  int nevr = data->numEntries();
+  float nevs = nevr * fsig;
+  float nevb = nevr * ( 1.0 - fsig );
+/*
+  tmpdf.fitTo( *data );
+  fsig = frac2.getVal();
+  float nevs = nevr * fsig;
+  float nevb = nevr * ( 1.0 - fsig );
+  cout << nevs << ' ' << nevb << endl;
+//  RooAddPdf& model = tmpdf;
+  float errs = 10 * sqrt( nevs );
+  float errb = 10 * sqrt( nevb );
+  if ( errs < errb ) errs = errb;
+  else               errb = errs;
+  RooRealVar nsig( "nsig", "nsignal", nevs, nevs - errs, nevs + errs );
+  RooExtendPdf exsig( "exsig", "esig", cbsum, nsig );
+  RooRealVar nbkg( "nbkg", "nbackgr", nevb, nevb - errb, nevb + errb );
+  RooExtendPdf exbkg( "exbkg", "ebkg", polyn, nbkg );
+*/
+  RooRealVar nsig( "nsig", "nsignal", nevs, nevs / 10.0, nevs * 10.0 );
+  RooExtendPdf exsig( "exsig", "esig", crybf, nsig );
+  RooRealVar nbkg( "nbkg", "nbackgr", nevb, nevb / 10.0, nevb * 10.0 );
+  RooExtendPdf exbkg( "exbkg", "ebkg", polyn, nbkg );
+  RooAddPdf model( "model", "Signal + Background", RooArgList( exsig, exbkg ) );
+//  RooAddPdf model( "model", "Signal + Background", RooArgList( cbsum, polyn ), frac2 );
+  // fit the data to the model with an unbinned maximum likelihood method
+  model.fitTo( *data, Extended( kTRUE ) );
+//  model.fitTo( *data );
+  // print results
+  cout << nfit << " results" << endl;
+/*
+  cout << "rmass: " << rmass.getVal() << " +/- " << rmass.getError() << endl;
+  cout << "width: " << width.getVal() << " +/- " << width.getError() << endl;
+  cout << "sfcut: " << sfcut.getVal() << " +/- " << sfcut.getError() << endl;
+  cout << "power: " << power.getVal() << " +/- " << power.getError() << endl;
+  cout << "coef1: " << coef1.getVal() << " +/- " << coef1.getError() << endl;
+  cout << "coef2: " << coef2.getVal() << " +/- " << coef2.getError() << endl;
+//  cout << "frac1: " << frac1.getVal() << " +/- " << frac1.getError() << endl;
+//  cout << "frac2: " << frac2.getVal() << " +/- " << frac2.getError() << endl;
+  cout << "nsig:  " << nsig .getVal() << " +/- " << nsig .getError() << endl;
+  cout << "nbkg:  " << nbkg .getVal() << " +/- " << nbkg .getError() << endl;
+  cout << "norm:  " << nsig .getVal() / lumi << " +/- "
+                    << nsig .getError() / lumi << endl;
+*/
+  float sigma = width.getVal();
+  ofstream os( ( nfit + ".tex" ).c_str() );
+  print( rmass, os );
+  print( width, os );
+  print( sfcut, os );
+  print( power, os );
+  print( coef1, os );
+  print( coef2, os );
+//  print( frac1, os );
+  print( nsig , os );
+  print( nbkg , os );
+  print( nsig , os, 1.0 / lumi );
+//  float f1 = frac1.getVal();
+//  float sigma = sqrt( ( pow( widt1.getVal(), 2 ) *         f1   ) +
+//                      ( pow( widt2.getVal(), 2 ) * ( 1.0 - f1 ) ) );
+  os << "$\\sigma = " << sigma << '$' << endl;
+  cout << " sigma = " << sigma << endl;
+//  int nevt = lround( data->sumEntries() );
+//  fsig = frac2.getVal();
+//  float esig = frac2.getError();
+//  string nfit = name + dset;
+//  cout << nfit << " : " << nevt * fsig << " +/- " << nevt * esig
+//       << " ; sigma = " << width << endl;
+//  cout << nfit << " : " << nevt * fsig / lumi << " +/- " << nevt * esig / lumi
+//       << endl;
+  // plot function
+  TCanvas* can = new TCanvas( nfit.c_str(), nfit.c_str(), 800, 600 );
+  can->SetLeftMargin( 0.15 );
+  can->cd();
+  m.setBins( nbin );
+  RooPlot* mframe = m.frame();
+  mframe->SetTitle( ptit.c_str() );
+  mframe->SetXTitle( atit.c_str() );
+  data->plotOn( mframe );
+  if ( psig ) model.plotOn( mframe, Components( "crybf" ),
+                            LineStyle( kDashed ), LineColor( csig ) );
+  if ( pbkg ) model.plotOn( mframe, Components( "polyn" ),
+                            LineStyle( kDashed ), LineColor( cbkg ) );
+  model.plotOn( mframe );
+  mframe->Draw();
+  cout << mframe->GetYaxis()->GetXmin() << " <---> " << mframe->GetYaxis()->GetXmax() << endl;
+  cout << mframe->GetMinimum() << " <---> " << mframe->GetMaximum() << endl;
+/*
+  char lstr[100];
+  sprintf( lstr, "%5.2f", lumi );
+  TLatex t;
+  string s = "#font[";
+  s += to_string( mframe->GetYaxis()->GetLabelFont() ) + "]{L}=";
+  s += lstr;
+  s += " fb^{-1} (#sqrt{s}=13 TeV, ";
+  s += to_string( year ) + ")";
+  cout << mframe->GetYaxis()->GetLabelFont() << endl;
+  cout << s << endl;
+  t.SetTextSize( mframe->GetYaxis()->GetLabelSize() );
+  t.SetTextFont( mframe->GetYaxis()->GetLabelFont() );
+  t.DrawLatex( ( xmin * 0.45 ) + ( xmax * 0.55 ), mframe->GetMaximum() * 1.01, s.c_str() );
+//  h->Draw( "same" );
+*/
+  printTitleLin( mframe, year, lumi, xmin, xmax );
+  if ( wwid ) printSigma( mframe, sigma, xmin, xmax, xfac, yfac );
+  printInfo( mframe, lv, xmin, xmax, xfac, yfac );
+  yfac -= ( 0.07 + ( 0.06 * lv.size() ) );
+  if ( line ) {
+    printLine( mframe, xmin, xmax, xfac, yfac, "Total Fit" );
+    if ( psig ) printLine( mframe, xmin, xmax, xfac, yfac -= 0.04,
+                           "Signal"           , kDashed, csig );
+    if ( pbkg ) printLine( mframe, xmin, xmax, xfac, yfac -= 0.04,
+                           "Combinatorial bkg", kDashed, cbkg );
+  }
+//  nfit += ".pdf";
+  can->Print( ( nfit + ".pdf" ).c_str() );
+  can->Print( ( nfit + ".png" ).c_str() );
+
+}
+
+void fitCBGChP2 ( const string& head,
+                  const string& name,
+                  const string& pset, int year,
+                  const string& dset, float lumi,
+                  const string& ptit,
+                  const string& atit,
+                  const vector<const InfoLabel*>& lv,
+                  const string& cbfl, const string& gaul,
+                  int nbin, double xmin, double xmax, float xfac, float yfac,
+                  double mcbf, double scbf, double tcut, double tpow,
+                  double mgau, double sgau,
+                  double fcbf, double fgau,
+//                  bool wwid = true,
+                  bool pbkg = true, bool pscb = false, bool pgau = false,
+                  bool line = false ) {
+  string nfit = name + pset + to_string( year ) + dset;
+  string file = head + nfit;
+  const char* list = file.c_str();
+  // define the data variables and fit model parameters
+  RooRealVar m( "m", "Reconstructed Mass", xmin, xmax, "GeV" );
+  RooRealVar cmass( "cmass", "CBFun  Mass" , mcbf, xmin, xmax, "GeV" );
+  RooRealVar width( "width", "CBFun Width" , scbf, scbf/10, scbf*5, "GeV" );
+  RooRealVar gmass( "gmass", "Gauss  Mass" , mgau, xmin, xmax, "GeV" );
+  RooRealVar sigma( "sigma", "Gauss Width" , sgau, sgau/10, sgau*5, "GeV" );
+  RooRealVar sfcut( "sfcut", "Cut Distance"    , tcut, 0.0, tcut*10, "GeV" );
+  RooRealVar power( "power", "Tail Power"      , tpow, 0.0, tpow*10, "." );
+  RooRealVar coef1( "coef1", "Coefficicent 1"  , 0.0, -100.0, 100.0, "GeV^-1" );
+  RooRealVar coef2( "coef2", "Coefficicent 1"  , 0.0,  -10.0,  10.0, "GeV^-2" );
+//  RooRealVar frac1( "frac1", "signal fraction1",  0.5, 0.0, 1.0 );
+//  RooRealVar frac2( "frac2", "signal fraction2", fsig, 0.0, 1.0 );
+  // create the fit model components: CB and polynomial PDFs
+  RooCBShape crybf( "crybf", "Crystal Ball Lineshape", m, cmass, width,
+                                                          sfcut, power );
+  RooGaussian gauss( "gauss", "Gaussian Distribution", m, gmass, sigma );
+  RooChebychev polyn( "polyn", "Polynomial Distribution", m, RooArgList( coef1, coef2 ) );
+  // combine them using addition
+//  RooAddPdf cbsum( "cbsum", "Signal", RooArgList( cryb1, cryb2 ), frac1 );
+//  RooAddPdf tmpdf( "tmpdf", "Signal + Background tmp", RooArgList( cbsum, polyn ), frac2 );
+  // read values of ’m’ from a text file
+  RooDataSet* data = RooDataSet::read( list, m );
+  int nevr = data->numEntries();
+  float nevc = nevr * fcbf;
+  float nevg = nevr * fgau;
+  float nevb = nevr * ( 1.0 - ( fcbf + fgau ) );
+  RooRealVar ncbf( "ncbf", "nscrybf", nevc, nevc / 10.0, nevc * 10.0 );
+  RooExtendPdf excbf( "excbf", "ecbf", crybf, ncbf );
+  RooRealVar ngau( "ngau", "nsgauss", nevg, nevg / 10.0, nevg * 10.0 );
+  RooExtendPdf exgau( "exgau", "egau", gauss, ngau );
+  RooRealVar nbkg( "nbkg", "nbackgr", nevb, nevb / 10.0, nevb * 10.0 );
+  RooExtendPdf exbkg( "exbkg", "ebkg", polyn, nbkg );
+  RooAddPdf model( "model", "Signal + Background", RooArgList( excbf, exgau, exbkg ) );
+//  RooAddPdf model( "model", "Signal + Background", RooArgList( cbsum, polyn ), frac2 );
+  // fit the data to the model with an unbinned maximum likelihood method
+  model.fitTo( *data, Extended( kTRUE ) );
+//  model.fitTo( *data );
+  // print results
+  cout << nfit << " results" << endl;
+/*
+  cout << "rmass: " << rmass.getVal() << " +/- " << rmass.getError() << endl;
+  cout << "width: " << width.getVal() << " +/- " << width.getError() << endl;
+  cout << "sfcut: " << sfcut.getVal() << " +/- " << sfcut.getError() << endl;
+  cout << "power: " << power.getVal() << " +/- " << power.getError() << endl;
+  cout << "coef1: " << coef1.getVal() << " +/- " << coef1.getError() << endl;
+  cout << "coef2: " << coef2.getVal() << " +/- " << coef2.getError() << endl;
+//  cout << "frac1: " << frac1.getVal() << " +/- " << frac1.getError() << endl;
+//  cout << "frac2: " << frac2.getVal() << " +/- " << frac2.getError() << endl;
+  cout << "nsig:  " << nsig .getVal() << " +/- " << nsig .getError() << endl;
+  cout << "nbkg:  " << nbkg .getVal() << " +/- " << nbkg .getError() << endl;
+  cout << "norm:  " << nsig .getVal() / lumi << " +/- "
+                    << nsig .getError() / lumi << endl;
+*/
+//  float sigma = width.getVal();
+  ofstream os( ( nfit + ".tex" ).c_str() );
+  print( cmass, os );
+  print( width, os );
+  print( sfcut, os );
+  print( power, os );
+  print( gmass, os );
+  print( sigma, os );
+  print( coef1, os );
+  print( coef2, os );
+//  print( frac1, os );
+  print( ncbf , os );
+  print( ngau , os );
+  print( nbkg , os );
+  print( ncbf , os, 1.0 / lumi );
+  print( ngau , os, 1.0 / lumi );
+//  float f1 = frac1.getVal();
+//  float sigma = sqrt( ( pow( widt1.getVal(), 2 ) *         f1   ) +
+//                      ( pow( widt2.getVal(), 2 ) * ( 1.0 - f1 ) ) );
+//  os << "$\\sigma = " << sigma << '$' << endl;
+//  cout << " sigma = " << sigma << endl;
+//  int nevt = lround( data->sumEntries() );
+//  fsig = frac2.getVal();
+//  float esig = frac2.getError();
+//  string nfit = name + dset;
+//  cout << nfit << " : " << nevt * fsig << " +/- " << nevt * esig
+//       << " ; sigma = " << width << endl;
+//  cout << nfit << " : " << nevt * fsig / lumi << " +/- " << nevt * esig / lumi
+//       << endl;
+  // plot function
+  TCanvas* can = new TCanvas( nfit.c_str(), nfit.c_str(), 800, 600 );
+  can->SetLeftMargin( 0.15 );
+  can->cd();
+  m.setBins( nbin );
+  RooPlot* mframe = m.frame();
+  mframe->SetTitle( ptit.c_str() );
+  mframe->SetXTitle( atit.c_str() );
+  data->plotOn( mframe );
+  if ( pscb ) model.plotOn( mframe, Components( "crybf" ),
+                            LineStyle( kDashed ), LineColor( csig ) );
+  if ( pgau ) model.plotOn( mframe, Components( "gauss" ),
+                            LineStyle( kDashed ), LineColor( csi2 ) );
+  if ( pbkg ) model.plotOn( mframe, Components( "polyn" ),
+                            LineStyle( kDashed ), LineColor( cbkg ) );
+  model.plotOn( mframe );
+  mframe->Draw();
+  cout << mframe->GetYaxis()->GetXmin() << " <---> " << mframe->GetYaxis()->GetXmax() << endl;
+  cout << mframe->GetMinimum() << " <---> " << mframe->GetMaximum() << endl;
+/*
+  char lstr[100];
+  sprintf( lstr, "%5.2f", lumi );
+  TLatex t;
+  string s = "#font[";
+  s += to_string( mframe->GetYaxis()->GetLabelFont() ) + "]{L}=";
+  s += lstr;
+  s += " fb^{-1} (#sqrt{s}=13 TeV, ";
+  s += to_string( year ) + ")";
+  cout << mframe->GetYaxis()->GetLabelFont() << endl;
+  cout << s << endl;
+  t.SetTextSize( mframe->GetYaxis()->GetLabelSize() );
+  t.SetTextFont( mframe->GetYaxis()->GetLabelFont() );
+  t.DrawLatex( ( xmin * 0.45 ) + ( xmax * 0.55 ), mframe->GetMaximum() * 1.01, s.c_str() );
+//  h->Draw( "same" );
+*/
+  printTitleLin( mframe, year, lumi, xmin, xmax );
+//  if ( wwid ) printSigma( mframe, sigma, xmin, xmax, xfac, yfac );
+  printInfo( mframe, lv, xmin, xmax, xfac, yfac );
+  yfac -= ( 0.07 + ( 0.06 * lv.size() ) );
+  if ( line ) {
+    printLine( mframe, xmin, xmax, xfac, yfac, "Total Fit" );
+    if ( pscb ) printLine( mframe, xmin, xmax, xfac, yfac -= 0.04,
+                           cbfl               , kDashed, csig );
+    if ( pgau ) printLine( mframe, xmin, xmax, xfac, yfac -= 0.04,
+                           gaul               , kDashed, csi2 );
+    if ( pbkg ) printLine( mframe, xmin, xmax, xfac, yfac -= 0.04,
+                           "Combinatorial bkg", kDashed, cbkg );
+  }
+//  nfit += ".pdf";
+  can->Print( ( nfit + ".pdf" ).c_str() );
+  can->Print( ( nfit + ".png" ).c_str() );
 
 }
 
@@ -403,11 +881,12 @@ void fitCB2ChP2( const string& head,
                  const string& ptit,
                  const string& atit,
                  const vector<const InfoLabel*>& lv,
-                 int nbin, double xmin, double xmax,
+                 int nbin, double xmin, double xmax, float xfac, float yfac,
                  double mass, double sig1, double sig2,
                  double tcut, double tpow, double fsig,
-                 bool pbkg = true, bool psig = false ) {
-  string file = head + name + pset + to_string( year ) + dset;
+                 bool wwid = true, bool pbkg = true, bool psig = false ) {
+  string nfit = name + pset + to_string( year ) + dset;
+  string file = head + nfit;
   const char* list = file.c_str();
   // define the data variables and fit model parameters
   RooRealVar m( "m", "Reconstructed Mass", xmin, xmax, "GeV" );
@@ -460,7 +939,6 @@ void fitCB2ChP2( const string& head,
   model.fitTo( *data, Extended( kTRUE ) );
 //  model.fitTo( *data );
   // print results
-  string nfit = name + dset;
   cout << nfit << " results" << endl;
 /*
   cout << "rmass: " << rmass.getVal() << " +/- " << rmass.getError() << endl;
@@ -536,10 +1014,11 @@ void fitCB2ChP2( const string& head,
 //  h->Draw( "same" );
 */
   printTitleLin( mframe, year, lumi, xmin, xmax );
-  printSigma( mframe, sigma, xmin, xmax );
-  printInfo( mframe, lv, xmin, xmax );
-  nfit += ".pdf";
-  can->Print( nfit.c_str() );
+  if ( wwid ) printSigma( mframe, sigma, xmin, xmax, xfac, yfac );
+  printInfo( mframe, lv, xmin, xmax, xfac, yfac );
+//  nfit += ".pdf";
+  can->Print( ( nfit + ".pdf" ).c_str() );
+  can->Print( ( nfit + ".png" ).c_str() );
 
 }
 
@@ -550,14 +1029,15 @@ void fitCB4ChP2( const string& head,
                  const string& ptit,
                  const string& atit,
                  const vector<const InfoLabel*>& lv,
-                 int nbin, double xmin, double xmax,
+                 int nbin, double xmin, double xmax, float xfac, float yfac,
                  double mas1, double siga, double sigb,
                  double cut1, double pow1,
                  double mas2, double sig2, double cut2, double pow2,
                  double mas3, double sig3, double cut3, double pow3,
                  double fsig,
-                 bool pbkg = true, bool psig = false ) {
-  string file = head + name + pset + to_string( year ) + dset;
+                 bool wwid = true, bool pbkg = true, bool psig = false ) {
+  string nfit = name + pset + to_string( year ) + dset;
+  string file = head + nfit;
   const char* list = file.c_str();
   // define the data variables and fit model parameters
   RooRealVar m( "m", "Reconstructed Mass", xmin, xmax, "GeV" );
@@ -618,7 +1098,6 @@ void fitCB4ChP2( const string& head,
   model.fitTo( *data, Extended( kTRUE ) );
 //  model.fitTo( *data );
   // print results
-  string nfit = name + dset;
   cout << nfit << " results" << endl;
 /*
   cout << "rmas1: " << rmas1.getVal() << " +/- " << rmas1.getError() << endl;
@@ -725,10 +1204,11 @@ void fitCB4ChP2( const string& head,
 //  h->Draw( "same" );
 */
   printTitleLin( mframe, year, lumi, xmin, xmax );
-  printSigma( mframe, sigma, xmin, xmax );
-  printInfo( mframe, lv, xmin, xmax );
-  nfit += ".pdf";
-  can->Print( nfit.c_str() );
+  if ( wwid ) printSigma( mframe, sigma, xmin, xmax, xfac, yfac );
+  printInfo( mframe, lv, xmin, xmax, xfac, yfac );
+//  nfit += ".pdf";
+  can->Print( ( nfit + ".pdf" ).c_str() );
+  can->Print( ( nfit + ".png" ).c_str() );
 
 }
 
@@ -739,11 +1219,12 @@ void fitGauss2Exp( const string& head,
                    const string& ptit,
                    const string& atit,
                    const vector<const InfoLabel*>& lv,
-                   int nbin, double xmin, double xmax,
+                   int nbin, double xmin, double xmax, float xfac, float yfac,
                    double mass, double sig1, double sig2,
                    double expc, double fsig,
                    bool pbkg = true, bool psig = false ) {
-  string file = head + name + pset + to_string( year ) + dset;
+  string nfit = name + pset + to_string( year ) + dset;
+  string file = head + nfit;
   const char* list = file.c_str();
   // define the data variables and fit model parameters
   RooRealVar m( "m", "Reconstructed Mass", xmin, xmax, "GeV" );
@@ -777,7 +1258,6 @@ void fitGauss2Exp( const string& head,
   model.fitTo( *data, Extended( kTRUE ) );
 //  model.fitTo( *data );
   // print results
-  string nfit = name + dset;
   cout << nfit << " results" << endl;
 /*
   cout << "rmass: " << rmass.getVal() << " +/- " << rmass.getError() << endl;
@@ -844,16 +1324,18 @@ void fitGauss2Exp( const string& head,
   t.DrawLatex( ( xmin * 0.45 ) + ( xmax * 0.55 ), mframe->GetMaximum() * 1.01, s.c_str() );
 */
   printTitleLin( mframe, year, lumi, xmin, xmax );
-  printInfo( mframe, lv, xmin, xmax );
-  float xfac = 0.65;
-  float yfac = 0.78 - ( 0.06 * lv.size() );
+  printInfo( mframe, lv, xmin, xmax, xfac, yfac );
+//  float xfac = 0.65;
+//  float yfac = 0.78 - ( 0.06 * lv.size() );
+  yfac -= ( 0.07 + ( 0.06 * lv.size() ) );
   printLine( mframe, xmin, xmax, xfac, yfac, "Total Fit" );
   if ( psig ) printLine( mframe, xmin, xmax, xfac, yfac -= 0.04,
                          "Signal"           , kDashed, csig );
   if ( pbkg ) printLine( mframe, xmin, xmax, xfac, yfac -= 0.04,
                          "Combinatorial bkg", kDashed, cbkg );
-  nfit += ".pdf";
-  can->Print( nfit.c_str() );
+//  nfit += ".pdf";
+  can->Print( ( nfit + ".pdf" ).c_str() );
+  can->Print( ( nfit + ".png" ).c_str() );
 
 }
 
@@ -864,12 +1346,13 @@ void fitGauss2ExpE( const string& head,
                     const string& ptit,
                     const string& atit,
                     const vector<const InfoLabel*>& lv, const string& misrl,
-                    int nbin, double xmin, double xmax,
+                    int nbin, double xmin, double xmax, float xfac, float yfac,
                     double mass, double sig1, double sig2,
                     double expc, double mbkg, double sbkg, double fbkg,
                     double fsig,
                     bool pbkg = true, bool psig = false ) {
-  string file = head + name + pset + to_string( year ) + dset;
+  string nfit = name + pset + to_string( year ) + dset;
+  string file = head + nfit;
   const char* list = file.c_str();
   // define the data variables and fit model parameters
   RooRealVar m( "m", "Reconstructed Mass", xmin, xmax, "GeV" );
@@ -912,7 +1395,6 @@ void fitGauss2ExpE( const string& head,
   model.fitTo( *data, Extended( kTRUE ) );
 //  model.fitTo( *data );
   // print results
-  string nfit = name + dset;
   cout << nfit << " results" << endl;
 /*
   cout << "rmass: " << rmass.getVal() << " +/- " << rmass.getError() << endl;
@@ -987,9 +1469,10 @@ void fitGauss2ExpE( const string& head,
   t.DrawLatex( ( xmin * 0.45 ) + ( xmax * 0.55 ), mframe->GetMaximum() * 1.01, s.c_str() );
 */
   printTitleLin( mframe, year, lumi, xmin, xmax );
-  printInfo( mframe, lv, xmin, xmax );
-  float xfac = 0.65;
-  float yfac = 0.78 - ( 0.06 * lv.size() );
+  printInfo( mframe, lv, xmin, xmax, xfac, yfac );
+//  float xfac = 0.65;
+//  float yfac = 0.78 - ( 0.06 * lv.size() );
+  yfac -= ( 0.07 + ( 0.06 * lv.size() ) );
   printLine( mframe, xmin, xmax, xfac, yfac, "Total Fit" );
   if ( psig ) printLine( mframe, xmin, xmax, xfac, yfac -= 0.04,
                          "Signal"           , kDashed, csig );
@@ -997,8 +1480,9 @@ void fitGauss2ExpE( const string& head,
                          "Combinatorial bkg", kDashed, cbkg );
   if ( pbkg ) printLine( mframe, xmin, xmax, xfac, yfac -= 0.04,
                          misrl, kDashed, cmis );
-  nfit += ".pdf";
-  can->Print( nfit.c_str() );
+//  nfit += ".pdf";
+  can->Print( ( nfit + ".pdf" ).c_str() );
+  can->Print( ( nfit + ".png" ).c_str() );
 
 }
 
@@ -1010,11 +1494,13 @@ void fitGauss2ExpE2D( const string& head,
                       const string& atit,
                       const vector<const InfoLabel*>& lv, const string& misrl,
                       int nbin, double xmin, double xmax,
+                      float xfac, float yfac, float xfct, float yfct,
                       double mass, double sig1, double sig2,
                       double expc, double mbkg, double sbkg, double fbkg,
                       double fsig,
                       bool pbkg = true, bool psig = false ) {
-  string file = head + name + pset + to_string( year ) + dset;
+  string nfit = name + pset + to_string( year ) + dset;
+  string file = head + nfit;
   const char* list = file.c_str();
   // define the data variables and fit model parameters
   float dmin = -0.05;
@@ -1070,7 +1556,6 @@ void fitGauss2ExpE2D( const string& head,
   model.fitTo( *data, Extended( kTRUE ) );
 //  model.fitTo( *data );
   // print results
-  string nfit = name + dset;
   cout << nfit << " results" << endl;
   cout << "rmass: " << rmass.getVal() << " +/- " << rmass.getError() << endl;
   cout << "widt1: " << widt1.getVal() << " +/- " << widt1.getError() << endl;
@@ -1436,9 +1921,10 @@ void fitGauss2ExpE2D( const string& head,
   t.DrawLatex( ( xmin * 0.45 ) + ( xmax * 0.55 ), mframe->GetMaximum() * 1.01, s.c_str() );
 */
   printTitleLin( mframe, year, lumi, xmin, xmax );
-  printInfo( mframe, lv, xmin, xmax );
-  float xfac = 0.65;
-  float yfac = 0.78 - ( 0.06 * lv.size() );
+  printInfo( mframe, lv, xmin, xmax, xfac, yfac );
+//  float xfac = 0.65;
+//  float yfac = 0.78 - ( 0.06 * lv.size() );
+  yfac -= ( 0.07 + ( 0.06 * lv.size() ) );
   printLine( mframe, xmin, xmax, xfac, yfac, "Total Fit" );
   if ( psig ) printLine( mframe, xmin, xmax, xfac, yfac -= 0.04,
                          "Signal"           , kDashed, csig );
@@ -1446,8 +1932,9 @@ void fitGauss2ExpE2D( const string& head,
                          "Combinatorial bkg", kDashed, cbkg );
   if ( pbkg ) printLine( mframe, xmin, xmax, xfac, yfac -= 0.04,
                          misrl, kDashed, cmis );
-  nfit += ".pdf";
-  can->Print( nfit.c_str() );
+//  nfit += ".pdf";
+  can->Print( ( nfit + ".pdf" ).c_str() );
+  can->Print( ( nfit + ".png" ).c_str() );
 
   TCanvas* c2d = new TCanvas( nf2d.c_str(), nf2d.c_str(), 800, 600 );
   c2d->SetLeftMargin( 0.15 );
@@ -1489,8 +1976,10 @@ void fitGauss2ExpE2D( const string& head,
   dframe->SetMaximum( ymax );
   dframe->SetMinimum( ymax / range );
   printTitleLog( dframe, year, lumi, dmin, dmax );
-  printInfo( dframe, lv, dmin, dmax, 0.65, 0.85, InfoLabel::log );
-  yfac = 0.78 - ( 0.06 * lv.size() );
+  xfac = xfct;
+  yfac = yfct;
+  printInfo( dframe, lv, dmin, dmax, xfac, yfac, InfoLabel::log );
+  yfac -= ( 0.07 + ( 0.06 * lv.size() ) );
   printLine( dframe, dmin, dmax, xfac, yfac, "Total Fit",
              kSolid, kBlue, InfoLabel::log );
   if ( psig ) printLine( dframe, dmin, dmax, xfac, yfac -= 0.04,
@@ -1502,8 +1991,9 @@ void fitGauss2ExpE2D( const string& head,
   if ( pbkg ) printLine( dframe, dmin, dmax, xfac, yfac -= 0.04,
                          misrl,
                          kDashed, cmis, InfoLabel::log );
-  nf2d += ".pdf";
-  c2d->Print( nf2d.c_str() );
+//  nf2d += ".pdf";
+  c2d->Print( ( nf2d + ".pdf" ).c_str() );
+  c2d->Print( ( nf2d + ".png" ).c_str() );
 
 }
 
@@ -1514,12 +2004,13 @@ void fitGauss2ExpG( const string& head,
                     const string& ptit,
                     const string& atit,
                     const vector<const InfoLabel*>& lv, const string& misrl,
-                    int nbin, double xmin, double xmax,
+                    int nbin, double xmin, double xmax, float xfac, float yfac,
                     double mass, double sig1, double sig2,
                     double expc, double mbkg, double sbkg, double fbkg,
                     double fsig,
                     bool pbkg = true, bool psig = false ) {
-  string file = head + name + pset + to_string( year ) + dset;
+  string nfit = name + pset + to_string( year ) + dset;
+  string file = head + nfit;
   const char* list = file.c_str();
   // define the data variables and fit model parameters
   RooRealVar m( "m", "Reconstructed Mass", xmin, xmax, "GeV" );
@@ -1555,7 +2046,6 @@ void fitGauss2ExpG( const string& head,
   model.fitTo( *data, Extended( kTRUE ) );
 //  model.fitTo( *data );
   // print results
-  string nfit = name + dset;
   cout << nfit << " results" << endl;
 /*
   cout << "rmass: " << rmass.getVal() << " +/- " << rmass.getError() << endl;
@@ -1630,9 +2120,10 @@ void fitGauss2ExpG( const string& head,
   t.DrawLatex( ( xmin * 0.45 ) + ( xmax * 0.55 ), mframe->GetMaximum() * 1.01, s.c_str() );
 */
   printTitleLin( mframe, year, lumi, xmin, xmax );
-  printInfo( mframe, lv, xmin, xmax );
-  float xfac = 0.65;
-  float yfac = 0.78 - ( 0.06 * lv.size() );
+  printInfo( mframe, lv, xmin, xmax, xfac, yfac );
+//  float xfac = 0.65;
+//  float yfac = 0.78 - ( 0.06 * lv.size() );
+  yfac -= ( 0.07 + ( 0.06 * lv.size() ) );
   printLine( mframe, xmin, xmax, xfac, yfac, "Total Fit" );
   if ( psig ) printLine( mframe, xmin, xmax, xfac, yfac -= 0.04,
                          "Signal"           , kDashed, csig );
@@ -1640,8 +2131,9 @@ void fitGauss2ExpG( const string& head,
                          "Combinatorial bkg", kDashed, cbkg );
   if ( pbkg ) printLine( mframe, xmin, xmax, xfac, yfac -= 0.04,
                          misrl, kDashed, cmis );
-  nfit += ".pdf";
-  can->Print( nfit.c_str() );
+//  nfit += ".pdf";
+  can->Print( ( nfit + ".pdf" ).c_str() );
+  can->Print( ( nfit + ".png" ).c_str() );
 
 }
 
@@ -1652,11 +2144,14 @@ void fitGaussExp( const string& head,
                   const string& ptit,
                   const string& atit,
                   const vector<const InfoLabel*>& lv,
-                  int nbin, double xmin, double xmax,
+                  int nbin, double xmin, double xmax, float xfac, float yfac,
                   double mass, double ssig,
                   double expc, double fsig,
                   bool pbkg = true, bool psig = false ) {
-  string file = head + name + pset + to_string( year ) + dset;
+  string nfit = name + pset + to_string( year ) + dset;
+  string file = head + nfit;
+//  cout << file << endl;
+//  return;
   const char* list = file.c_str();
   // define the data variables and fit model parameters
   RooRealVar m( "m", "Reconstructed Mass", xmin, xmax, "GeV" );
@@ -1688,7 +2183,6 @@ void fitGaussExp( const string& head,
   // fit the data to the model with an unbinned maximum likelihood method
   model.fitTo( *data );
   // print results
-  string nfit = name + dset;
   cout << nfit << " results" << endl;
 /*
   cout << "rmass: " << rmass.getVal() << " +/- " << rmass.getError() << endl;
@@ -1753,16 +2247,17 @@ void fitGaussExp( const string& head,
   t.DrawLatex( ( xmin * 0.45 ) + ( xmax * 0.55 ), mframe->GetMaximum() * 1.01, s.c_str() );
 */
   printTitleLin( mframe, year, lumi, xmin, xmax );
-  float xfac = 0.25;
-  printInfo( mframe, lv, xmin, xmax, xfac, 0.98 );
-  float yfac = 0.91 - ( 0.06 * lv.size() );
+  printInfo( mframe, lv, xmin, xmax, xfac, yfac );
+//  float 
+  yfac -= ( 0.07 + ( 0.06 * lv.size() ) );
   printLine( mframe, xmin, xmax, xfac, yfac, "Total Fit" );
   if ( psig ) printLine( mframe, xmin, xmax, xfac, yfac -= 0.04,
                          "Signal"           , kDashed, csig );
   if ( pbkg ) printLine( mframe, xmin, xmax, xfac, yfac -= 0.04,
                          "Combinatorial bkg", kDashed, cbkg );
-  nfit += ".pdf";
-  can->Print( nfit.c_str() );
+//  nfit += ".pdf";
+  can->Print( ( nfit + ".pdf" ).c_str() );
+  can->Print( ( nfit + ".png" ).c_str() );
 
 }
 
@@ -1773,12 +2268,13 @@ void fitGaussExpE( const string& head,
                    const string& ptit,
                    const string& atit,
                    const vector<const InfoLabel*>& lv, const string& misrl,
-                   int nbin, double xmin, double xmax,
+                   int nbin, double xmin, double xmax, float xfac, float yfac,
                    double mass, double ssig,
                    double expc, double mbkg, double sbkg, double fbkg,
                    double fsig,
                    bool pbkg = true, bool psig = false ) {
-  string file = head + name + pset + to_string( year ) + dset;
+  string nfit = name + pset + to_string( year ) + dset;
+  string file = head + nfit;
   const char* list = file.c_str();
   // define the data variables and fit model parameters
   RooRealVar m( "m", "Reconstructed Mass", xmin, xmax, "GeV" );
@@ -1812,7 +2308,6 @@ void fitGaussExpE( const string& head,
   model.fitTo( *data, Extended( kTRUE ) );
 //  model.fitTo( *data );
   // print results
-  string nfit = name + dset;
   cout << nfit << " results" << endl;
 /*
   cout << "rmass: " << rmass.getVal() << " +/- " << rmass.getError() << endl;
@@ -1881,9 +2376,10 @@ void fitGaussExpE( const string& head,
   t.DrawLatex( ( xmin * 0.45 ) + ( xmax * 0.55 ), mframe->GetMaximum() * 1.01, s.c_str() );
 */
   printTitleLin( mframe, year, lumi, xmin, xmax );
-  printInfo( mframe, lv, xmin, xmax );
-  float xfac = 0.65;
-  float yfac = 0.78 - ( 0.06 * lv.size() );
+  printInfo( mframe, lv, xmin, xmax, xfac, yfac );
+//  float xfac = 0.65;
+//  float yfac = 0.78 - ( 0.06 * lv.size() );
+  yfac -= ( 0.07 + ( 0.06 * lv.size() ) );
   printLine( mframe, xmin, xmax, xfac, yfac, "Total Fit" );
   if ( psig ) printLine( mframe, xmin, xmax, xfac, yfac -= 0.04,
                          "Signal"           , kDashed, csig );
@@ -1891,8 +2387,9 @@ void fitGaussExpE( const string& head,
                          "Combinatorial bkg", kDashed, cbkg );
   if ( pbkg ) printLine( mframe, xmin, xmax, xfac, yfac -= 0.04,
                          misrl, kDashed, cmis );
-  nfit += ".pdf";
-  can->Print( nfit.c_str() );
+//  nfit += ".pdf";
+  can->Print( ( nfit + ".pdf" ).c_str() );
+  can->Print( ( nfit + ".png" ).c_str() );
 
 }
 
@@ -1903,12 +2400,13 @@ void fitGaussExpG( const string& head,
                    const string& ptit,
                    const string& atit,
                    const vector<const InfoLabel*>& lv, const string& misrl,
-                   int nbin, double xmin, double xmax,
+                   int nbin, double xmin, double xmax, float xfac, float yfac,
                    double mass, double ssig,
                    double expc, double mbkg, double sbkg, double fbkg,
                    double fsig,
                    bool pbkg = true, bool psig = false ) {
-  string file = head + name + pset + to_string( year ) + dset;
+  string nfit = name + pset + to_string( year ) + dset;
+  string file = head + nfit;
   const char* list = file.c_str();
   // define the data variables and fit model parameters
   RooRealVar m( "m", "Reconstructed Mass", xmin, xmax, "GeV" );
@@ -1940,7 +2438,6 @@ void fitGaussExpG( const string& head,
   model.fitTo( *data, Extended( kTRUE ) );
 //  model.fitTo( *data );
   // print results
-  string nfit = name + dset;
   cout << nfit << " results" << endl;
 /*
   cout << "rmass: " << rmass.getVal() << " +/- " << rmass.getError() << endl;
@@ -2010,8 +2507,9 @@ void fitGaussExpG( const string& head,
 */
   printTitleLin( mframe, year, lumi, xmin, xmax );
   printInfo( mframe, lv, xmin, xmax );
-  float xfac = 0.65;
-  float yfac = 0.78 - ( 0.06 * lv.size() );
+//  float xfac = 0.65;
+//  float yfac = 0.78 - ( 0.06 * lv.size() );
+  yfac -= ( 0.07 + ( 0.06 * lv.size() ) );
   printLine( mframe, xmin, xmax, xfac, yfac, "Total Fit" );
   if ( psig ) printLine( mframe, xmin, xmax, xfac, yfac -= 0.04,
                          "Signal"           , kDashed, csig );
@@ -2019,12 +2517,33 @@ void fitGaussExpG( const string& head,
                          "Combinatorial bkg", kDashed, cbkg );
   if ( pbkg ) printLine( mframe, xmin, xmax, xfac, yfac -= 0.04,
                          misrl, kDashed, cmis );
-  nfit += ".pdf";
-  can->Print( nfit.c_str() );
+//  nfit += ".pdf";
+  can->Print( ( nfit + ".pdf" ).c_str() );
+  can->Print( ( nfit + ".png" ).c_str() );
 
 }
 
-void fitDataset( int year, float clum, float mlum, const char* name ) {
+void fitDataset( int year, float clum, float mlum, const char* name,
+                 const string& channels ) {
+
+  set<string> chanLabels = parseLabels( channels );
+  SETLOGVAL(fitijp,chanLabels);
+  SETLOGVAL(fitbjp,chanLabels);
+  SETLOGVAL(fitphi,chanLabels);
+  SETLOGVAL(fitip2,chanLabels);
+  SETLOGVAL(fitbp2,chanLabels);
+  SETLOGVAL(fitups,chanLabels);
+  SETLOGVAL(fitbui,chanLabels);
+  SETLOGVAL(fitbud,chanLabels);
+  SETLOGVAL(fitbsd,chanLabels);
+  SETLOGVAL(fitbdd,chanLabels);
+  SETLOGVAL(fitb0i,chanLabels);
+  SETLOGVAL(fitlbi,chanLabels);
+  SETLOGVAL(fitlbd,chanLabels);
+  SETLOGVAL(fitbci,chanLabels);
+  SETLOGVAL(fitbcd,chanLabels);
+  SETLOGVAL(fitx3i,chanLabels);
+  SETLOGVAL(fitx3d,chanLabels);
 
   vector<const InfoLabel*> ijpl;
   ijpl.push_back( new InfoLabel(
@@ -2032,7 +2551,7 @@ void fitDataset( int year, float clum, float mlum, const char* name ) {
   if ( fitijp )
   fitCB2ChP2   ( "list", "IncJPsi_"    , "Charmonium", year, name, clum,
                  "", "#mu^{+}#mu^{-} invariant mass [GeV]", ijpl,
-                 40, 2.90, 3.30,
+                 40, 2.90, 3.30, 0.65, 0.85,
                  3.10, 0.025, 0.050, 1.3, 3.0, 0.9 );
   vector<const InfoLabel*> bjpl;
   bjpl.push_back( new InfoLabel(
@@ -2042,7 +2561,7 @@ void fitDataset( int year, float clum, float mlum, const char* name ) {
   if ( fitbjp )
   fitCB2ChP2   ( "list", "BarJPsi_"    , "Charmonium", year, name, clum,
                  "", "#mu^{+}#mu^{-} invariant mass [GeV]", bjpl,
-                 40, 2.90, 3.30,
+                 40, 2.90, 3.30, 0.65, 0.85,
                  3.10, 0.02, 0.05, 1.3, 3.0, 0.9 ); // only A1_lrun
   vector<const InfoLabel*> phil;
   phil.push_back( new InfoLabel(
@@ -2052,15 +2571,15 @@ void fitDataset( int year, float clum, float mlum, const char* name ) {
   if ( fitphi )
   fitCB2ChP2   ( "list", "BarPhi_"     , "MuOnia"    , year, name, mlum,
                  "", "#mu^{+}#mu^{-} invariant mass [GeV]", phil,
-                 30, 0.88, 1.18,
-                 1.02, 0.005, 0.010, 0.5, 10.0, 0.2, true, true );
+                 30, 0.88, 1.18, 0.65, 0.85,
+                 1.02, 0.005, 0.010, 0.5, 10.0, 0.2 );
   vector<const InfoLabel*> ip2l;
   ip2l.push_back( new InfoLabel(
                   "#font[62]{p_{T}(#mu^{+}#mu^{-}) > 18 GeV}" ) );
   if ( fitip2 )
   fitCB2ChP2   ( "list", "IncPsi2_"    , "Charmonium", year, name, clum,
                  "", "#mu^{+}#mu^{-} invariant mass [GeV]", ip2l,
-                 50, 3.45, 3.95,
+                 50, 3.45, 3.95, 0.65, 0.85,
                  3.70, 0.02, 0.05, 0.5, 3.0, 0.5 );
   vector<const InfoLabel*> bp2l;
   bp2l.push_back( new InfoLabel(
@@ -2070,7 +2589,7 @@ void fitDataset( int year, float clum, float mlum, const char* name ) {
   if ( fitbp2 )
   fitCB2ChP2   ( "list", "BarPsi2_"    , "Charmonium", year, name, clum,
                  "", "#mu^{+}#mu^{-} invariant mass [GeV]", bp2l,
-                 50, 3.45, 3.95,
+                 50, 3.45, 3.95, 0.65, 0.85,
                  3.70, 0.02, 0.05, 0.5, 3.0, 0.5 ); // only A1_lrun
   vector<const InfoLabel*> upsl;
   upsl.push_back( new InfoLabel(
@@ -2078,9 +2597,9 @@ void fitDataset( int year, float clum, float mlum, const char* name ) {
   upsl.push_back( new InfoLabel(
                   "|#font[62]{y(#mu^{+}#mu^{-})| < 1.4}" ) );
   if ( fitups )
-  fitCB4ChP2   ( "list", "BarUpsilon123_", "MuOnia", year, name, clum,
+  fitCB4ChP2   ( "list", "BarUpsilon123_", "MuOnia", year, name, mlum,
                  "", "#mu^{+}#mu^{-} invariant mass [GeV]", upsl,
-		 115, 8.70, 11.00,
+		 115, 8.70, 11.00, 0.65, 0.85,
                  9.45, 0.03, 0.10, 0.5, 3.0,
                 10.00, 0.05, 0.5, 3.0, 10.35, 0.05, 0.5, 3.0, 0.5 );
   vector<const InfoLabel*> buil;
@@ -2090,9 +2609,9 @@ void fitDataset( int year, float clum, float mlum, const char* name ) {
                   "#font[62]{p_{T} > 27 GeV}" ) );
   if ( fitbui )
   fitGauss2ExpE2D( "list", "InclusiveBu_", "Charmonium", year, name, clum,
-                   "", "M(J/#psi K^{+}) [GeV]", buil,
+                   "", "M(J/#psi K^{#pm}) [GeV]", buil,
                    "#font[62]{J/#psi K + X }",
-                   100, 5.0, 6.0,
+                   100, 5.0, 6.0, 0.65, 0.85, 0.65, 0.85,
                    5.27, 0.01, 0.02, -3.0, 5.10, 0.01, 0.95, 0.5, true, true );
   vector<const InfoLabel*> budl;
   budl.push_back( new InfoLabel(
@@ -2101,19 +2620,19 @@ void fitDataset( int year, float clum, float mlum, const char* name ) {
                   "#font[62]{p_{T} > 10 GeV}" ) );
   if ( fitbud )
   fitGauss2ExpE( "list", "DisplacedBu_", "Charmonium", year, name, clum,
-                 "", "M(J/#psi K^{+}) [GeV]", budl,
+                 "", "M(J/#psi K^{#pm}) [GeV]", budl,
                  "#font[62]{J/#psi K + X }",
-                 100, 5.0, 6.0,
+                 100, 5.0, 6.0, 0.65, 0.85,
                  5.27, 0.01, 0.02, -3.0, 5.10, 0.01, 0.95, 0.5, true, true );
   vector<const InfoLabel*> bsdl;
   bsdl.push_back( new InfoLabel(
-                  "#font[62]{B^{0}_{s} #rightarrow J/#psi #phi}" ) );
+                  "#font[62]{B^{0}_{s} #rightarrow J/#psi #Phi}" ) );
   bsdl.push_back( new InfoLabel(
                   "#font[62]{p_{T} > 10 GeV}" ) );
   if ( fitbsd )
   fitGauss2Exp ( "list", "DisplacedBs_", "Charmonium", year, name, clum,
                  "", "M(J/#psi K^{+}K^{-}) [GeV]", bsdl,
-                 100, 5.0, 6.0,
+                 100, 5.0, 6.0, 0.65, 0.85,
                  5.37, 0.01, 0.02, -3.0, 0.5, true, true );
   vector<const InfoLabel*> bddl;
   bddl.push_back( new InfoLabel(
@@ -2122,8 +2641,8 @@ void fitDataset( int year, float clum, float mlum, const char* name ) {
                   "#font[62]{p_{T} > 10 GeV}" ) );
   if ( fitbdd )
   fitGauss2Exp ( "list", "DisplacedBd_", "Charmonium", year, name, clum,
-                 "", "M(J/#psi K^{+}#pi^{-}) [GeV]", bddl,
-                 100, 5.0, 6.0,
+                 "", "M(J/#psi K^{#pm}#pi^{#mp}) [GeV]", bddl,
+                 100, 5.0, 6.0, 0.65, 0.85,
                  5.27, 0.01, 0.02, -3.0, 0.5, true, true );
   vector<const InfoLabel*> b0il;
   b0il.push_back( new InfoLabel(
@@ -2133,40 +2652,110 @@ void fitDataset( int year, float clum, float mlum, const char* name ) {
 ////  if ( fitb0i )
 ////  fitGauss2Exp ( "list", "InclusiveB0_", "Charmonium", year, name, clum,
 ////                 "", "M(J/#psi K^{+}K^{-}) [GeV]", b0il,
-////                 100, 5.0, 6.0,
+////                 100, 5.0, 6.0, 0.65, 0.78,
 ////                 5.27, 0.005, 0.020, -3.0, 0.5, true, true );
 //  if ( fitb0i )
 //  fitGauss2ExpG( "list", "InclusiveB0_", "Charmonium", year, name, clum,
 //                 "", "M(J/#psi K^{+}K^{-}) [GeV]", b0il,
 //                 "J/#psi K^{0}_{S} + X",
-//                 100, 5.0, 6.0,
+//                 100, 5.0, 6.0, 0.65, 0.85,
 //                 5.27, 0.005, 0.020, -3.0, 5.05, 0.01, 0.95, 0.5, true, true );
 //  if ( fitb0i )
 //  fitGaussExpG ( "list", "InclusiveB0_", "Charmonium", year, name, clum,
 //                 "", "M(J/#psi K^{+}K^{-}) [GeV]", b0il,
 //                 "J/#psi K^{0}_{S} + X",
-//                 100, 5.0, 6.0,
+//                 100, 5.0, 6.0, 0.65, 0.85,
 //                 5.27, 0.015, -3.0, 5.10, 0.01, 0.95, 0.5, true, true );
   if ( fitb0i )
   fitGaussExpE ( "list", "InclusiveB0_", "Charmonium", year, name, clum,
                  "", "M(J/#psi K^{0}_{S}) [GeV]", b0il,
                  "J/#psi K^{0}_{S} + X",
-                 100, 5.0, 6.0,
+                 100, 5.0, 6.0, 0.65, 0.85,
                  5.27, 0.015, -3.0, 5.10, 0.1, 0.95, 0.5, true, true );
   vector<const InfoLabel*> lbil;
   lbil.push_back( new InfoLabel(
-                  "#font[62]{#Lambda_{b} #rightarrow J/#psi #Lambda_{0}}" ) );
+                  "#font[62]{#Lambda_{b} #rightarrow J/#psi #Lambda^{0}}" ) );
   lbil.push_back( new InfoLabel(
                   "#font[62]{p_{T} > 27 GeV}" ) );
   if ( fitlbi )
   fitGaussExp  ( "list", "InclusiveLambdab_", "Charmonium", year, name, clum,
                  "", "M(J/#psi #Lambda^{0}) [GeV]", lbil,
-                 100, 5.0, 6.0,
+                 100, 5.0, 6.0, 0.25, 0.98,
                  5.62, 0.015, -3.0, 0.05, true, true );
+  vector<const InfoLabel*> lbdl;
+  lbdl.push_back( new InfoLabel(
+                  "#font[62]{#Lambda_{b} #rightarrow J/#psi #Lambda^{0}}" ) );
+  lbdl.push_back( new InfoLabel(
+                  "#font[62]{p_{T} > 10 GeV}" ) );
+  if ( fitlbd )
+  fitGaussExp  ( "list", "DisplacedLambdab_", "Charmonium", year, name, clum,
+                 "", "M(J/#psi #Lambda^{0}) [GeV]", lbdl,
+                 100, 5.0, 6.0, 0.25, 0.98,
+                 5.62, 0.015, -3.0, 0.05, true, true );
+  vector<const InfoLabel*> bcil;
+  bcil.push_back( new InfoLabel(
+                  "#font[62]{B_{c}^{#pm} #rightarrow J/#psi #pi^{#pm}}" ) );
+  bcil.push_back( new InfoLabel(
+                  "#font[62]{p_{T} > 27 GeV}" ) );
+  if ( fitbci )
+  fitGaussExp  ( "list", "InclusiveBc_", "Charmonium", year, name, clum,
+                 "", "M(J/#psi #pi^{#pm}) [GeV]", bcil,
+                 100, 6.0, 7.0, 0.50, 0.98,
+                 6.27, 0.05, -3.0, 0.10, true, true );
+  vector<const InfoLabel*> bcdl;
+  bcdl.push_back( new InfoLabel(
+                  "#font[62]{B_{c}^{#pm} #rightarrow J/#psi #pi^{#pm}}" ) );
+  bcdl.push_back( new InfoLabel(
+                  "#font[62]{p_{T} > 10 GeV}" ) );
+  if ( fitbcd )
+  fitGaussExp  ( "list", "DisplacedBc_", "Charmonium", year, name, clum,
+                 "", "M(J/#psi #pi^{#pm}) [GeV]", bcdl,
+                 100, 6.0, 7.0, 0.50, 0.98,
+                 6.27, 0.05, -3.0, 0.10, true, true );
+
+
+  vector<const InfoLabel*> x3il;
+  x3il.push_back( new InfoLabel(
+                  "#font[62]{J/#psi #pi^{+} #pi^{-}}" ) );
+  x3il.push_back( new InfoLabel(
+                  "#font[62]{p_{T} > 27 GeV}" ) );
+//  if ( fitx3i )
+//  fitCBChP2    ( "list", "InclusiveX3872_", "Charmonium", year, name, clum,
+//                 "", "M(J/#psi #pi^{+} #pi^{-}) [GeV]", x3il,
+//                 40, 3.6, 4.0, 0.50, 0.98,
+//                 3.69, 0.01, 1.3, 3.0, 0.1, false, true, true, true );
+  if ( fitx3i )
+  fitCBGChP2   ( "list", "InclusiveX3872_", "Charmonium", year, name, clum,
+                 "", "M(J/#psi #pi^{+} #pi^{-}) [GeV]", x3il,
+                 "#psi(2S)", "X(3872)",
+                 40, 3.6, 4.0, 0.50, 0.98,
+                 3.69, 0.01, 1.3, 3.0,
+                 3.87, 0.01, 0.1, 0.005, true, true, true, true );
+  vector<const InfoLabel*> x3dl;
+  x3dl.push_back( new InfoLabel(
+                  "#font[62]{J/#psi #pi^{+} #pi^{-}}" ) );
+  x3dl.push_back( new InfoLabel(
+                  "#font[62]{p_{T} > 10 GeV}" ) );
+//  if ( fitx3d )
+//  fitCBChP2    ( "list", "DisplacedX3872_", "Charmonium", year, name, clum,
+//                 "", "M(J/#psi #pi^{+} #pi^{-}) [GeV]", x3dl,
+//                 40, 3.6, 4.0, 0.50, 0.98,
+//                 3.69, 0.01, 1.3, 3.0, 0.1, false, true, true, true );
+  if ( fitx3d )
+  fitCBGChP2   ( "list", "DisplacedX3872_", "Charmonium", year, name, clum,
+                 "", "M(J/#psi #pi^{+} #pi^{-}) [GeV]", x3dl,
+                 "#psi(2S)", "X(3872)",
+                 40, 3.6, 4.0, 0.50, 0.98,
+                 3.69, 0.01, 1.3, 3.0,
+                 3.87, 0.01, 0.1, 0.005, true, true, true, true );
   return;
 }
 
-void histoFit() {
+void histoFit( const string& datasets, const string& channels ) {
+  set<string> dataLabels = parseLabels( datasets );
+  SETLOGVAL(fitA,dataLabels);
+  SETLOGVAL(fitB,dataLabels);
+  SETLOGVAL(fitC,dataLabels);
   gROOT->ProcessLine( ".L tdrstyle.C" );
 /*
   float clum;
@@ -2178,11 +2767,11 @@ void histoFit() {
   name = "A2_recoHhrun", clum = 0.839398; mlum = 0.839398;
   fitCB2ChP2  ( "list", "IncJPsi_"    , "Charmonium", year, name, clum,
                 "", "#mu^{+}#mu^{-} invariant mass [GeV]",
-                40, 2.90, 3.30,
+                40, 2.90, 3.30, 0.65, 0.85,
                 3.10, 0.025, 0.050, 1.3, 3.0, 0.9 );
 */
-  if ( fitA1l ) fitDataset( 2018,  5.421429,  5.421429, "A1_recoHlrun" );
-  if ( fitA1h ) fitDataset( 2018,  3.003443,  3.003443, "A1_recoHhrun" );
-  if ( fitA2h ) fitDataset( 2018,  0.839398,  0.839398, "A2_recoHhrun" );
+  if ( fitA ) fitDataset( 2018, 13.872646,  8.766920, "A", channels );
+  if ( fitB ) fitDataset( 2018,  6.863278,  6.863278, "B", channels );
+  if ( fitC ) fitDataset( 2018,  6.612243,  6.612243, "C", channels );
 }
 
