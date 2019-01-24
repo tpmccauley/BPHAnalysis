@@ -82,8 +82,16 @@ class BPHReco {
 //                                                           + tail ).c_str() ) );
     ofMap["TILambdab"] = new OutList( new ofstream( ( head + "InclusiveLambdab"
                                                            + tail ).c_str() ) );
-//    ofMap["TDLambdab"] = new OutList( new ofstream( ( head + "DisplacedLambdab"
-//                                                           + tail ).c_str() ) );
+    ofMap["TDLambdab"] = new OutList( new ofstream( ( head + "DisplacedLambdab"
+                                                           + tail ).c_str() ) );
+    ofMap["TIBc"     ] = new OutList( new ofstream( ( head + "InclusiveBc"
+                                                           + tail ).c_str() ) );
+    ofMap["TDBc"     ] = new OutList( new ofstream( ( head + "DisplacedBc"
+                                                           + tail ).c_str() ) );
+    ofMap["TIX3872"  ] = new OutList( new ofstream( ( head + "InclusiveX3872"
+                                                           + tail ).c_str() ) );
+    ofMap["TDX3872"  ] = new OutList( new ofstream( ( head + "DisplacedX3872"
+                                                           + tail ).c_str() ) );
   }
   ~BPHReco() {}
 
@@ -123,6 +131,7 @@ class BPHReco {
     int ientry;
     for ( ientry = 0; ientry < evtnum; ientry++ ) {
       currentTree->GetEntry( ientry );
+//      if ( runNumber < 315975 ) continue;
       process();
     }
     return;
