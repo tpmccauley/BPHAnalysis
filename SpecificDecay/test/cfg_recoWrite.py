@@ -4,6 +4,8 @@ process = cms.Process("bphAnalysis")
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+#filename = open('/lustre/cmswork/ronchese/pat_ntu/cmssw910/chkMini02/src/PDAnalysis/EDM/prod/datafiles_Vmini/mc/BsToJpsiPhi_BMuonFilter_TuneCUEP8M1_13TeV-pythia8-evtgen_mini910/BsToJpsiPhi_BMuonFilter_TuneCUEP8M1_13TeV-pythia8-evtgen_mini910_020.list', 'r')
+#fileList = cms.untracked.vstring( filename.readlines() )
 
 process.load("Configuration.Geometry.GeometryRecoDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
@@ -17,6 +19,10 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
 process.load("TrackingTools/TransientTrack/TransientTrackBuilder_cfi")
 
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
+process.options.allowUnscheduled = cms.untracked.bool(True)
+
 # for BPH skim input
 process.CandidateSelectedTracks = cms.EDProducer( "ConcreteChargedCandidateProducer",
                 src=cms.InputTag("oniaSelectedTracks::RECO"),
@@ -26,11 +32,6 @@ process.CandidateSelectedTracks = cms.EDProducer( "ConcreteChargedCandidateProdu
 from PhysicsTools.PatAlgos.producersLayer1.genericParticleProducer_cfi import patGenericParticles
 process.patSelectedTracks = patGenericParticles.clone(src=cms.InputTag("CandidateSelectedTracks"))
 # end BPH skim input
-
-process.MessageLogger.cerr.FwkReport.reportEvery = 100
-
-process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
-process.options.allowUnscheduled = cms.untracked.bool(True)
 
 process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring(
 #
@@ -61,11 +62,6 @@ process.bphWriteSpecificDecay = cms.EDProducer('BPHWriteSpecificDecay',
 #    pcCandsLabel = cms.string('packedPFCandidates::RECO'),
 #    kSCandsLabel = cms.string('slimmedKshortVertices::RECO'),
 #    lSCandsLabel = cms.string('slimmedLambdaVertices::RECO'),
-# for AOD input
-#    patMuonLabel = cms.string('slimmedMuons'),
-#    pfCandsLabel = cms.string('particleFlow::RECO'),
-#    k0CandsLabel = cms.string('generalV0Candidates:Kshort:RECO'),
-#    l0CandsLabel = cms.string('generalV0Candidates:Lambda:RECO'),
 
     oniaName = cms.string('oniaFitted'),
     sdName   = cms.string('kx0Cand'),
@@ -90,12 +86,12 @@ process.out = cms.OutputModule(
     outputCommands = cms.untracked.vstring(
 # for BPH skim input
       "keep *",
-      "keep *_writeBPHSpecificDecay_*_*",
+      "keep *_bphWriteSpecificDecay_*_*",
       "drop *_patSelectedTracks_*_*",
       "drop *_CandidateSelectedTracks_*_*",
       "drop *_TriggerResults_*_bphAnalysis",
       "drop *_random*_*_bphAnalysis"
-# for (MINI)AOD input
+# for MINIAOD input
 #      "keep *_bphWriteSpecificDecay_*_*",
 #      "keep *_TriggerResults_*_HLT",
 #      "keep *_offlineSlimmedPrimaryVertices_*_*"

@@ -2772,6 +2772,6 @@ void histoFit( const string& datasets, const string& channels ) {
 */
   if ( fitA ) fitDataset( 2018, 13.872646,  8.766920, "A", channels );
   if ( fitB ) fitDataset( 2018,  6.863278,  6.863278, "B", channels );
-  if ( fitC ) fitDataset( 2018,  6.612243,  6.612243, "C", channels );
+  if ( fitC ) fitDataset( 2018,  6.612243,  6.280281, "C", channels );
 }
 
