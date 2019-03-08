@@ -27,6 +27,7 @@ namespace reco {
 // Collaborating Class Declarations --
 //------------------------------------
 #include "DataFormats/VertexReco/interface/Vertex.h"
+#include "RecoVertex/VertexPrimitives/interface/VertexFitter.h"
 
 //---------------
 // C++ Headers --
@@ -59,7 +60,10 @@ class BPHDecayVertex: public virtual BPHDecayMomentum {
   virtual bool validVertex() const;
 
   /// get reconstructed vertex
-  virtual const reco::Vertex& vertex() const;
+  virtual const reco::Vertex& vertex( VertexFitter<5>* fitter = 0,
+                                      const reco::BeamSpot* bs = 0,
+                                      const GlobalPoint* priorPos = 0,
+                                      const GlobalError* priorError = 0 ) const;
 
   /// get list of Tracks
   const std::vector<const reco::Track*>& tracks() const;
@@ -117,10 +121,17 @@ class BPHDecayVertex: public virtual BPHDecayMomentum {
   mutable std::map<const reco::Candidate*,const    reco::Track*> tkMap;
   mutable std::map<const reco::Candidate*,reco::TransientTrack*> ttMap;
   mutable reco::Vertex fittedVertex;
+  mutable VertexFitter<5>* savedFitter;
+  mutable reco::BeamSpot const * savedBS;
+  mutable GlobalPoint    const * savedPP;
+  mutable GlobalError    const * savedPE;
 
   // create TransientTrack and fit vertex
   virtual void tTracks() const;
-  virtual void fitVertex() const;
+  virtual void fitVertex( VertexFitter<5>* fitter,
+                          const reco::BeamSpot* bs,
+                          const GlobalPoint* priorPos,
+                          const GlobalError* priorError ) const;
 
 };
 

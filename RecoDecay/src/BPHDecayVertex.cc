@@ -46,7 +46,11 @@ BPHDecayVertex::BPHDecayVertex( const edm::EventSetup* es ):
  evSetup( es ),
  oldTracks( true ),
  oldVertex( true ),
- validTks( false ) {
+ validTks( false ),
+ savedFitter( 0 ),
+ savedBS( 0 ),
+ savedPP( 0 ),
+ savedPE( 0 ) {
 }
 
 
@@ -55,7 +59,11 @@ BPHDecayVertex::BPHDecayVertex( const BPHDecayVertex* ptr,
  evSetup( es ),
  oldTracks( true ),
  oldVertex( true ),
- validTks( false ) {
+ validTks( false ),
+ savedFitter( 0 ),
+ savedBS( 0 ),
+ savedPP( 0 ),
+ savedPE( 0 ) {
   map<const reco::Candidate*,const reco::Candidate*> iMap;
   const vector<const reco::Candidate*>& daug = daughters();
   const vector<Component>& list = ptr->componentList();
@@ -88,19 +96,43 @@ BPHDecayVertex::~BPHDecayVertex() {
 // Operations --
 //--------------
 bool BPHDecayVertex::validTracks() const {
-  if ( oldVertex ) fitVertex();
+  if ( oldTracks ) tTracks();
   return validTks;
 }
 
 
 bool BPHDecayVertex::validVertex() const {
-  if ( oldVertex ) fitVertex();
+  vertex();
   return validTks && fittedVertex.isValid();
 }
 
 
-const reco::Vertex& BPHDecayVertex::vertex() const {
-  if ( oldVertex ) fitVertex();
+const reco::Vertex& BPHDecayVertex::vertex( VertexFitter<5>* fitter,
+                                    const reco::BeamSpot* bs,
+                                    const GlobalPoint* priorPos,
+                                    const GlobalError* priorError ) const {
+  if ( ( fitter     == 0 ) &&
+       ( bs         == 0 ) &&
+       ( priorPos   == 0 ) &&
+       ( priorError == 0 ) ) {
+    fitter     = savedFitter;
+    bs         = savedBS;
+    priorPos   = savedPP;
+    priorError = savedPE;
+  }
+  if ( oldVertex ||
+       ( fitter     != savedFitter ) ||
+       ( bs         != savedBS     ) ||
+       ( priorPos   != savedPP     ) ||
+       ( priorError != savedPE     ) ) {
+    if ( fitter != 0 ) {
+      fitVertex( fitter, bs, priorPos, priorError );
+    }
+    else {
+      KalmanVertexFitter kvf( true );
+      fitVertex( &kvf, bs, priorPos, priorError );
+    }
+  }
   return fittedVertex;
 }
 
@@ -222,14 +254,39 @@ void BPHDecayVertex::tTracks() const {
 }
 
 
-void BPHDecayVertex::fitVertex() const {
+void BPHDecayVertex::fitVertex( VertexFitter<5>* fitter,
+                                const reco::BeamSpot* bs,
+                                const GlobalPoint* priorPos,
+                                const GlobalError* priorError ) const {
   oldVertex = false;
+  savedFitter = fitter;
+  savedBS = bs;
+  savedPP = priorPos;
+  savedPE = priorError;
   if ( oldTracks ) tTracks();
   if ( trTracks.size() < 2 ) return;
-  KalmanVertexFitter kvf( true );
   try {
-    TransientVertex tv = kvf.vertex( trTracks );
-    fittedVertex = tv;
+    if ( bs == 0 ) {
+      if ( priorPos == 0 ) {
+        TransientVertex tv = fitter->vertex( trTracks );
+        fittedVertex = tv;
+      }
+      else {
+        if ( priorError == 0 ) {
+          TransientVertex tv = fitter->vertex( trTracks, *priorPos );
+          fittedVertex = tv;
+        }
+        else {
+          TransientVertex tv = fitter->vertex( trTracks, *priorPos,
+                                                         *priorError );
+          fittedVertex = tv;
+        }
+      }
+    }
+    else {
+      TransientVertex tv = fitter->vertex( trTracks, *bs );
+      fittedVertex = tv;
+    }
   }
   catch ( std::exception e ) {
     reco::Vertex tv;
