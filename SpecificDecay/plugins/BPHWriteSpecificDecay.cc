@@ -427,12 +427,12 @@ void BPHWriteSpecificDecay::fill( edm::Event& ev,
   BPHOniaToMuMuBuilder* onia = 0;
   if ( recoOnia ) {
     if ( usePM ) onia = new BPHOniaToMuMuBuilder( es,
-                        BPHRecoBuilder::createCollection( patMuon, "cfmig" ),
-                        BPHRecoBuilder::createCollection( patMuon, "cfmig" ) );
+                        BPHRecoBuilder::createCollection( patMuon, "ingmcf" ),
+                        BPHRecoBuilder::createCollection( patMuon, "ingmcf" ) );
     else
     if ( useCC ) onia = new BPHOniaToMuMuBuilder( es,
-                        BPHRecoBuilder::createCollection( muDaugs, "cfmig" ),
-                        BPHRecoBuilder::createCollection( muDaugs, "cfmig" ) );
+                        BPHRecoBuilder::createCollection( muDaugs, "ingmcf" ),
+                        BPHRecoBuilder::createCollection( muDaugs, "ingmcf" ) );
   }
 
   if ( onia != 0 ) {
