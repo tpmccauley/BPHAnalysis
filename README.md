@@ -93,7 +93,19 @@ BPHAnalysis
 ```
 
 
+### Grid proxy
 
+If you want to get a grid proxy you can mount your `.globus` directory by add `-v ~/.globus:/home/cmsusr/.globus` to your `docker run` command:
+
+`
+docker run -v ~/.globus:/home/cmsusr/.globus --name bph -it clelange/cmssw:9_4_4 /bin/bash
+`
+
+Then in the running container you can run 
+
+```
+cmsbld@a5f12b5b3b6a ~/CMSSW_9_4_4/src $ voms-proxy-init -key /home/cmsusr/.globus/userkey.pem -cert /home/cmsusr/.globus/usercert.pem --voms cms 
+```
 
 
 
