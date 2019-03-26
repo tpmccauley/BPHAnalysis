@@ -37,11 +37,11 @@ process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring(
 #
 ### use this to access the nearest copy of the input file, querying the catalog
 #
-    '/store/data/Run2016E/Charmonium/USER/BPHSkim-PromptReco-v2/000/276/831/00000/00FD1519-714D-E611-B686-FA163E321AE0.root'
+    #'/store/data/Run2016E/Charmonium/USER/BPHSkim-PromptReco-v2/000/276/831/00000/00FD1519-714D-E611-B686-FA163E321AE0.root'
 ### use this to access the input file if by any reason you want to specify 
 ### the data server
 #    'root://xrootd-cms.infn.it//store/data/Run2016E/Charmonium/USER/BPHSkim-PromptReco-v2/000/276/831/00000/00FD1519-714D-E611-B686-FA163E321AE0.root'
-#
+ 'root://xrootd-cms.infn.it//store/data/Run2017C/Charmonium/USER/BPHSkim-PromptReco-v3/000/302/029/00000/1C606E98-318F-E711-A8EE-02163E014637.root'
 ### use this to access an input file locally available
 #    'file:/...complete_file_path.../XXXX.root'
 ))

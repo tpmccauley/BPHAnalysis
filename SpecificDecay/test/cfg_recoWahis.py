@@ -6,7 +6,9 @@ process = cms.Process("bphAnalysis")
 patAlgosToolsTask = getPatAlgosToolsTask(process)
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
+
 #filename = open('/lustre/cmswork/ronchese/pat_ntu/cmssw910/chkMini02/src/PDAnalysis/EDM/prod/datafiles_Vmini/mc/BsToJpsiPhi_BMuonFilter_TuneCUEP8M1_13TeV-pythia8-evtgen_mini910/BsToJpsiPhi_BMuonFilter_TuneCUEP8M1_13TeV-pythia8-evtgen_mini910_020.list', 'r')
 #fileList = cms.untracked.vstring( filename.readlines() )
 
@@ -22,14 +24,21 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
 process.load("TrackingTools/TransientTrack/TransientTrackBuilder_cfi")
 
-process.MessageLogger.cerr.FwkReport.reportEvery = 1
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 process.options.allowUnscheduled = cms.untracked.bool(True)
 
+import FWCore.Utilities.FileUtils as FileUtils
+files = FileUtils.loadListFromFile('Run2017C_Charmonium_AOD.txt')
+
 process.source = cms.Source ("PoolSource", 
-    fileNames = cms.untracked.vstring('file:/home/ronchese/data/store/data/Run2017C/Charmonium/AOD/PromptReco-v2/000/300/079/00000/1C712689-2177-E711-944B-02163E01472F.root')
+    #fileNames = cms.untracked.vstring('file:/home/ronchese/data/store/data/Run2017C/Charmonium/AOD/PromptReco-v2/000/300/079/00000/1C712689-2177-E711-944B-02163E01472F.root')
 #    fileNames = cms.untracked.vstring('file:/home/ronchese/data/store/data/Run2017C/Charmonium/MINIAOD/PromptReco-v1/000/299/368/00000/64EE2B4F-866D-E711-A9DF-02163E01A6CE.root')
 #    fileNames = cms.untracked.vstring('file:/lustre/cmswork/cmsdata/ronchese/store/data/Run2017B/Charmonium/MINIAOD/PromptReco-v2/000/298/853/00000/0C3845CC-8A68-E711-AAC9-02163E0118E2.root')
+
+#fileNames = cms.untracked.vstring('root://xrootd-cms.infn.it//store/data/Run2017C/Charmonium/AOD/PromptReco-v2/000/300/079/00000/1C712689-2177-E711-944B-02163E01472F.root')
+
+fileNames = cms.untracked.vstring(*files)
 )
 
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
