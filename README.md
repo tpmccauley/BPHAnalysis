@@ -107,5 +107,23 @@ Then in the running container you can run
 cmsbld@a5f12b5b3b6a ~/CMSSW_9_4_4/src $ voms-proxy-init -key /home/cmsusr/.globus/userkey.pem -cert /home/cmsusr/.globus/usercert.pem --voms cms 
 ```
 
+### Running examples
+
+There are example configuration files in 
+
+```
+BPHAnalysis/SpecificDecay/test
+BPHAnalysis/RecoDecay/test
+```
+
+`BPHAnalysis/SpecficDecay/test/cfg_recoWahis.py` takes as its input AOD files and outputs a skim of selected events in `reco.root`, histograms in `his.root`, and summary text files. 
+
+### Copy files from docker container to host
+
+`
+docker cp bph:/home/cmsbld/CMSSW_9_4_4/src/his.root
+`
+
+
 
 
