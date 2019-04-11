@@ -124,6 +124,35 @@ BPHAnalysis/RecoDecay/test
 docker cp bph:/home/cmsbld/CMSSW_9_4_4/src/his.root
 `
 
+### Running GUIs 
 
+#### Mac OSX
 
+Follow the instructions [here](https://cntnr.io/running-guis-with-docker-on-mac-os-x-a14df6a76efc) which can be boiled down to installing `socat` and `xquartz`:
+
+```
+brew install socat
+brew install xquartz
+```
+
+Run `socat` and open `Xquartz`:
+
+```
+socat TCP-LISTEN:6000,reuseaddr,fork UNIX-CLIENT:\"$DISPLAY\"
+open -a Xquartz
+```
+
+Fetch the ip of the host:
+
+```
+ifconfig en0
+``` 
+
+and note the ip address of `inet`.
+
+Then specifiy the ip on the command line as `DISPLAY` when running:
+
+```
+docker run -e DISPLAY=194.12.179.202:0 --rm -it clelange/cmssw:9_4_4 /bin/bash
+```
 
