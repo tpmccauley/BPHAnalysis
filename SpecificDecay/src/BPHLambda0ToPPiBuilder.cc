@@ -191,6 +191,8 @@ void BPHLambda0ToPPiBuilder::buildFromV0( const T* v0Collection ) {
                   BPHParticleMasses::protonMass );
     lambdaY->add(   pionName, lv0.daughter( 0 ), sList,
                   BPHParticleMasses::  pionMass );
+    if ( lambdaX->daughters().size() != 2 ) continue;
+    if ( lambdaY->daughters().size() != 2 ) continue;
     BPHPlusMinusCandidatePtr* pp0 = 0;
 
     // check which daughter has proton mass or choose the nearest V0 mass
