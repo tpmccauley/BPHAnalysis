@@ -231,7 +231,7 @@ void BPHDecayVertex::fitVertex() const {
     TransientVertex tv = kvf.vertex( trTracks );
     fittedVertex = tv;
   }
-  catch ( std::exception e ) {
+  catch ( std::exception& e ) {
     reco::Vertex tv;
     fittedVertex = tv;
     edm::LogPrint( "FitFailed" )
