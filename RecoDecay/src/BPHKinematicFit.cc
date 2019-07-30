@@ -249,7 +249,7 @@ const RefCountedKinematicTree& BPHKinematicFit::kinematicTree(
       kinTree = compTree;
     }
   }
-  catch ( std::exception e ) {
+  catch ( std::exception& e ) {
     edm::LogPrint( "FitFailed" )
                 << "BPHKinematicFit::kinematicTree: "
                 << "kin fit reset";
@@ -278,7 +278,7 @@ const RefCountedKinematicTree& BPHKinematicFit::kinematicTree(
     KinematicConstrainedVertexFitter cvf;
     kinTree = cvf.fit( kPart, kc );
   }
-  catch ( std::exception e ) {
+  catch ( std::exception& e ) {
     edm::LogPrint( "FitFailed" )
                 << "BPHKinematicFit::kinematicTree: "
                 << "kin fit reset";

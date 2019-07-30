@@ -288,7 +288,7 @@ void BPHDecayVertex::fitVertex( VertexFitter<5>* fitter,
       fittedVertex = tv;
     }
   }
-  catch ( std::exception e ) {
+  catch ( std::exception& e ) {
     reco::Vertex tv;
     fittedVertex = tv;
     edm::LogPrint( "FitFailed" )
