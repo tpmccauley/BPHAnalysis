@@ -65,8 +65,9 @@ class BPHTrackReference {
   /// g :   pat ::            Muon ::            globalTrack     ()
   /// s :   pat ::            Muon ::             standAloneMuon ()
   /// e :   pat ::        Electron ::pfCandidateRef()::trackRef  ()
+  /// t :   pat ::        Electron ::        closestCtfTrackRef  ()
   static const reco::Track* getTrack( const reco::Candidate& rc,
-                            const char* modeList = "cfhbpmnigse",
+                            const char* modeList = "cfhbpmnigset",
                                   char* modeFlag = 0 ) {
     if ( rc.charge() == 0 ) return 0;
     const char* mptr = modeList;
@@ -87,6 +88,7 @@ class BPHTrackReference {
       case 'g': if ( ( tkp = getMuonGT( rc ) ) != 0 ) return tkp; break;
       case 's': if ( ( tkp = getMuonSA( rc ) ) != 0 ) return tkp; break;
       case 'e': if ( ( tkp = getElecPF( rc ) ) != 0 ) return tkp; break;
+      case 't': if ( ( tkp = getElecTC( rc ) ) != 0 ) return tkp; break;
       }
     }
     return 0;
@@ -98,7 +100,7 @@ class BPHTrackReference {
       const reco::TrackRef& tkr = rc.get<reco::TrackRef>();
       if ( tkr.isNonnull() && tkr.isAvailable() ) return tkr.get();
     }
-    catch ( edm::Exception e ) {
+    catch ( edm::Exception& e ) {
     }
     return 0;
   }
@@ -111,7 +113,7 @@ class BPHTrackReference {
       const reco::TrackRef& tkr = pf->trackRef();
       if ( tkr.isNonnull() && tkr.isAvailable() ) return tkr.get();
     }
-    catch ( edm::Exception e ) {
+    catch ( edm::Exception& e ) {
     }
     return 0;
   }
@@ -124,7 +126,7 @@ class BPHTrackReference {
       const reco::TrackRef& tkr = gp->track();
       if ( tkr.isNonnull() && tkr.isAvailable() ) return tkr.get();
     }
-    catch ( edm::Exception e ) {
+    catch ( edm::Exception& e ) {
     }
     return 0;
   }
@@ -134,7 +136,7 @@ class BPHTrackReference {
       const reco::Track* trk = rc.bestTrack();
       return trk;
     }
-    catch ( edm::Exception e ) {
+    catch ( edm::Exception& e ) {
     }
     return 0;
   }
@@ -147,7 +149,7 @@ class BPHTrackReference {
       const reco::Track* trk = &pp->pseudoTrack();
       return trk;
     }
-    catch ( edm::Exception e ) {
+    catch ( edm::Exception& e ) {
     }
     return 0;
   }
@@ -165,7 +167,7 @@ class BPHTrackReference {
         if ( tkr.isNonnull() && tkr.isAvailable() ) return tkr.get();
       }
     }
-    catch ( edm::Exception e ) {
+    catch ( edm::Exception& e ) {
     }
     return 0;
   }
@@ -180,7 +182,7 @@ class BPHTrackReference {
       const reco::TrackRef& tkr = mu->muonBestTrack();
       if ( tkr.isNonnull() && tkr.isAvailable() ) return tkr.get();
     }
-    catch ( edm::Exception e ) {
+    catch ( edm::Exception& e ) {
     }
     return 0;
   }
@@ -196,7 +198,7 @@ class BPHTrackReference {
       const reco::TrackRef& mit = mu->innerTrack();
       if ( mit.isNonnull() && mit.isAvailable() ) return mit.get();
     }
-    catch ( edm::Exception e ) {
+    catch ( edm::Exception& e ) {
     }
     return 0;
   }
@@ -212,7 +214,7 @@ class BPHTrackReference {
       const reco::TrackRef& mgt = mu->globalTrack();
       if ( mgt.isNonnull() && mgt.isAvailable() ) return mgt.get();
     }
-    catch ( edm::Exception e ) {
+    catch ( edm::Exception& e ) {
     }
     return 0;
   }
@@ -228,7 +230,7 @@ class BPHTrackReference {
       const reco::TrackRef& msa = mu->standAloneMuon();
       if ( msa.isNonnull() && msa.isAvailable() ) return msa.get();
     }
-    catch ( edm::Exception e ) {
+    catch ( edm::Exception& e ) {
     }
     return 0;
   }
@@ -246,7 +248,23 @@ class BPHTrackReference {
         if ( tkr.isNonnull() && tkr.isAvailable() ) return tkr.get();
       }
     }
-    catch ( edm::Exception e ) {
+    catch ( edm::Exception& e ) {
+    }
+    return 0;
+  }
+  static const reco::Track* getElecTC( const reco::Candidate& rc ) {
+//    std::cout << "getElecTC" << std::endl;
+    const pat::Electron* el = dynamic_cast<const pat::Electron*>( &rc );
+    if ( el == 0 ) return 0;
+    return getElecTC( el );
+  }
+  static const reco::Track* getElecTC( const pat::Electron* el ) {
+    try {
+      // Return the ctftrack closest to the electron
+      const reco::TrackRef& tkr = el->closestCtfTrackRef();
+      if ( tkr.isNonnull() && tkr.isAvailable() ) return tkr.get();
+    }
+    catch ( edm::Exception& e ) {
     }
     return 0;
   }

@@ -71,19 +71,6 @@ class VertexAnalysis {
                       float px, float py,
                       float mass,
                       double& ctauPV, double& ctauErrPV ) {
-/*
-    TVector3 cmom( px, py, 0 );
-    float cosAlpha = cAlpha( pvtx, svtx, cmom );
-    AlgebraicVector3 vmom( px, py, 0 );
-    VertexDistanceXY vdistXY;
-    Measurement1D distXY = vdistXY.distance( *svtx, *pvtx );
-    ctauPV = distXY.value() * cosAlpha * mass / cmom.Perp();
-    GlobalError sve = svtx->error();
-    GlobalError pve = pvtx->error();
-    AlgebraicSymMatrix33 vXYe = sve.matrix() + pve.matrix();
-    ctauErrPV = sqrt( ROOT::Math::Similarity( vmom, vXYe ) ) * mass /
-                      cmom.Perp2();
-*/
     dist2D( pvtx, svtx, px, py, cAlpha( pvtx, svtx, px, py ), mass,
             ctauPV, ctauErrPV );
     return;

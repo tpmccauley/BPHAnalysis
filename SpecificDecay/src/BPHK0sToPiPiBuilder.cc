@@ -197,6 +197,7 @@ void BPHK0sToPiPiBuilder::buildFromV0( const T* v0Collection ) {
                 BPHParticleMasses::pionMass );
     }
 
+    if ( k0s->daughters().size() != 2 ) continue;
     if ( !massSel->accept( *k0s ) ) continue;
     if ( ( chi2Sel != 0 ) &&
          ( !chi2Sel->accept( *k0s ) ) ) continue;

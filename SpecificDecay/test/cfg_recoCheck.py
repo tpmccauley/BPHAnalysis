@@ -29,19 +29,18 @@ process.checkBPHWriteDecay = cms.EDAnalyzer('CheckBPHWriteDecay',
 ### to dump only one event
 #    runNumber = cms.uint32( 275371 ),
 #    evtNumber = cms.uint32( 783544498 ),
-    candsLabel = cms.vstring(#'bphWriteSpecificDecay:oniaFitted:bphAnalysis'
-                            #,'bphWriteSpecificDecay:kx0Cand:bphAnalysis'
-                            #,'bphWriteSpecificDecay:phiCand:bphAnalysis'
-                            #,'bphWriteSpecificDecay:buFitted:bphAnalysis'
-                            #,'bphWriteSpecificDecay:bdFitted:bphAnalysis'
-                            #,'bphWriteSpecificDecay:bsFitted:bphAnalysis'
-                            #,'bphWriteSpecificDecay:k0Fitted:bphAnalysis'
-                            #,'bphWriteSpecificDecay:l0Fitted:bphAnalysis'
-                            #,'bphWriteSpecificDecay:b0Fitted:bphAnalysis'
-                            #,'bphWriteSpecificDecay:lbFitted:bphAnalysis'
-                            #,'bphWriteSpecificDecay:bcFitted:bphAnalysis'
-                            #,
-'bphWriteSpecificDecay:x3872Fitted:bphAnalysis')
+    candsLabel = cms.vstring('bphWriteSpecificDecay:oniaFitted:bphAnalysis'
+                            ,'bphWriteSpecificDecay:kx0Cand:bphAnalysis'
+                            ,'bphWriteSpecificDecay:phiCand:bphAnalysis'
+                            ,'bphWriteSpecificDecay:buFitted:bphAnalysis'
+                            ,'bphWriteSpecificDecay:bdFitted:bphAnalysis'
+                            ,'bphWriteSpecificDecay:bsFitted:bphAnalysis'
+                            ,'bphWriteSpecificDecay:k0Fitted:bphAnalysis'
+                            ,'bphWriteSpecificDecay:l0Fitted:bphAnalysis'
+                            ,'bphWriteSpecificDecay:b0Fitted:bphAnalysis'
+                            ,'bphWriteSpecificDecay:lbFitted:bphAnalysis'
+                            ,'bphWriteSpecificDecay:bcFitted:bphAnalysis'
+                            ,'bphWriteSpecificDecay:x3872Fitted:bphAnalysis')
 )
 
 process.p = cms.Path(
