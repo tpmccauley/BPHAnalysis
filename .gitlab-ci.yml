@@ -1,0 +1,14 @@
+stages:
+  - build
+
+cmssw_compile:
+  stage: build
+  only:
+    - gitlab-ci-build
+  tags:
+    - cvmfs
+  variables:
+    CMS_PATH: /cvmfs/cms.cern.ch
+    CMSSW_RELEASE: CMSSW_9_4_4
+  script:
+    - /bin/bash ./.gitlab/build.sh
