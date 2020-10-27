@@ -11,4 +11,12 @@ cmssw_compile:
     CMS_PATH: /cvmfs/cms.cern.ch
     CMSSW_RELEASE: CMSSW_9_4_4
   script:
-    - /bin/bash ./.gitlab/build.sh
+    - set -ex
+    - shopt -s expand_aliases
+    - set +u && source ${CMS_PATH}/cmsset_default.sh; set -u
+    - cmsrel ${CMSSW_RELEASE}
+    - cd ${CMSSW_RELEASE}/src
+    - mkdir -p BPHAnalysis
+    - mv ${CI_PROJECT_DIR} ${CMSSW_RELEASE}/src/BPHAnalysis
+    - cmsenv
+    - scram b
