@@ -17,6 +17,8 @@ cmssw_compile:
     - cmsrel ${CMSSW_RELEASE}
     - cd ${CMSSW_RELEASE}/src
     - mkdir -p BPHAnalysis
-    - mv ${CI_PROJECT_DIR} ${CMSSW_RELEASE}/src/BPHAnalysis
+    - mv ${BUILD_DIR}/RecoDecay BPHAnalysis
+    - mv ${BUILD_DIR}/SpecificDecay BPHAnalysis
+    - mv ${BUILD_DIR}/uty BPHAnalysis
     - cmsenv
-    - scram b
+    - scram b -v
